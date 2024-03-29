@@ -1,8 +1,8 @@
 package player
 
-type PlayerType int32
+type PlayerType uint16
 
 const (
-	PlayerOne PlayerType = iota + 4883834
+	PlayerOne PlayerType = iota + 48834
 	PlayerTwo
 )

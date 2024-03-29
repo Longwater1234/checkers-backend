@@ -1,16 +1,15 @@
 package game
 
-type MessageType uint16
+type MessageType uint8
 
 const (
-	WELCOME MessageType = iota + 9978
+	WELCOME MessageType = iota
 	START
 	EXIT
 	MOVE
 	CAPTURE
 	WIN
 	LOSE
-	DRAW
 )
 
 type WelcomePayload struct {
@@ -18,9 +17,14 @@ type WelcomePayload struct {
 	Name   string  `json:"name"`
 }
 
-type JumpPayload struct {
+type Pos struct {
+	X float32 `json:"x"`
+	Y float32 `json:"y"`
+}
+
+type MovePayload struct {
 	FromUser       string `json:"fromUser"`
 	CurrentPieceId int16  `json:"currentPieceId"`
-	DestCell       uint8  `json:"destCell"`
-	SrcCell        uint8  `json:"srcCell"`
+	DestPos        Pos    `json:"destPos"`
+	SrcCell        int16  `json:"srcCell"`
 }
