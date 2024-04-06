@@ -1,6 +1,8 @@
 package game
 
-type MessageType uint8
+import "checkers-backend/player"
+
+type MessageType uint16
 
 const (
 	WELCOME MessageType = iota
@@ -13,8 +15,10 @@ const (
 )
 
 type WelcomePayload struct {
-	Pieces []int16 `json:"pieces"`
-	Name   string  `json:"name"`
+	MessageType MessageType       `json:"messageType"`
+	MyType      player.PlayerType `json:"myType"`
+	PiecesRed   []int16           `json:"piecesRed"`
+	PiecesBlack []int16           `json:"piecesBlack"`
 }
 
 type Pos struct {

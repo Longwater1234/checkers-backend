@@ -1,6 +1,7 @@
 package main
 
 import (
+	"checkers-backend/player"
 	"crypto/rand"
 	"fmt"
 	"math/big"
@@ -12,8 +13,8 @@ import (
 const SERVER_VERSION = "1.0.0"
 const upperLimit int16 = 0x7FFF
 
-var numPlayers atomic.Uint32 // total number of LIVE players
-//var lobby = make(chan *player.Player, 2) // waiting room for players
+var numPlayers atomic.Uint32             // total number of LIVE players
+var lobby = make(chan *player.Player, 2) // waiting room for players
 
 // wsHandler assigns name to Player and redirects to Lobby
 func wsHandler(ws *websocket.Conn) {
