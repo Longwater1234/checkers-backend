@@ -5,7 +5,7 @@ import "checkers-backend/player"
 type MessageType uint16
 
 const (
-	WELCOME MessageType = iota
+	WELCOME MessageType = iota + 49
 	START
 	EXIT
 	MOVE
@@ -16,7 +16,7 @@ const (
 
 type WelcomePayload struct {
 	MessageType MessageType       `json:"messageType"`
-	MyType      player.PlayerType `json:"myType"`
+	MyTeam      player.PlayerType `json:"MyTeam"`
 	PiecesRed   []int16           `json:"piecesRed"`
 	PiecesBlack []int16           `json:"piecesBlack"`
 }
