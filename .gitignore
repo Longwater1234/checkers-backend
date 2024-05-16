@@ -25,6 +25,5 @@ go.work
 # IDE 
 .idea/
 .vscode/
-server-space-checkers
 checkers-backend
 bin/
