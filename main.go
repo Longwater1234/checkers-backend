@@ -40,20 +40,22 @@ func wsHandler(ws *websocket.Conn) {
 
 	//for each pair joining, the 1st will be player 1
 	if numPlayers.Load()%2 == 0 {
-		p.Name = player.RED.String()
+		p.Name = player.RED.SimpleName()
 	} else {
-		p.Name = player.BLACK.String()
+		p.Name = player.BLACK.SimpleName()
 	}
+	numPlayers.Add(1)
+	lobby <- p
 
 	log.Println("Someone connected", clientIp, "Total players:", numPlayers.Load())
-	<-p.Dead
+	<-p.Dead                   //block until player exits
 	numPlayers.Add(^uint32(0)) // if player exits, minus 1
 	log.Println(clientIp, p.Name, "just left the game. Total players:", numPlayers.Load())
 
 }
 
 func main() {
-	portNum, err := strconv.Atoi(os.Getenv("GAME_PORT"))
+	portNum, err := strconv.Atoi(os.Getenv("PORT"))
 	if err != nil {
 		portNum = 9876
 	}
@@ -64,6 +66,9 @@ func main() {
 	})
 	http.Handle("/game", websocket.Handler(wsHandler))
 
+	// defer func() {
+	// 	close(lobby)
+	// }()
 	go listenForJoins()
 	log.Println("Server listening at http://localhost:" + port)
 	log.Fatal(http.ListenAndServe(":"+port, nil))
@@ -85,10 +90,34 @@ func listenForJoins() {
 			}
 			p1.Pieces[i] = int16(val.Int64())
 		}
+		//p2 :=<-lobby
+		mama := make([]int16, 12)
+		for i := 0; i < len(mama); i++ {
+			val, err := rand.Int(rand.Reader, big.NewInt(int64(upperLimit)))
+			if err != nil {
+				log.Println("could not generate random number", err)
+				return
+			}
+			mama[i] = int16(val.Int64())
+		}
 		p1.SendMessage(&game.WelcomePayload{
 			MessageType: game.WELCOME,
 			MyTeam:      player.RED,
 			PiecesRed:   p1.Pieces,
+			PiecesBlack: mama,
 		})
+		var payload game.WelcomePayload
+		if err := websocket.JSON.Receive(p1.Conn, &payload); err != nil {
+			log.Println(p1.Name, "disconnected. Cause:", err.Error())
+			p1.Dead <- true
+			//return
+		}
+		log.Println("I AM HERE")
+		// p2.SendMessage(&game.WelcomePayload{
+		// 	MessageType: game.WELCOME,
+		// 	MyTeam:      player.BLACK,
+		// 	PiecesRed:   p1.Pieces,
+		// 	PiecesBlack: p2.Pieces,
+		// })
 	}
 }

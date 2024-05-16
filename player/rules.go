@@ -20,7 +20,7 @@ type Player struct {
 	Dead   chan bool       // whether player has disconnected
 }
 
-func (t PlayerType) String() string {
+func (t PlayerType) SimpleName() string {
 	switch t {
 	case RED:
 		return "RED"

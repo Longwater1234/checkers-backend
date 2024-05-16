@@ -16,7 +16,7 @@ const (
 
 type WelcomePayload struct {
 	MessageType MessageType       `json:"messageType"`
-	MyTeam      player.PlayerType `json:"MyTeam"`
+	MyTeam      player.PlayerType `json:"myTeam"`
 	PiecesRed   []int16           `json:"piecesRed"`
 	PiecesBlack []int16           `json:"piecesBlack"`
 }
@@ -27,8 +27,8 @@ type Pos struct {
 }
 
 type MovePayload struct {
-	FromUser       string `json:"fromUser"`
-	CurrentPieceId int16  `json:"currentPieceId"`
-	DestPos        Pos    `json:"destPos"`
-	SrcCell        int16  `json:"srcCell"`
+	FromTeam       player.PlayerType `json:"fromTeam"`
+	CurrentPieceId int16             `json:"currentPieceId"`
+	DestPos        Pos               `json:"destPos"`
+	SrcCell        int16             `json:"srcCell"`
 }
