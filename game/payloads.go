@@ -15,10 +15,10 @@ const (
 )
 
 type WelcomePayload struct {
-	MessageType MessageType       `json:"messageType"`
-	MyTeam      player.PlayerType `json:"myTeam"`
-	PiecesRed   []int16           `json:"piecesRed"`
-	PiecesBlack []int16           `json:"piecesBlack"`
+	MessageType MessageType       `json:"messageType"` // type of message
+	MyTeam      player.PlayerType `json:"myTeam"`      // equal to color of Player's pieces
+	PiecesRed   []int16           `json:"piecesRed"`   // red's pieces
+	PiecesBlack []int16           `json:"piecesBlack"` // black's pieces
 }
 
 type Pos struct {

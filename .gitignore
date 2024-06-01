@@ -7,8 +7,6 @@
 *.dll
 *.so
 *.dylib
-*.rar
-*.zip
 
 # Test binary, built with `go test -c`
 *.test
@@ -25,5 +23,6 @@ go.work
 # IDE 
 .idea/
 .vscode/
+server-space-checkers
 checkers-backend
 bin/

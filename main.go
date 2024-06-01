@@ -12,6 +12,8 @@ import (
 	"strconv"
 	"sync/atomic"
 
+	_ "github.com/goccy/go-json"
+
 	"golang.org/x/net/websocket"
 )
 
@@ -66,9 +68,6 @@ func main() {
 	})
 	http.Handle("/game", websocket.Handler(wsHandler))
 
-	// defer func() {
-	// 	close(lobby)
-	// }()
 	go listenForJoins()
 	log.Println("Server listening at http://localhost:" + port)
 	log.Fatal(http.ListenAndServe(":"+port, nil))

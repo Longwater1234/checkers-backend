@@ -3,6 +3,7 @@ package player
 import (
 	"log"
 
+	_ "github.com/goccy/go-json"
 	"golang.org/x/net/websocket"
 )
 
@@ -20,6 +21,7 @@ type Player struct {
 	Dead   chan bool       // whether player has disconnected
 }
 
+// convert PlayerType to string
 func (t PlayerType) SimpleName() string {
 	switch t {
 	case RED:
@@ -34,7 +36,7 @@ func (t PlayerType) SimpleName() string {
 func (p *Player) SendMessage(payload any) {
 	err := websocket.JSON.Send(p.Conn, payload)
 	if err != nil {
-		log.Printf("Failed to sendMessage to %s. Cause %+v", p.Name, err)
+		log.Println("Failed to sendMessage to", p.Name, ".Reason: ", err)
 		p.Dead <- true
 	}
 }
