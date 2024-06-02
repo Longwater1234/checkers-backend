@@ -19,8 +19,8 @@ import (
 
 var SERVER_VERSION = "1.0.0"
 
-const upperLimit int16 = 0x7FFF  //random gen max value
-const customMaxPayload = 2 << 10 //2KB
+const upperLimit int16 = 0x7FFF      //random ID max value (short_max)
+const customMaxPayload int = 2 << 10 //2KB
 
 var numPlayers atomic.Uint32             // total number of LIVE players
 var lobby = make(chan *player.Player, 2) // waiting room for players
@@ -73,9 +73,8 @@ func main() {
 	log.Fatal(http.ListenAndServe(":"+port, nil))
 }
 
-// listen for new players joining lobby
+// Listen for new players joining lobby
 func listenForJoins() {
-	//TODO
 	for {
 		log.Println("LOBBY:", "cap", cap(lobby), "len", len(lobby))
 		p1 := <-lobby
@@ -84,39 +83,65 @@ func listenForJoins() {
 			val, err := rand.Int(rand.Reader, big.NewInt(int64(upperLimit)))
 			if err != nil {
 				p1.Dead <- true
-				log.Println("could not generate random number", err)
+				log.Panic("could not generate random number", err)
 				break
 			}
 			p1.Pieces[i] = int16(val.Int64())
 		}
-		//p2 :=<-lobby
-		mama := make([]int16, 12)
-		for i := 0; i < len(mama); i++ {
+
+		playerTwoPieces := make([]int16, 12)
+		for i := 0; i < len(playerTwoPieces); i++ {
 			val, err := rand.Int(rand.Reader, big.NewInt(int64(upperLimit)))
 			if err != nil {
-				log.Println("could not generate random number", err)
-				return
+				log.Panic("could not generate random number", err)
 			}
-			mama[i] = int16(val.Int64())
+			playerTwoPieces[i] = int16(val.Int64())
 		}
+
 		p1.SendMessage(&game.WelcomePayload{
 			MessageType: game.WELCOME,
 			MyTeam:      player.RED,
+			Notice:      "Connected. Waiting for opponent...",
 			PiecesRed:   p1.Pieces,
-			PiecesBlack: mama,
+			PiecesBlack: playerTwoPieces,
 		})
+
+		p2 := <-lobby                    //waiting for 2nd player to join
+		copy(p2.Pieces, playerTwoPieces) // copy pieces to p2
+		p2.SendMessage(&game.WelcomePayload{
+			MessageType: game.WELCOME,
+			Notice:      "Connected. Game is starting!",
+			MyTeam:      player.BLACK,
+			PiecesRed:   p1.Pieces,
+			PiecesBlack: p2.Pieces,
+		})
+
+		playerTwoPieces = nil // we dont need this anymore
+
+		//TODO start a timer of 30 seconds to wait for 2nd player. if timeout, close p1 connection
 		var payload game.WelcomePayload
 		if err := websocket.JSON.Receive(p1.Conn, &payload); err != nil {
 			log.Println(p1.Name, "disconnected. Cause:", err.Error())
 			p1.Dead <- true
 			//return
 		}
-		log.Println("I AM HERE")
-		// p2.SendMessage(&game.WelcomePayload{
-		// 	MessageType: game.WELCOME,
-		// 	MyTeam:      player.BLACK,
-		// 	PiecesRed:   p1.Pieces,
-		// 	PiecesBlack: p2.Pieces,
-		// })
+
+		//var payload game.WelcomePayload
+		if err := websocket.JSON.Receive(p2.Conn, &payload); err != nil {
+			log.Println(p2.Name, "disconnected. Cause:", err.Error())
+			p2.Dead <- true
+			//return
+		}
+		//start the match in new goroutine
+		// go func(p1 *player.Player, p2 *player.Player) {
+		// 	gameOver := make(chan bool, 1)
+		// 	room.StartMatch(p1, p2, gameOver)
+		// 	//block until match ends
+		// 	<-gameOver
+		// 	log.Println("🔴 GAME OVER!")
+		// 	p1.Dead <- true
+		// 	p2.Dead <- true
+		// }(p1, p2)
 	}
+
 }

@@ -16,6 +16,7 @@ const (
 
 type WelcomePayload struct {
 	MessageType MessageType       `json:"messageType"` // type of message
+	Notice      string            `json:"notice"`      //text UI
 	MyTeam      player.PlayerType `json:"myTeam"`      // equal to color of Player's pieces
 	PiecesRed   []int16           `json:"piecesRed"`   // red's pieces
 	PiecesBlack []int16           `json:"piecesBlack"` // black's pieces
@@ -27,6 +28,7 @@ type Pos struct {
 }
 
 type MovePayload struct {
+	MessageType    MessageType       `json:"messageType"` // type of message
 	FromTeam       player.PlayerType `json:"fromTeam"`
 	CurrentPieceId int16             `json:"currentPieceId"`
 	DestPos        Pos               `json:"destPos"`

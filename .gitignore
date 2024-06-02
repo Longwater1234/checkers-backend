@@ -26,3 +26,4 @@ go.work
 server-space-checkers
 checkers-backend
 bin/
+*.prof
