@@ -21,7 +21,7 @@ var SERVER_VERSION = "1.0.0"
 const customMaxPayload int = 2 << 10 //2KB
 
 var numPlayers atomic.Uint32             // total number of LIVE players
-var lobby = make(chan *player.Player, 2) // waiting room for players
+var lobby = make(chan *player.Player, 1) // waiting room for players
 
 // wsHandler assigns name to Player and redirects to Lobby
 func wsHandler(ws *websocket.Conn) {
@@ -29,7 +29,6 @@ func wsHandler(ws *websocket.Conn) {
 	defer ws.Close()
 
 	var clientIp = ws.Request().RemoteAddr
-	defer ws.Close()
 
 	p := &player.Player{
 		Conn:   ws,
@@ -38,20 +37,19 @@ func wsHandler(ws *websocket.Conn) {
 	}
 	defer close(p.Dead)
 
-	//for each pair joining, the 1st will be player 1
+	//for each pair joining, the 1st will be player 1 (RED)
 	if numPlayers.Load()%2 == 0 {
 		p.Name = player.RED.SimpleName()
 	} else {
 		p.Name = player.BLACK.SimpleName()
 	}
 	numPlayers.Add(1)
-	lobby <- p
+	lobby <- p //send player to lobby
 
 	log.Println("Someone connected", clientIp, "Total players:", numPlayers.Load())
 	<-p.Dead                   //block until player exits
 	numPlayers.Add(^uint32(0)) // if player exits, minus 1
 	log.Println(clientIp, p.Name, "just left the game. Total players:", numPlayers.Load())
-
 }
 
 func main() {
@@ -71,7 +69,7 @@ func main() {
 	log.Fatal(http.ListenAndServe(":"+port, nil))
 }
 
-// Listen for new players joining lobby
+// Keep Listening for new players joining lobby
 func listenForJoins() {
 	for {
 		log.Println("LOBBY:", "cap", cap(lobby), "len", len(lobby))
