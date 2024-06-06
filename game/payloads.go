@@ -26,20 +26,20 @@ type WelcomePayload struct {
 
 type StartPayload struct {
 	BasePayload
-	Notice      string  `json:"notice"`      //text for the UI
+	Notice      string  `json:"notice"`      // text for the UI
 	PiecesRed   []int16 `json:"piecesRed"`   // red's pieces
 	PiecesBlack []int16 `json:"piecesBlack"` // black's pieces
 }
 
 type Pos struct {
-	X float32 `json:"x"` // target cell x
-	Y float32 `json:"y"` // target cell y
+	X float32 `json:"x"` // cell x position
+	Y float32 `json:"y"` // cell y position
 }
 
 type MovePayload struct {
 	BasePayload
-	FromTeam       player.PlayerType `json:"fromTeam"`
-	CurrentPieceId int16             `json:"currentPieceId"`
-	DestPos        Pos               `json:"destPos"`
-	SrcCell        int16             `json:"srcCell"`
+	FromTeam player.PlayerType `json:"fromTeam"` // which Player made the move
+	PieceId  int16             `json:"PieceId"`  // the moving pieceId
+	DestCell Pos               `json:"destCell"` // target cell position
+	SrcCell  int16             `json:"srcCell"`  // souce cell index
 }

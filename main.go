@@ -80,7 +80,7 @@ func listenForJoins() {
 				MessageType: game.WELCOME,
 			},
 			MyTeam: player.RED,
-			Notice: "Connected. Waiting for opponent...",
+			Notice: "Connected. You are Team RED. Waiting for opponent...",
 		})
 
 		p2 := <-lobby //waiting for 2nd player to join
@@ -88,7 +88,7 @@ func listenForJoins() {
 			BasePayload: game.BasePayload{
 				MessageType: game.WELCOME,
 			},
-			Notice: "Connected. Match is starting!",
+			Notice: "Connected. You are Team BLACK. Match is starting!",
 			MyTeam: player.BLACK,
 		})
 
