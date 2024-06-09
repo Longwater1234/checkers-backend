@@ -11,8 +11,6 @@ import (
 	"strconv"
 	"sync/atomic"
 
-	_ "github.com/goccy/go-json"
-
 	"golang.org/x/net/websocket"
 )
 
@@ -32,7 +30,7 @@ func wsHandler(ws *websocket.Conn) {
 
 	p := &player.Player{
 		Conn:   ws,
-		Pieces: make([]int16, 12),
+		Pieces: make([]int32, 12),
 		Dead:   make(chan bool, 1),
 	}
 	defer close(p.Dead)
@@ -75,22 +73,26 @@ func listenForJoins() {
 		log.Println("LOBBY:", "cap", cap(lobby), "len", len(lobby))
 		p1 := <-lobby
 
-		p1.SendMessage(&game.WelcomePayload{
-			BasePayload: game.BasePayload{
-				MessageType: game.WELCOME,
-			},
-			MyTeam: player.RED,
+		var msgOne = &game.BasePayload{
 			Notice: "Connected. You are Team RED. Waiting for opponent...",
-		})
+			Inner: &game.BasePayload_Welcome{
+				Welcome: &game.WelcomePayload{
+					MyTeam: game.TeamColor_TEAM_RED,
+				},
+			},
+		}
+		p1.SendMessage(msgOne)
 
 		p2 := <-lobby //waiting for 2nd player to join
-		p2.SendMessage(&game.WelcomePayload{
-			BasePayload: game.BasePayload{
-				MessageType: game.WELCOME,
-			},
+		var msgTwo = &game.BasePayload{
 			Notice: "Connected. You are Team BLACK. Match is starting!",
-			MyTeam: player.BLACK,
-		})
+			Inner: &game.BasePayload_Welcome{
+				Welcome: &game.WelcomePayload{
+					MyTeam: game.TeamColor_TEAM_BLACK,
+				},
+			},
+		}
+		p2.SendMessage(msgTwo)
 
 		//start the match in new goroutine
 		go func(p1 *player.Player, p2 *player.Player) {
