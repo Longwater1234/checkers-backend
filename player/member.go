@@ -3,7 +3,6 @@ package player
 import (
 	"log"
 
-	_ "github.com/goccy/go-json"
 	"golang.org/x/net/websocket"
 	"google.golang.org/protobuf/proto"
 )
