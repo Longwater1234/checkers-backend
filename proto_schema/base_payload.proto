@@ -1,16 +1,16 @@
 syntax = "proto3";
-package chk.payloads;
+package chk.payload;
 
-option go_package = "checkers-backend/payloads";
+option go_package = "checkers-backend/game";
 
 message BasePayload {
   // GUI display text from server to client
-  optional string notice = 2;
+  string notice = 2;
 
   oneof inner {
     WelcomePayload welcome = 5;
     MovePayload move_payload = 4;
-    StartPayload start_payload = 6;
+    StartPayload start = 6;
   }
 }
 
@@ -21,7 +21,7 @@ enum TeamColor {
 }
 
 message WelcomePayload {
-  // Define the Welcome message fields here
+  // Color of this player pieces
   TeamColor my_team = 1;
 }
 
@@ -33,14 +33,17 @@ message StartPayload {
 }
 
 message MovePayload {
-  // Define the Move message fields here
+  // Represents destination cell
   message DestCell {
     int32 cell_index = 1;
     float x = 2;
     float y = 3; 
   }
+  //from which player
   TeamColor from_team = 1;
+  //moving piece id
   int32 piece_id = 2;
+  //destination cell
   DestCell dest_cell = 3;
 }
 
