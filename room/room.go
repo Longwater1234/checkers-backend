@@ -55,6 +55,10 @@ func StartMatch(p1 *player.Player, p2 *player.Player, gamOver chan bool) {
 
 	var isPlayerRedTurn = true
 
-	log.Println("playerREdturn", isPlayerRedTurn)
+	log.Println("playerRedturn", isPlayerRedTurn)
+
+	//CREATE gameMap for this match
+	//var gameMap = make(map[int32]int32)
+	//START GAME MAIN LOOP
 
 }
