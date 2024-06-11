@@ -19,7 +19,7 @@ var SERVER_VERSION = "1.0.0"
 const customMaxPayload int = 2 << 10 //2KB
 
 var numPlayers atomic.Uint32             // total number of LIVE players
-var lobby = make(chan *player.Player, 1) // waiting room for players
+var lobby = make(chan *player.Player, 2) // waiting room for players
 
 // wsHandler assigns name to Player and redirects to Lobby
 func wsHandler(ws *websocket.Conn) {
@@ -58,7 +58,7 @@ func main() {
 	port := strconv.Itoa(portNum)
 
 	http.HandleFunc("/", func(writer http.ResponseWriter, r *http.Request) {
-		fmt.Fprintf(writer, `<p>This is a socket game server. Dial ws://%s:%s/game </p>`, r.URL.Host, port)
+		fmt.Fprintf(writer, `<p>This is a socket server. Dial ws://%s:%s/game </p>`, r.URL.Host, port)
 	})
 	http.Handle("/game", websocket.Handler(wsHandler))
 
@@ -70,9 +70,9 @@ func main() {
 // Keep Listening for new players joining lobby
 func listenForJoins() {
 	for {
-		log.Println("LOBBY:", "cap", cap(lobby), "len", len(lobby))
+		//welcome 1st player
 		p1 := <-lobby
-
+		log.Println("LOBBY:", "cap", cap(lobby), "len", len(lobby))
 		var msgOne = &game.BasePayload{
 			Notice: "Connected. You are Team RED. Waiting for opponent...",
 			Inner: &game.BasePayload_Welcome{
@@ -83,7 +83,8 @@ func listenForJoins() {
 		}
 		p1.SendMessage(msgOne)
 
-		p2 := <-lobby //waiting for 2nd player to join
+		//waiting for 2nd player to join
+		p2 := <-lobby
 		var msgTwo = &game.BasePayload{
 			Notice: "Connected. You are Team BLACK. Match is starting!",
 			Inner: &game.BasePayload_Welcome{
