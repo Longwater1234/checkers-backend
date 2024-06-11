@@ -10,6 +10,7 @@ import (
 	"os"
 	"strconv"
 	"sync/atomic"
+	"time"
 
 	"golang.org/x/net/websocket"
 )
@@ -83,28 +84,45 @@ func listenForJoins() {
 		}
 		p1.SendMessage(msgOne)
 
-		//waiting for 2nd player to join
-		p2 := <-lobby
-		var msgTwo = &game.BasePayload{
-			Notice: "Connected. You are Team BLACK. Match is starting!",
-			Inner: &game.BasePayload_Welcome{
-				Welcome: &game.WelcomePayload{
-					MyTeam: game.TeamColor_TEAM_BLACK,
+		//waiting for 2nd player to join (max wait 30 seconds)
+		t := time.NewTimer(30 * time.Second)
+		select {
+		case p2 := <-lobby:
+			t.Stop()
+			var msgTwo = &game.BasePayload{
+				Notice: "Connected. You are Team BLACK. Match is starting!",
+				Inner: &game.BasePayload_Welcome{
+					Welcome: &game.WelcomePayload{
+						MyTeam: game.TeamColor_TEAM_BLACK,
+					},
 				},
-			},
-		}
-		p2.SendMessage(msgTwo)
+			}
+			p2.SendMessage(msgTwo)
 
-		//start the match in new goroutine
-		go func(p1, p2 *player.Player) {
-			gameOver := make(chan bool, 1)
-			room.RunMatch(p1, p2, gameOver)
-			//block until match ends
-			<-gameOver
-			log.Println("🔴 GAME OVER!")
+			//start the match in new goroutine
+			go func(p1, p2 *player.Player) {
+				gameOver := make(chan bool, 1)
+				room.RunMatch(p1, p2, gameOver)
+				//block until match ends
+				<-gameOver
+				log.Println("🔴 GAME OVER!")
+				p1.Dead <- true
+				p2.Dead <- true
+			}(p1, p2)
+
+		case <-t.C:
+			t.Stop()
+			p1.SendMessage(&game.BasePayload{
+				Notice: "No player at this moment. Try again a bit later!",
+				Inner: &game.BasePayload_ExitPayload{
+					ExitPayload: &game.ExitPayload{
+						FromTeam: game.TeamColor_TEAM_BLACK,
+					},
+				},
+			})
 			p1.Dead <- true
-			p2.Dead <- true
-		}(p1, p2)
+		}
+
 	}
 
 }
