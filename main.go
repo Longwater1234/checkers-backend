@@ -97,7 +97,7 @@ func listenForJoins() {
 		//start the match in new goroutine
 		go func(p1, p2 *player.Player) {
 			gameOver := make(chan bool, 1)
-			room.StartMatch(p1, p2, gameOver)
+			room.RunMatch(p1, p2, gameOver)
 			//block until match ends
 			<-gameOver
 			log.Println("🔴 GAME OVER!")

@@ -6,11 +6,15 @@ import (
 	"crypto/rand"
 	"log"
 	"math/big"
+
+	"golang.org/x/net/websocket"
+	"google.golang.org/protobuf/proto"
 )
 
 const upperLimit int16 = 0x7FFF //random ID max value (short_max)
 
-func StartMatch(p1 *player.Player, p2 *player.Player, gamOver chan bool) {
+// RunMatch between the two players. If game ends, send signal through `gameOver` channel
+func RunMatch(p1 *player.Player, p2 *player.Player, gamOver chan bool) {
 	log.Println("🟢 Match has begun!")
 
 	//make random pieceId's for player 1
@@ -57,8 +61,101 @@ func StartMatch(p1 *player.Player, p2 *player.Player, gamOver chan bool) {
 
 	log.Println("playerRedturn", isPlayerRedTurn)
 
-	//CREATE gameMap for this match
-	//var gameMap = make(map[int32]int32)
 	//START GAME MAIN LOOP
+	for {
+		if isPlayerRedTurn {
+			//IT'S PLAYER 1'S TURN
+			var rawBytes []byte
+			if err := websocket.Message.Receive(p1.Conn, &rawBytes); err != nil {
+				log.Println(p1.Name, "disconnected. Cause:", err.Error())
+				p2.SendMessage(&game.BasePayload{
+					Notice: "Opponent has left the game!",
+					Inner: &game.BasePayload_ExitPayload{
+						ExitPayload: &game.ExitPayload{
+							FromTeam: game.TeamColor_TEAM_RED,
+						},
+					},
+				})
+				gamOver <- true
+				return
+			}
+
+			//FORWARD THE "MOVE" PAYLOAD TO PLAYER 2, FOR UI UPDATE
+			if err := websocket.Message.Send(p2.Conn, &rawBytes); err != nil {
+				log.Println(p2.Name, "disconnected. Cause:", err.Error())
+				p1.SendMessage(&game.BasePayload{
+					Notice: "Opponent has left the game!",
+					Inner: &game.BasePayload_ExitPayload{
+						ExitPayload: &game.ExitPayload{
+							FromTeam: game.TeamColor_TEAM_BLACK,
+						},
+					},
+				})
+				gamOver <- true
+				return
+			}
+
+			var payload game.BasePayload
+			if err := proto.Unmarshal(rawBytes, &payload); err != nil {
+				log.Println("failed  to read protobuf", err)
+				gamOver <- true
+				return
+			}
+
+			log.Println(payload.String())
+			//TODO handle capture
+
+			// switch x := payload.Inner.(type) {
+			// case *game.BasePayload_MovePayload:
+			// 	//HANDLE SOMETHING
+			// 	log.Println(x.MovePayload.String())
+			// default:
+			// 	log.Println("unknown message type")
+			// 	gamOver <- true
+			// }
+			isPlayerRedTurn = false
+		} else {
+			//IT'S PLAYER 2 (BLACK) TURN
+			var rawBytes []byte
+			if err := websocket.Message.Receive(p2.Conn, &rawBytes); err != nil {
+				log.Println(p1.Name, "disconnected. Cause:", err.Error())
+				p1.SendMessage(&game.BasePayload{
+					Notice: "Opponent has left the game!",
+					Inner: &game.BasePayload_ExitPayload{
+						ExitPayload: &game.ExitPayload{
+							FromTeam: game.TeamColor_TEAM_BLACK,
+						},
+					},
+				})
+				gamOver <- true
+				return
+			}
+
+			//FORWARD THE "MOVE" PAYLOAD TO PLAYER 1, FOR UI UPDATE
+			if err := websocket.Message.Send(p1.Conn, &rawBytes); err != nil {
+				log.Println(p2.Name, "disconnected. Cause:", err.Error())
+				p2.SendMessage(&game.BasePayload{
+					Notice: "Opponent has left the game!",
+					Inner: &game.BasePayload_ExitPayload{
+						ExitPayload: &game.ExitPayload{
+							FromTeam: game.TeamColor_TEAM_RED,
+						},
+					},
+				})
+				gamOver <- true
+				return
+			}
+
+			var payload game.BasePayload
+			if err := proto.Unmarshal(rawBytes, &payload); err != nil {
+				log.Println("failed  to read protobuf", err)
+				gamOver <- true
+				return
+			}
+
+			log.Println(payload.String())
+			isPlayerRedTurn = true
+		}
+	}
 
 }
