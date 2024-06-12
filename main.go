@@ -84,7 +84,7 @@ func listenForJoins() {
 		}
 		p1.SendMessage(msgOne)
 
-		//waiting for 2nd player to join (max wait 30 seconds)
+		//waiting for 2nd player to join (timeout at 30 seconds)
 		t := time.NewTimer(30 * time.Second)
 		select {
 		case p2 := <-lobby:
@@ -111,6 +111,7 @@ func listenForJoins() {
 			}(p1, p2)
 
 		case <-t.C:
+			// timeout reached. No other player joined! Goodbye!
 			t.Stop()
 			p1.SendMessage(&game.BasePayload{
 				Notice: "No player at this moment. Try again a bit later!",
@@ -122,7 +123,6 @@ func listenForJoins() {
 			})
 			p1.Dead <- true
 		}
-
 	}
 
 }
