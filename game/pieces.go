@@ -25,7 +25,7 @@ type Piece struct {
 	PieceColor TeamColor // either red or black
 }
 
-// When a piece is moved to given destPos. Returns TRUE if move is valid, else FALSE
+// When a piece is moved diagonally to given destPos. Returns TRUE if move is valid, else FALSE
 func (p *Piece) MoveSimple(destPos *Vec2) bool {
 	var deltaX = float64(destPos.X - p.Pos.X)
 	var deltaY = float64(destPos.Y - p.Pos.Y)

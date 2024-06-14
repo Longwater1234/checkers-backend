@@ -80,7 +80,23 @@ func RunMatch(p1 *player.Player, p2 *player.Player, gamOver chan bool) {
 				return
 			}
 
-			//FORWARD THE "MOVE" PAYLOAD TO PLAYER 2, FOR UI UPDATE
+			var payload game.BasePayload
+			if err := proto.Unmarshal(rawBytes, &payload); err != nil {
+				log.Println("failed  to read protobuf", err)
+				gamOver <- true
+				return
+			}
+
+			log.Println(payload.String())
+
+			if payload.GetMovePayload() != nil {
+				log.Println("moveTo", payload.GetMovePayload().String())
+				//TODO validate move in separate function here
+				// if result == false, abort and notify p1 and p2  (separate messages)
+				// then end match at once
+			}
+
+			//FORWARD THE "MOVE" PAYLOAD TO PLAYER 2,
 			if err := websocket.Message.Send(p2.Conn, rawBytes); err != nil {
 				log.Println(p2.Name, "disconnected. Cause:", err.Error())
 				p1.SendMessage(&game.BasePayload{
@@ -95,24 +111,6 @@ func RunMatch(p1 *player.Player, p2 *player.Player, gamOver chan bool) {
 				return
 			}
 
-			var payload game.BasePayload
-			if err := proto.Unmarshal(rawBytes, &payload); err != nil {
-				log.Println("failed  to read protobuf", err)
-				gamOver <- true
-				return
-			}
-
-			log.Println(payload.String())
-			//TODO handle capture
-
-			// switch x := payload.Inner.(type) {
-			// case *game.BasePayload_MovePayload:
-			// 	//HANDLE SOMETHING
-			// 	log.Println(x.MovePayload.String())
-			// default:
-			// 	log.Println("unknown message type")
-			// 	gamOver <- true
-			// }
 			isPlayerRedTurn = false
 		} else {
 			//IT'S PLAYER 2 (BLACK) TURN
