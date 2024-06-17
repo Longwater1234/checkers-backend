@@ -123,6 +123,7 @@ func listenForJoins() {
 			})
 			p1.Dead <- true
 		}
+		// goto TOP [listenForJoins]... wait for another pair.
 	}
 
 }

@@ -57,9 +57,10 @@ func RunMatch(p1 *player.Player, p2 *player.Player, gamOver chan bool) {
 		},
 	})
 
-	var isPlayerRedTurn = true
-
-	log.Println("playerRedturn", isPlayerRedTurn)
+	var isPlayerRedTurn = true                    // Who turn is it now? RED always starts.
+	var gameMap = make(map[int32]*game.Piece, 32) // map of cell index --> pieces
+	//TODO populate gameMap HERE
+	log.Println("size of ", len(gameMap))
 
 	//START GAME MAIN LOOP
 	for {
@@ -92,7 +93,7 @@ func RunMatch(p1 *player.Player, p2 *player.Player, gamOver chan bool) {
 			if payload.GetMovePayload() != nil {
 				log.Println("moveTo", payload.GetMovePayload().String())
 				//TODO validate move in separate function here
-				// if result == false, abort and notify p1 and p2  (separate messages)
+				// if result == false, kickout p1 and notify p2  (separate messages)
 				// then end match at once
 			}
 
