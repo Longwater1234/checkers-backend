@@ -4,6 +4,7 @@ import (
 	"checkers-backend/game"
 	"checkers-backend/player"
 	"crypto/rand"
+	"fmt"
 	"log"
 	"math/big"
 
@@ -57,10 +58,11 @@ func RunMatch(p1 *player.Player, p2 *player.Player, gamOver chan bool) {
 		},
 	})
 
-	var isPlayerRedTurn = true                    // Who turn is it now? RED always starts.
-	var gameMap = make(map[int32]*game.Piece, 32) // map of cell index --> pieces
-	//TODO populate gameMap HERE
-	log.Println("size of ", len(gameMap))
+	var isPlayerRedTurn = true            // Who turn is it now? RED always starts.
+	var gameMap = generateGameMap(p1, p2) // map of cell index --> pieces
+	for i, v := range gameMap {
+		fmt.Println(i, "->", v.Id)
+	}
 
 	//START GAME MAIN LOOP
 	for {
@@ -88,10 +90,8 @@ func RunMatch(p1 *player.Player, p2 *player.Player, gamOver chan bool) {
 				return
 			}
 
-			log.Println(payload.String())
-
 			if payload.GetMovePayload() != nil {
-				log.Println("moveTo", payload.GetMovePayload().String())
+				log.Println("movePayload:", payload.GetMovePayload().String())
 				//TODO validate move in separate function here
 				// if result == false, kickout p1 and notify p2  (separate messages)
 				// then end match at once

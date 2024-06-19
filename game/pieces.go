@@ -11,18 +11,18 @@ type Vec2 struct {
 	Y float32 // y position
 }
 
-// type PieceType int16
+type PieceType int16
 
-// const (
-// 	Piece_Red PieceType = iota + 1
-// 	Piece_Black
-// )
+const (
+	Piece_Red PieceType = iota + 1
+	Piece_Black
+)
 
 type Piece struct {
 	Id         int32     // unique piece id
 	IsKing     bool      // whether this piece is King
 	Pos        Vec2      // current piece position
-	PieceColor TeamColor // either red or black
+	PieceColor PieceType // either red or black
 }
 
 // When a piece is moved diagonally to given destPos. Returns TRUE if move is valid, else FALSE
@@ -33,17 +33,17 @@ func (p *Piece) MoveSimple(destPos *Vec2) bool {
 	if math.Abs(deltaX) > float64(SIZE_CELL) || math.Abs(deltaY) > float64(SIZE_CELL) {
 		return false
 	}
-	if p.PieceColor == TeamColor_TEAM_RED && deltaY > 0 && !p.IsKing {
+	if p.PieceColor == Piece_Red && deltaY > 0 && !p.IsKing {
 		return false
 	}
-	if p.PieceColor == TeamColor_TEAM_BLACK && deltaY < 0 && !p.IsKing {
+	if p.PieceColor == Piece_Black && deltaY < 0 && !p.IsKing {
 		return false
 	}
 
 	p.Pos.X = destPos.X
 	p.Pos.Y = destPos.Y
-	if (p.PieceColor == TeamColor_TEAM_RED && destPos.Y == 0) ||
-		(p.PieceColor == TeamColor_TEAM_BLACK && destPos.Y == 7*SIZE_CELL) {
+	if (p.PieceColor == Piece_Red && destPos.Y == 0) ||
+		(p.PieceColor == Piece_Black && destPos.Y == 7*SIZE_CELL) {
 		p.IsKing = true
 	}
 	return true
@@ -58,17 +58,17 @@ func (p *Piece) MoveCapture(destPos *Vec2) bool {
 	if math.Abs(deltaX) != float64(2*SIZE_CELL) || math.Abs(deltaY) != float64(2*SIZE_CELL) {
 		return false
 	}
-	if p.PieceColor == TeamColor_TEAM_RED && deltaY > 0 && !p.IsKing {
+	if p.PieceColor == Piece_Red && deltaY > 0 && !p.IsKing {
 		return false
 	}
-	if p.PieceColor == TeamColor_TEAM_BLACK && deltaY < 0 && !p.IsKing {
+	if p.PieceColor == Piece_Black && deltaY < 0 && !p.IsKing {
 		return false
 	}
 
 	p.Pos.X = destPos.X
 	p.Pos.Y = destPos.Y
-	if (p.PieceColor == TeamColor_TEAM_RED && destPos.Y == 0) ||
-		(p.PieceColor == TeamColor_TEAM_BLACK && destPos.Y == 7*SIZE_CELL) {
+	if (p.PieceColor == Piece_Red && destPos.Y == 0) ||
+		(p.PieceColor == Piece_Black && destPos.Y == 7*SIZE_CELL) {
 		p.IsKing = true
 	}
 	return true
