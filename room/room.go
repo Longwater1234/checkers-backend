@@ -4,7 +4,6 @@ import (
 	"checkers-backend/game"
 	"checkers-backend/player"
 	"crypto/rand"
-	"fmt"
 	"log"
 	"math/big"
 
@@ -60,9 +59,7 @@ func RunMatch(p1 *player.Player, p2 *player.Player, gamOver chan bool) {
 
 	var isPlayerRedTurn = true            // Who turn is it now? RED always starts.
 	var gameMap = generateGameMap(p1, p2) // map of cell index --> pieces
-	for i, v := range gameMap {
-		fmt.Println(i, "->", v.Id)
-	}
+	log.Panicln("len", len(gameMap))
 
 	//START GAME MAIN LOOP
 	for {
