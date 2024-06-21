@@ -82,16 +82,36 @@ func RunMatch(p1 *player.Player, p2 *player.Player, gamOver chan bool) {
 
 			var payload game.BasePayload
 			if err := proto.Unmarshal(rawBytes, &payload); err != nil {
-				log.Println("failed  to read protobuf", err)
+				log.Println("failed to read protobuf", err)
 				gamOver <- true
 				return
 			}
 
 			if payload.GetMovePayload() != nil {
-				log.Println("movePayload:", payload.GetMovePayload().String())
+				//log.Println("movePayload:", payload.GetMovePayload().String())
 				//TODO validate move in separate function here
-				// if result == false, kickout p1 and notify p2  (separate messages)
-				// then end match at once
+				result := isValidMove(payload.GetMovePayload(), gameMap)
+				if !result {
+					p1.SendMessage(&game.BasePayload{
+						Notice: "Illegal move!",
+						Inner: &game.BasePayload_ExitPayload{
+							ExitPayload: &game.ExitPayload{
+								FromTeam: game.TeamColor_TEAM_RED,
+							},
+						},
+					})
+					p2.SendMessage(&game.BasePayload{
+						Notice: "Opponent got kicked out!",
+						Inner: &game.BasePayload_ExitPayload{
+							ExitPayload: &game.ExitPayload{
+								FromTeam: game.TeamColor_TEAM_BLACK,
+							},
+						},
+					})
+					gamOver <- true
+				}
+				// else success move, so updatet gameMap
+
 			}
 
 			//FORWARD THE "MOVE" PAYLOAD TO PLAYER 2,
