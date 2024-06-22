@@ -3,11 +3,15 @@ package room
 import (
 	"checkers-backend/game"
 	"checkers-backend/player"
+	"crypto/rand"
+	"log"
+	"math/big"
 )
 
 const (
-	numRows = 8 // checker cells rows
-	numCols = 8 // checker cell columns
+	numRows          = 8      // checker cells rows
+	numCols          = 8      // checker cell columns
+	upperLimit int16 = 0x7FFF //random ID max value (short_max)
 )
 
 // generateGameMap makes the hashmap of cell_index --> player piece
@@ -49,4 +53,25 @@ func generateGameMap(p1 *player.Player, p2 *player.Player) map[int32]*game.Piece
 		}
 	}
 	return gameMap
+}
+
+// GeneratePlayerPieces for both player 1 and player 2
+func generatePlayerPieces(p1 *player.Player, p2 *player.Player, gamOver chan bool) {
+	for i := 0; i < len(p1.Pieces); i++ {
+		val, err := rand.Int(rand.Reader, big.NewInt(int64(upperLimit)))
+		if err != nil {
+			gamOver <- true
+			log.Panic("cannot generate random number", err)
+		}
+		p1.Pieces[i] = int32(val.Int64())
+	}
+
+	for i := 0; i < len(p2.Pieces); i++ {
+		val, err := rand.Int(rand.Reader, big.NewInt(int64(upperLimit)))
+		if err != nil {
+			gamOver <- true
+			log.Panic("cannot generate random number", err)
+		}
+		p2.Pieces[i] = int32(val.Int64())
+	}
 }
