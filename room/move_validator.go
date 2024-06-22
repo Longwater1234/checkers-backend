@@ -29,7 +29,7 @@ func handleMovePiece(payload *game.BasePayload, gameMap map[int32]*game.Piece, c
 		return false
 	}
 	//forward the "move" payload to opponent
-	opponent.SendMessage(payload.GetMovePayload())
+	opponent.SendMessage(payload)
 	return true
 }
 
