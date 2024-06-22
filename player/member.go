@@ -16,7 +16,7 @@ const (
 
 type Player struct {
 	Conn   *websocket.Conn // client connection
-	Name   string          // Name can only be X or O
+	Name   string          // Name can only be RED or BLACK
 	Pieces []int32         // cell indexes used by this player
 	Dead   chan bool       // whether player has disconnected
 }

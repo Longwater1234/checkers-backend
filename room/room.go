@@ -87,46 +87,14 @@ func RunMatch(p1 *player.Player, p2 *player.Player, gamOver chan bool) {
 				return
 			}
 
+			//CHECK MESSAGE TYPE EQUALs "move"
 			if payload.GetMovePayload() != nil {
-				//log.Println("movePayload:", payload.GetMovePayload().String())
-				//TODO validate move in separate function here
-				result := isValidMove(payload.GetMovePayload(), gameMap)
+				//validate move in separate function here
+				result := handleMovePiece(&payload, gameMap, p1, p2)
 				if !result {
-					p1.SendMessage(&game.BasePayload{
-						Notice: "Illegal move!",
-						Inner: &game.BasePayload_ExitPayload{
-							ExitPayload: &game.ExitPayload{
-								FromTeam: game.TeamColor_TEAM_RED,
-							},
-						},
-					})
-					p2.SendMessage(&game.BasePayload{
-						Notice: "Opponent got kicked out!",
-						Inner: &game.BasePayload_ExitPayload{
-							ExitPayload: &game.ExitPayload{
-								FromTeam: game.TeamColor_TEAM_BLACK,
-							},
-						},
-					})
 					gamOver <- true
+					return
 				}
-				// else success move, so updatet gameMap
-
-			}
-
-			//FORWARD THE "MOVE" PAYLOAD TO PLAYER 2,
-			if err := websocket.Message.Send(p2.Conn, rawBytes); err != nil {
-				log.Println(p2.Name, "disconnected. Cause:", err.Error())
-				p1.SendMessage(&game.BasePayload{
-					Notice: "Opponent has left the game!",
-					Inner: &game.BasePayload_ExitPayload{
-						ExitPayload: &game.ExitPayload{
-							FromTeam: game.TeamColor_TEAM_BLACK,
-						},
-					},
-				})
-				gamOver <- true
-				return
 			}
 
 			isPlayerRedTurn = false
@@ -182,4 +150,31 @@ func RunMatch(p1 *player.Player, p2 *player.Player, gamOver chan bool) {
 		}
 	}
 
+}
+
+// handleMovePiece validates "MOVE" made by Player `p1` against `opponent`. Returns TRUE if all is OK and updates Map. Else returns FALSE.
+func handleMovePiece(payload *game.BasePayload, gameMap map[int32]*game.Piece, p1 *player.Player, opponent *player.Player) bool {
+	result := validateAndUpdateMap(payload.GetMovePayload(), gameMap)
+	if !result {
+		p1.SendMessage(&game.BasePayload{
+			Notice: "Illegal move!",
+			Inner: &game.BasePayload_ExitPayload{
+				ExitPayload: &game.ExitPayload{
+					FromTeam: game.TeamColor_TEAM_UNSPECIFIED,
+				},
+			},
+		})
+		opponent.SendMessage(&game.BasePayload{
+			Notice: "Your opponent got kicked out!",
+			Inner: &game.BasePayload_ExitPayload{
+				ExitPayload: &game.ExitPayload{
+					FromTeam: game.TeamColor_TEAM_UNSPECIFIED,
+				},
+			},
+		})
+		return false
+	}
+
+	opponent.SendMessage(payload.GetMovePayload())
+	return true
 }
