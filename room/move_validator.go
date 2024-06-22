@@ -5,8 +5,9 @@ import (
 	"checkers-backend/player"
 )
 
-// handleMovePiece validates "MOVE" made by Player `current` against `opponent`. Returns TRUE if all is OK and updates Map. Else returns FALSE.
-func handleMovePiece(payload *game.BasePayload, gameMap map[int32]*game.Piece, current *player.Player, opponent *player.Player) bool {
+// handleMovePiece validates "MOVE" made by Player `current` against `opponent`.
+// Updates Map and returns TRUE if all is OK. Else returns FALSE.
+func handleMovePiece(payload *game.BasePayload, gameMap map[int32]*game.Piece, current, opponent *player.Player) bool {
 	success := validateAndUpdateMap(payload.GetMovePayload(), gameMap)
 	if !success {
 		current.SendMessage(&game.BasePayload{

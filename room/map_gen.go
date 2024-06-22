@@ -5,9 +5,12 @@ import (
 	"checkers-backend/player"
 )
 
-const numRows = 8
+const (
+	numRows = 8 // checker cells rows
+	numCols = 8 // checker cell columns
+)
 
-// generateGameMap makes the hashmap of cell index --> player piece
+// generateGameMap makes the hashmap of cell_index --> player piece
 func generateGameMap(p1 *player.Player, p2 *player.Player) map[int32]*game.Piece {
 	var gameMap = make(map[int32]*game.Piece)
 	var counter int32 = 32
@@ -16,7 +19,7 @@ func generateGameMap(p1 *player.Player, p2 *player.Player) map[int32]*game.Piece
 
 	// create pieces objects, and position them on Board
 	for row := 0; row < numRows; row++ {
-		for col := 0; col < numRows; col++ {
+		for col := 0; col < numCols; col++ {
 			if (row+col)%2 != 0 {
 				pos := game.Vec2{
 					X: float32(col%numRows) * game.SIZE_CELL,
