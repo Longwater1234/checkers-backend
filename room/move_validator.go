@@ -28,16 +28,16 @@ func handleMovePiece(payload *game.BasePayload, gameMap map[int32]*game.Piece, c
 		})
 		return false
 	}
-	//forward the move to opponent
+	//forward the "move" payload to opponent
 	opponent.SendMessage(payload.GetMovePayload())
 	return true
 }
 
 // validateAndUpdateMap validates player's move and update gameMap. Returns TRUE if move success, else FALSE
 func validateAndUpdateMap(payload *game.MovePayload, gameMap map[int32]*game.Piece) bool {
-	srcCell := payload.SourceCell
+	srcCell := payload.GetSourceCell()
 	destCell := payload.GetDestCell()
-	movingPieceId := payload.PieceId
+	movingPieceId := payload.GetPieceId()
 
 	piecePtr, exists := gameMap[srcCell]
 	if !exists || movingPieceId != piecePtr.Id {
