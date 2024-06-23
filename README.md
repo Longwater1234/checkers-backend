@@ -16,3 +16,5 @@ Server for SpaceCheckers game. Written entirely using only Go's standard library
 - Set ENV variable for `GAME_PORT` which the server will listen to.
 - If port not set, it will be default listen at 9876
 - How to determine a point (x,y) is inside circle with radius r and center (a,b) see [link](https://study.com/skill/learn/determining-if-a-point-lies-inside-outside-or-on-a-circle-given-the-center-point-a-radius-explanation.html)
+
+

@@ -22,7 +22,7 @@ const customMaxPayload int = 2 << 10 //2KB
 var numPlayers atomic.Uint32             // total number of LIVE players
 var lobby = make(chan *player.Player, 2) // waiting room for players
 
-// wsHandler assigns name to Player and redirects to Lobby
+// wsHandler handles every new WS connection and redirects Player to Lobby
 func wsHandler(ws *websocket.Conn) {
 	ws.MaxPayloadBytes = customMaxPayload
 	defer ws.Close()
@@ -84,7 +84,7 @@ func listenForJoins() {
 		}
 		p1.SendMessage(msgOne)
 
-		//waiting for 2nd player to join (timeout at 30 seconds)
+		//waiting for 2nd player to join (TIMEOUT at 30 seconds)
 		t := time.NewTimer(30 * time.Second)
 		select {
 		case p2 := <-lobby:
@@ -102,13 +102,13 @@ func listenForJoins() {
 
 			//start the match in new goroutine
 			go func(p1, p2 *player.Player) {
-				//Sleep necessary for [p2] Client to process previous msg and get ready
+				//Sleep necessary for [p2] Client to read prev message get ready
 				time.Sleep(200 * time.Millisecond)
 				gameOver := make(chan bool, 1)
 				room.RunMatch(p1, p2, gameOver)
-				//block until match ends
-				<-gameOver
+				<-gameOver //block until match ends
 				log.Println("🔴 GAME OVER!")
+				close(gameOver)
 				p1.Dead <- true
 				p2.Dead <- true
 			}(p1, p2)
