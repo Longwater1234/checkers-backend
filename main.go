@@ -36,19 +36,19 @@ func wsHandler(ws *websocket.Conn) {
 	}
 	defer close(p.Dead)
 
-	//for each pair joining, the 1st will be player 1 (RED)
+	//for each pair joining, the First will always be RED
 	if numPlayers.Load()%2 == 0 {
-		p.Name = player.RED.SimpleName()
+		p.Name = game.TeamColor_TEAM_RED.String()
 	} else {
-		p.Name = player.BLACK.SimpleName()
+		p.Name = game.TeamColor_TEAM_BLACK.String()
 	}
 	numPlayers.Add(1)
 	lobby <- p //send player to lobby
 
 	log.Println("Someone connected", clientIp, "Total players:", numPlayers.Load())
-	<-p.Dead                   //block until player exits
+	<-p.Dead                   // block until player exits
 	numPlayers.Add(^uint32(0)) // if player exits, minus 1
-	log.Println(clientIp, p.Name, "just left the game. Total players:", numPlayers.Load())
+	log.Println(p.Name, "just left the game. Total players:", numPlayers.Load())
 }
 
 func main() {
@@ -89,6 +89,7 @@ func listenForJoins() {
 		select {
 		case p2 := <-lobby:
 			t.Stop()
+			// welcome 2nd player
 			var msgTwo = &game.BasePayload{
 				Notice: "Connected. You are Team BLACK. Match is starting!",
 				Inner: &game.BasePayload_Welcome{
@@ -101,7 +102,7 @@ func listenForJoins() {
 
 			//start the match in new goroutine
 			go func(p1, p2 *player.Player) {
-				//Sleep necessary for [p2] Client to set TeamColor and get ready
+				//Sleep necessary for [p2] Client to process previous msg and get ready
 				time.Sleep(200 * time.Millisecond)
 				gameOver := make(chan bool, 1)
 				room.RunMatch(p1, p2, gameOver)

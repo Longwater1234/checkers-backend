@@ -7,29 +7,11 @@ import (
 	"google.golang.org/protobuf/proto"
 )
 
-type PlayerType uint16
-
-const (
-	RED PlayerType = iota + 48834
-	BLACK
-)
-
 type Player struct {
-	Conn   *websocket.Conn // client connection
+	Conn   *websocket.Conn // client WS connection
 	Name   string          // Name can only be RED or BLACK
-	Pieces []int32         // cell indexes used by this player
-	Dead   chan bool       // whether player has disconnected
-}
-
-// convert PlayerType to string
-func (t PlayerType) SimpleName() string {
-	switch t {
-	case RED:
-		return "RED"
-	case BLACK:
-		return "BLACK"
-	}
-	return "unknown"
+	Pieces []int32         // pieces IDs owned by this player. Max count 12
+	Dead   chan bool       // to signal player has disconnected
 }
 
 // SendMessage - sends the payload as PROTOBUF to this player

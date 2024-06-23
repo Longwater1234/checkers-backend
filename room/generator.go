@@ -11,10 +11,10 @@ import (
 const (
 	numRows          = 8      // checker cells rows
 	numCols          = 8      // checker cell columns
-	upperLimit int16 = 0x7FFF //random ID max value (short_max)
+	upperLimit int16 = 0x7FFF //piece ID max value (short_max)
 )
 
-// generateGameMap makes the hashmap of cell_index --> player piece
+// generateGameMap makes the hashmap of cell_index --> player Piece
 func generateGameMap(p1 *player.Player, p2 *player.Player) map[int32]*game.Piece {
 	var gameMap = make(map[int32]*game.Piece)
 	var counter int32 = 32
@@ -55,7 +55,7 @@ func generateGameMap(p1 *player.Player, p2 *player.Player) map[int32]*game.Piece
 	return gameMap
 }
 
-// GeneratePlayerPieces for both player 1 and player 2
+// GeneratePlayerPieces using secure PRNG for both player 1 and player 2
 func generatePlayerPieces(p1 *player.Player, p2 *player.Player, gamOver chan bool) {
 	for i := 0; i < len(p1.Pieces); i++ {
 		val, err := rand.Int(rand.Reader, big.NewInt(int64(upperLimit)))
