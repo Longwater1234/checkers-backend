@@ -101,6 +101,8 @@ func listenForJoins() {
 
 			//start the match in new goroutine
 			go func(p1, p2 *player.Player) {
+				//Sleep necessary for [p2] Client to set TeamColor and get ready
+				time.Sleep(200 * time.Millisecond)
 				gameOver := make(chan bool, 1)
 				room.RunMatch(p1, p2, gameOver)
 				//block until match ends
@@ -114,16 +116,16 @@ func listenForJoins() {
 			// timeout reached. No other player joined! Goodbye!
 			t.Stop()
 			p1.SendMessage(&game.BasePayload{
-				Notice: "No player at this moment. Try again a bit later!",
+				Notice: "No other players at this moment. Try again later!",
 				Inner: &game.BasePayload_ExitPayload{
 					ExitPayload: &game.ExitPayload{
-						FromTeam: game.TeamColor_TEAM_BLACK,
+						FromTeam: game.TeamColor_TEAM_UNSPECIFIED,
 					},
 				},
 			})
 			p1.Dead <- true
 		}
-		// goto TOP [listenForJoins]... wait for another pair.
+		// goto TOP... wait for another pair to join.
 	}
 
 }
