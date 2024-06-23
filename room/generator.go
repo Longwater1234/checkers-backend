@@ -55,12 +55,12 @@ func generateGameMap(p1 *player.Player, p2 *player.Player) map[int32]*game.Piece
 	return gameMap
 }
 
-// GeneratePlayerPieces using secure PRNG for both player 1 and player 2
-func generatePlayerPieces(p1 *player.Player, p2 *player.Player, gamOver chan bool) {
+// GeneratePlayerPieces using Secure RNG for both player 1 and player 2
+func generatePlayerPieces(p1 *player.Player, p2 *player.Player, gameOver chan bool) {
 	for i := 0; i < len(p1.Pieces); i++ {
 		val, err := rand.Int(rand.Reader, big.NewInt(int64(upperLimit)))
 		if err != nil {
-			gamOver <- true
+			gameOver <- true
 			log.Panic("cannot generate random number", err)
 		}
 		p1.Pieces[i] = int32(val.Int64())
@@ -69,7 +69,7 @@ func generatePlayerPieces(p1 *player.Player, p2 *player.Player, gamOver chan boo
 	for i := 0; i < len(p2.Pieces); i++ {
 		val, err := rand.Int(rand.Reader, big.NewInt(int64(upperLimit)))
 		if err != nil {
-			gamOver <- true
+			gameOver <- true
 			log.Panic("cannot generate random number", err)
 		}
 		p2.Pieces[i] = int32(val.Int64())
