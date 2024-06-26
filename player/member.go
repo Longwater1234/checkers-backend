@@ -14,7 +14,7 @@ type Player struct {
 	Dead   chan bool       // to signal player has disconnected
 }
 
-// SendMessage - sends the payload as PROTOBUF to this player
+// SendMessage as PROTOBUF to this player
 func (p *Player) SendMessage(payload proto.Message) {
 	bb, err := proto.Marshal(payload)
 	if err != nil {

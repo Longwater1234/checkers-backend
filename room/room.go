@@ -67,7 +67,7 @@ func RunMatch(p1 *player.Player, p2 *player.Player, gameOver chan bool) {
 
 			log.Println(payload.String()) //FIXME delete me in production
 
-			//CHECK MESSAGE TYPE EQUALs "move"
+			//if MESSAGE TYPE == "move"
 			if payload.GetMovePayload() != nil {
 				result := handleMovePiece(&payload, gameMap, p1, p2)
 				if !result {
