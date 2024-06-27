@@ -18,3 +18,28 @@ Server for SpaceCheckers game. Written entirely using only Go's standard library
 - How to determine a point (x,y) is inside circle with radius r and center (a,b) see [link](https://study.com/skill/learn/determining-if-a-point-lies-inside-outside-or-on-a-circle-given-the-center-point-a-radius-explanation.html)
 
 
+### Relation between Pieces on Checkboard
+
+- This is when a piece is on EVEN row of cells. The number denotes the cell_index difference between two pieces
+```
+4         3
+ \       /   
+  \     /
+ EVEN_ROW   
+  /     \
+ /       \   
+4         5
+
+```
+
+- This is when a piece is on ODD row of cells.
+```
+5         4
+ \       /   
+  \     /
+  ODD_ROW   
+  /     \
+ /       \   
+3         4
+
+```

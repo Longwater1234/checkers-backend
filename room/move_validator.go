@@ -33,7 +33,7 @@ func handleMovePiece(payload *game.BasePayload, gameMap map[int32]*game.Piece, c
 	return true
 }
 
-// validateAndUpdateMap validates player's move and update gameMap. Returns TRUE if move success, else FALSE
+// validateAndUpdateMap validates player's move and update gameMap. Returns TRUE if successful, else FALSE
 func validateAndUpdateMap(payload *game.MovePayload, gameMap map[int32]*game.Piece) bool {
 	srcCell := payload.GetSourceCell()
 	destCell := payload.GetDestCell()

@@ -8,7 +8,7 @@ import (
 )
 
 type Player struct {
-	Conn   *websocket.Conn // client WS connection
+	Conn   *websocket.Conn // client's WS connection
 	Name   string          // Name can only be RED or BLACK
 	Pieces []int32         // pieces IDs owned by this player. Max count 12
 	Dead   chan bool       // to signal player has disconnected

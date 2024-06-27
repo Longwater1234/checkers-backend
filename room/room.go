@@ -42,7 +42,7 @@ func RunMatch(p1 *player.Player, p2 *player.Player, gameOver chan bool) {
 	//START GAME MAIN LOOP
 	for {
 		if isPlayerRedTurn {
-			//IT'S PLAYER 1'S TURN
+			//IT'S PLAYER 1 (red's) TURN
 			var rawBytes []byte
 			if err := websocket.Message.Receive(p1.Conn, &rawBytes); err != nil {
 				log.Println(p1.Name, "disconnected. Cause:", err)
@@ -74,11 +74,14 @@ func RunMatch(p1 *player.Player, p2 *player.Player, gameOver chan bool) {
 					gameOver <- true
 					return
 				}
+			} else if payload.GetCapturePayload() != nil {
+				//if MESSAGE TYPE == "cappture"
+
 			}
 			//TODO ELSE IF MESSAGE_TYPE == "CAPTURE", VALIDATE CAPTURE HERE
 			isPlayerRedTurn = false
 		} else {
-			//IT'S PLAYER 2 (BLACK) TURN
+			//IT'S PLAYER 2 (BLACK's) TURN
 			var rawBytes []byte
 			if err := websocket.Message.Receive(p2.Conn, &rawBytes); err != nil {
 				log.Println(p1.Name, "disconnected. Cause:", err.Error())
