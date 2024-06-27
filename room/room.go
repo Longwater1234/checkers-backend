@@ -75,10 +75,13 @@ func RunMatch(p1 *player.Player, p2 *player.Player, gameOver chan bool) {
 					return
 				}
 			} else if payload.GetCapturePayload() != nil {
-				//if MESSAGE TYPE == "cappture"
-
+				//if MESSAGE TYPE == "capture"
+				var result bool = handleCapturePiece(&payload, gameMap, p1, p2)
+				if !result {
+					gameOver <- true
+					return
+				}
 			}
-			//TODO ELSE IF MESSAGE_TYPE == "CAPTURE", VALIDATE CAPTURE HERE
 			isPlayerRedTurn = false
 		} else {
 			//IT'S PLAYER 2 (BLACK's) TURN

@@ -5,12 +5,11 @@ import (
 	"checkers-backend/player"
 )
 
-// handleMovePiece validates "MOVE" made by Player `current` against `opponent`.
-// Updates Map and returns TRUE if all is OK. Else returns FALSE.
-func handleMovePiece(payload *game.BasePayload, gameMap map[int32]*game.Piece, current, opponent *player.Player) bool {
+// handleMovePiece made by Player `p` against `opponent`. Returns TRUE if all is OK. Else returns FALSE.
+func handleMovePiece(payload *game.BasePayload, gameMap map[int32]*game.Piece, p *player.Player, opponent *player.Player) bool {
 	success := validateAndUpdateMap(payload.GetMovePayload(), gameMap)
 	if !success {
-		current.SendMessage(&game.BasePayload{
+		p.SendMessage(&game.BasePayload{
 			Notice: "Illegal move!",
 			Inner: &game.BasePayload_ExitPayload{
 				ExitPayload: &game.ExitPayload{
@@ -33,7 +32,7 @@ func handleMovePiece(payload *game.BasePayload, gameMap map[int32]*game.Piece, c
 	return true
 }
 
-// validateAndUpdateMap validates player's move and update gameMap. Returns TRUE if successful, else FALSE
+// validateAndUpdateMap after player's "MOVE" and update gameMap. Returns TRUE if successful, else FALSE
 func validateAndUpdateMap(payload *game.MovePayload, gameMap map[int32]*game.Piece) bool {
 	srcCell := payload.GetSourceCell()
 	destCell := payload.GetDestCell()
