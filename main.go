@@ -15,7 +15,7 @@ import (
 	"golang.org/x/net/websocket"
 )
 
-var SERVER_VERSION = "1.0.0"
+var SERVER_VERSION = "2024.6.0"
 
 const customMaxPayload int = 2 << 10 //2KB
 
@@ -78,7 +78,8 @@ func listenForJoins() {
 			Notice: "Connected. You are Team RED. Waiting for opponent...",
 			Inner: &game.BasePayload_Welcome{
 				Welcome: &game.WelcomePayload{
-					MyTeam: game.TeamColor_TEAM_RED,
+					MyTeam:        game.TeamColor_TEAM_RED,
+					ServerVersion: SERVER_VERSION,
 				},
 			},
 		}

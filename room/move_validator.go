@@ -6,7 +6,7 @@ import (
 )
 
 // handleMovePiece made by Player `p` against `opponent`. Returns TRUE if all is OK. Else returns FALSE.
-func handleMovePiece(payload *game.BasePayload, gameMap map[int32]*game.Piece, p *player.Player, opponent *player.Player) bool {
+func handleMovePiece(payload *game.BasePayload, gameMap map[int32]*game.Piece, p, opponent *player.Player) bool {
 	success := validateAndUpdateMap(payload.GetMovePayload(), gameMap)
 	if !success {
 		p.SendMessage(&game.BasePayload{
