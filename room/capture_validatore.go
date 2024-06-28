@@ -15,8 +15,23 @@ func validateCatptureUpdateMap(captureReq *game.CapturePayload, gameMap map[int3
 	if captureReq.GetDetails() == nil {
 		return false
 	}
-	//hunterPieceId := captureReq.GetHunterPieceId()
-	//preyPiece := captureReq.GetDetails().GetPreyPieceId()
+	hunterPieceId := captureReq.GetHunterPieceId()
+	hunterCell := captureReq.GetHunterCell()
+
+	//check hunter params
+	hunterPiecePtr, exists := gameMap[hunterCell]
+	if !exists || hunterPieceId != hunterPiecePtr.Id {
+		return false
+	}
+
+	preyPieceId := captureReq.GetDetails().GetPreyPieceId()
+	preyCell := captureReq.GetDetails().GetPreyCellIdx()
+
+	//check Prey params
+	preyPiecePtr, exists := gameMap[preyCell]
+	if !exists || preyPieceId != preyPiecePtr.Id {
+		return false
+	}
 
 	return true
 }
