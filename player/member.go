@@ -2,6 +2,7 @@ package player
 
 import (
 	"log"
+	"slices"
 
 	"golang.org/x/net/websocket"
 	"google.golang.org/protobuf/proto"
@@ -26,4 +27,16 @@ func (p *Player) SendMessage(payload proto.Message) {
 		p.Dead <- true
 	}
 
+}
+
+// LosePiece removes targetPieceId from player's basket their piece is captured
+func (p *Player) LosePiece(targetPieceId int32) {
+	original := make([]int32, len(p.Pieces))
+	for i := 0; i < len(p.Pieces); i++ {
+		if p.Pieces[i] == targetPieceId {
+			original = slices.Delete(p.Pieces, i, i+1)
+			break
+		}
+	}
+	p.Pieces = original
 }
