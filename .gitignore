@@ -27,3 +27,4 @@ server-space-checkers
 checkers-backend
 bin/
 *.prof
+.DS_Store

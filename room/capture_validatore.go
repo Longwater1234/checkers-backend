@@ -16,10 +16,10 @@ func validateCatptureUpdateMap(captureReq *game.CapturePayload, gameMap map[int3
 		return false
 	}
 	hunterPieceId := captureReq.GetHunterPieceId()
-	hunterCell := captureReq.GetHunterCell()
+	hunterSrc := captureReq.GetDetails().HunterSrcCell
 
 	//check hunter params
-	hunterPiecePtr, exists := gameMap[hunterCell]
+	hunterPiecePtr, exists := gameMap[hunterSrc]
 	if !exists || hunterPieceId != hunterPiecePtr.Id {
 		return false
 	}
