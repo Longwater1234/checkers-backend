@@ -7,20 +7,38 @@ import (
 
 // handleCapturePiece made by Player `p` against `opponent`. Returns TRUE if all is OK. Else returns FALSE.
 func handleCapturePiece(basePayload *game.BasePayload, gameMap map[int32]*game.Piece, p, opponent *player.Player) bool {
-	ok := validateCatptureUpdateMap(basePayload.GetCapturePayload(), gameMap, opponent)
-	if !ok {
+	success := validateCapture(basePayload.GetCapturePayload(), gameMap, opponent)
+	if !success {
+		p.SendMessage(&game.BasePayload{
+			Notice: "Illegal move!",
+			Inner: &game.BasePayload_ExitPayload{
+				ExitPayload: &game.ExitPayload{
+					FromTeam: game.TeamColor_TEAM_UNSPECIFIED,
+				},
+			},
+		})
+		opponent.SendMessage(&game.BasePayload{
+			Notice: "Your opponent got kicked out!",
+			Inner: &game.BasePayload_ExitPayload{
+				ExitPayload: &game.ExitPayload{
+					FromTeam: game.TeamColor_TEAM_UNSPECIFIED,
+				},
+			},
+		})
 		return false
 	}
-
+	// Else, forward the "CAPTURE" payload to opponent
+	opponent.SendMessage(basePayload)
 	return true
 }
 
-func validateCatptureUpdateMap(captureReq *game.CapturePayload, gameMap map[int32]*game.Piece, opponent *player.Player) bool {
-	if captureReq.GetDetails() == nil {
+// validateCapture and updates map if VALID when opponent's piece is attacked by current player
+func validateCapture(captureReq *game.CapturePayload, gameMap map[int32]*game.Piece, opponent *player.Player) bool {
+	if captureReq.GetDetails() == nil || captureReq.GetHunterDestCell() == nil {
 		return false
 	}
 	hunterPieceId := captureReq.GetHunterPieceId()
-	hunterSrc := captureReq.GetDetails().HunterSrcCell
+	hunterSrc := captureReq.GetDetails().GetHunterSrcCell()
 
 	//check hunter params
 	hunterPiecePtr, exists := gameMap[hunterSrc]
@@ -28,8 +46,8 @@ func validateCatptureUpdateMap(captureReq *game.CapturePayload, gameMap map[int3
 		return false
 	}
 
-	preyPieceId := captureReq.GetDetails().GetPreyPieceId()
-	preyCell := captureReq.GetDetails().GetPreyCellIdx()
+	preyPieceId := captureReq.GetDetails().PreyPieceId
+	preyCell := captureReq.GetDetails().PreyCellIdx
 
 	//check Prey params
 	preyPiecePtr, exists := gameMap[preyCell]
@@ -38,12 +56,12 @@ func validateCatptureUpdateMap(captureReq *game.CapturePayload, gameMap map[int3
 	}
 
 	//check if destCell already has a Piece or not
-	_, hasValue := gameMap[captureReq.GetHunterDestCell().CellIndex]
+	destCell := captureReq.GetHunterDestCell()
+	_, hasValue := gameMap[destCell.GetCellIndex()]
 	if hasValue {
 		return false
 	}
 
-	destCell := captureReq.GetHunterDestCell()
 	success := hunterPiecePtr.MoveCapture(&game.Vec2{
 		X: destCell.GetX(),
 		Y: destCell.GetY(),
@@ -55,7 +73,7 @@ func validateCatptureUpdateMap(captureReq *game.CapturePayload, gameMap map[int3
 
 	delete(gameMap, hunterSrc)                        // set hunter's old location empty!
 	delete(gameMap, preyCell)                         // set Prey's old location empty!
-	gameMap[destCell.GetCellIndex()] = hunterPiecePtr // fill in hunter new location
-	opponent.LosePiece(preyPieceId)                   // the defending player loses 1 piece
+	gameMap[destCell.GetCellIndex()] = hunterPiecePtr // move hunter to new location
+	opponent.LosePiece(preyPieceId)                   // the opponent loses 1 piece
 	return true
 }
