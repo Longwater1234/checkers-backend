@@ -65,8 +65,6 @@ func RunMatch(p1 *player.Player, p2 *player.Player, gameOver chan bool) {
 				return
 			}
 
-			log.Println(payload.String()) //FIXME delete me in production
-
 			//if MESSAGE TYPE == "move"
 			if payload.GetMovePayload() != nil {
 				result := handleMovePiece(&payload, gameMap, p1, p2)
@@ -76,8 +74,12 @@ func RunMatch(p1 *player.Player, p2 *player.Player, gameOver chan bool) {
 				}
 			} else if payload.GetCapturePayload() != nil {
 				//if MESSAGE TYPE == "capture"
-				var result bool = handleCapturePiece(&payload, gameMap, p1, p2)
+				result := handleCapturePiece(&payload, gameMap, p1, p2)
 				if !result {
+					gameOver <- true
+					return
+				}
+				if checkEndGame(p1, p2) {
 					gameOver <- true
 					return
 				}
@@ -107,12 +109,21 @@ func RunMatch(p1 *player.Player, p2 *player.Player, gameOver chan bool) {
 				return
 			}
 
-			log.Println(payload.String()) //FIXME delete me in production
-
 			//CHECK MESSAGE TYPE EQUALs "move"
 			if payload.GetMovePayload() != nil {
 				result := handleMovePiece(&payload, gameMap, p2, p1)
 				if !result {
+					gameOver <- true
+					return
+				}
+			} else if payload.GetCapturePayload() != nil {
+				//if MESSAGE TYPE == "capture"
+				result := handleCapturePiece(&payload, gameMap, p2, p1)
+				if !result {
+					gameOver <- true
+					return
+				}
+				if checkEndGame(p2, p1) {
 					gameOver <- true
 					return
 				}
@@ -121,4 +132,30 @@ func RunMatch(p1 *player.Player, p2 *player.Player, gameOver chan bool) {
 			isPlayerRedTurn = true
 		}
 	}
+}
+
+// checkEndGame in the match between Player `p` and `opponent`
+func checkEndGame(p *player.Player, opponent *player.Player) bool {
+	if len(opponent.Pieces) == 0 {
+		//`opponent` has lost, `p` has won! game over
+		p.SendMessage(&game.BasePayload{
+			Notice: "Congrats! You won! GAME OVER",
+			Inner: &game.BasePayload_ExitPayload{
+				ExitPayload: &game.ExitPayload{
+					FromTeam: game.TeamColor_TEAM_UNSPECIFIED,
+				},
+			},
+		})
+		opponent.SendMessage(&game.BasePayload{
+			Notice: "Sorry! You lost! GAME OVER",
+			Inner: &game.BasePayload_ExitPayload{
+				ExitPayload: &game.ExitPayload{
+					FromTeam: game.TeamColor_TEAM_UNSPECIFIED,
+				},
+			},
+		})
+		log.Println("🏆 We got a winner!", p.Name, " has won!")
+		return true
+	}
+	return false
 }
