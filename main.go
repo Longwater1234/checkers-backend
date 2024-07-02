@@ -17,14 +17,14 @@ import (
 
 var SERVER_VERSION = "2024.6.0"
 
-const customMaxPayload int = 2 << 10 //2KB
+const maxRequestSize int = 2 << 10 //2KB
 
 var numPlayers atomic.Uint32             // total number of LIVE players
 var lobby = make(chan *player.Player, 2) // waiting room for players
 
 // wsHandler handles every new WS connection and redirects Player to Lobby
 func wsHandler(ws *websocket.Conn) {
-	ws.MaxPayloadBytes = customMaxPayload
+	ws.MaxPayloadBytes = maxRequestSize
 	defer ws.Close()
 
 	var clientIp = ws.Request().RemoteAddr
@@ -103,7 +103,7 @@ func listenForJoins() {
 
 			//start the match in new goroutine
 			go func(p1, p2 *player.Player) {
-				//Sleep necessary for [p2] Client to read prev message get ready
+				//Sleep necessary for [p2] Client to process prev message
 				time.Sleep(200 * time.Millisecond)
 				gameOver := make(chan bool, 1)
 				room.RunMatch(p1, p2, gameOver)
