@@ -26,7 +26,6 @@ func (p *Player) SendMessage(payload proto.Message) {
 		log.Println("Failed to sendMessage to", p.Name, ".Reason: ", err)
 		p.Dead <- true
 	}
-
 }
 
 // LosePiece removes captured `targetPieceId` from player's basket
@@ -37,4 +36,9 @@ func (p *Player) LosePiece(targetPieceId int32) {
 			return
 		}
 	}
+}
+
+// HasThisPiece returns TRUE if this player owns the given `pieceId`
+func (p *Player) HasThisPiece(pieceId int32) bool {
+	return slices.Contains(p.Pieces, pieceId)
 }

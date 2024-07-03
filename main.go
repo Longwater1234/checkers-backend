@@ -43,7 +43,7 @@ func wsHandler(ws *websocket.Conn) {
 		p.Name = game.TeamColor_TEAM_BLACK.String()
 	}
 	numPlayers.Add(1)
-	lobby <- p //send player to lobby
+	lobby <- p
 
 	log.Println("Someone connected", clientIp, "Total players:", numPlayers.Load())
 	<-p.Dead                   // block until player exits
