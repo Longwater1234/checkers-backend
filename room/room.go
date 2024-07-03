@@ -72,6 +72,8 @@ func RunMatch(p1 *player.Player, p2 *player.Player, gameOver chan bool) {
 					gameOver <- true
 					return
 				}
+				m := hasExtraTargets(p1, payload.GetMovePayload().DestCell.CellIndex, gameMap)
+				log.Println(p1.Name, "has enemy", m)
 			} else if payload.GetCapturePayload() != nil {
 				//if MESSAGE TYPE == "capture"
 				result := handleCapturePiece(&payload, gameMap, p1, p2)
@@ -116,6 +118,8 @@ func RunMatch(p1 *player.Player, p2 *player.Player, gameOver chan bool) {
 					gameOver <- true
 					return
 				}
+				m := hasExtraTargets(p2, payload.GetMovePayload().DestCell.CellIndex, gameMap)
+				log.Println(p2.Name, "has enemy", m)
 			} else if payload.GetCapturePayload() != nil {
 				//if MESSAGE TYPE == "capture"
 				result := handleCapturePiece(&payload, gameMap, p2, p1)

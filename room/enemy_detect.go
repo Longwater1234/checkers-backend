@@ -3,6 +3,7 @@ package room
 import (
 	"checkers-backend/game"
 	"checkers-backend/player"
+	"log"
 )
 
 // hasExtraTargets returns TRUE if there are nearby targets (4 sides of cellIdx) for player `p` to capture. (NOT entire board)
@@ -10,9 +11,10 @@ func hasExtraTargets(p *player.Player, cellIdx int32, gameMap map[int32]*game.Pi
 	//var hasExtra = false
 	piecePtr, exists := gameMap[cellIdx]
 	if !exists || !p.HasThisPiece(piecePtr.Id) {
+		log.Println("i am here exists")
 		return false
 	}
-
+	log.Println("i am after exists")
 	if ok := collectFrontLHS(p, cellIdx, gameMap); ok {
 		return ok
 	}
@@ -58,6 +60,7 @@ func collectFrontLHS(p *player.Player, cellIdx int32, gameMap map[int32]*game.Pi
 	}
 
 	pieceAhead, existFront := gameMap[cellAheadIdx] // north west
+	log.Println("existFront", existFront, "i dont won", !p.HasThisPiece(pieceAhead.Id))
 	hasEnemyAhead = existFront && !p.HasThisPiece(pieceAhead.Id)
 
 	cellBehindEnemy := cellIdx + (deltaBehindEnemy * mSign) + (deltaForward * mSign) // south east
@@ -67,5 +70,6 @@ func collectFrontLHS(p *player.Player, cellIdx int32, gameMap map[int32]*game.Pi
 	// does enemy piece have EMPTY cell behind it?
 	_, existBack := gameMap[cellBehindEnemy]
 	enemyOpenBehind = !existBack
+	log.Println("hasEnemyAhead", hasEnemyAhead, "enemyOpenBehind", enemyOpenBehind)
 	return hasEnemyAhead && enemyOpenBehind
 }
