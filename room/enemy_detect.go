@@ -3,6 +3,7 @@ package room
 import (
 	"checkers-backend/game"
 	"checkers-backend/player"
+	"log"
 )
 
 // isEvenCellRow determines wheter given cell_index is on even Row
@@ -16,19 +17,20 @@ func awayFromEdge(pos *game.Vec2) bool {
 	return pos.X > 0 && pos.X < 7*game.SIZE_CELL && pos.Y > 0 && pos.Y < 7*game.SIZE_CELL
 }
 
-// hasExtraTargets returns TRUE if `p` has extra nearby targets (4 sides) to capture. (NOT entire board)
-func hasExtraTargets(p *player.Player, cellIdx int32, gameMap map[int32]*game.Piece) bool {
+// hasExtraTargets returns TRUE if `p` has extra nearby targets (4 sides of currentCell) to capture. (NOT entire board)
+// This should be called ONLY AFTER `handleCapture` by player `p` succeeds
+func hasExtraTargets(p *player.Player, currCell int32, gameMap map[int32]*game.Piece) bool {
 	//var hasExtra = false
-	piecePtr, exists := gameMap[cellIdx]
+	piecePtr, exists := gameMap[currCell]
 	if !exists || !p.HasThisPiece(piecePtr.Id) {
 		return false
 	}
-	if collectFrontLHS(p, cellIdx, gameMap) || collectFrontRHS(p, cellIdx, gameMap) {
+	if collectFrontLHS(p, currCell, gameMap) || collectFrontRHS(p, currCell, gameMap) {
 		return true
 	}
 
 	if piecePtr.IsKing {
-		if collectBehindLHS(p, cellIdx, gameMap) || collectBehindRHS(p, cellIdx, gameMap) {
+		if collectBehindLHS(p, currCell, gameMap) || collectBehindRHS(p, currCell, gameMap) {
 			return true
 		}
 	}
@@ -80,6 +82,7 @@ func collectFrontLHS(p *player.Player, cellIdx int32, gameMap map[int32]*game.Pi
 	// does enemy piece have EMPTY cell behind it?
 	_, existBack := gameMap[cellBehindEnemy]
 	enemyOpenBehind = !existBack
+	log.Println("hasEnemyAhead", hasEnemyAhead, "enemyOpenBehind", enemyOpenBehind)
 	return hasEnemyAhead && enemyOpenBehind
 }
 
@@ -123,7 +126,7 @@ func collectFrontRHS(p *player.Player, cellIdx int32, gameMap map[int32]*game.Pi
 	if cellBehindEnemy > 32 || cellBehindEnemy < 1 {
 		return false
 	}
-
+	// does enemy piece have EMPTY cell behind it?
 	_, existBack := gameMap[cellBehindEnemy]
 	enemyOpenBehind = !existBack
 	return hasEnemyAhead && enemyOpenBehind
@@ -169,7 +172,7 @@ func collectBehindRHS(p *player.Player, cellIdx int32, gameMap map[int32]*game.P
 	if cellBehindEnemy > 32 || cellBehindEnemy < 1 {
 		return false
 	}
-
+	// does enemy piece have EMPTY cell behind it?
 	_, existBack := gameMap[cellBehindEnemy]
 	enemyOpenBehind = !existBack
 	return hasEnemyAhead && enemyOpenBehind
@@ -215,7 +218,7 @@ func collectBehindLHS(p *player.Player, cellIdx int32, gameMap map[int32]*game.P
 	if cellBehindEnemy > 32 || cellBehindEnemy < 1 {
 		return false
 	}
-
+	// does enemy piece have EMPTY cell behind it?
 	_, existBack := gameMap[cellBehindEnemy]
 	enemyOpenBehind = !existBack
 	return hasEnemyAhead && enemyOpenBehind

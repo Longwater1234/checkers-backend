@@ -72,8 +72,7 @@ func RunMatch(p1 *player.Player, p2 *player.Player, gameOver chan bool) {
 					gameOver <- true
 					return
 				}
-				m := hasExtraTargets(p1, payload.GetMovePayload().DestCell.CellIndex, gameMap)
-				log.Println(p1.Name, "has enemy", m)
+				isPlayerRedTurn = false
 			} else if payload.GetCapturePayload() != nil {
 				//if MESSAGE TYPE == "capture"
 				result := handleCapturePiece(&payload, gameMap, p1, p2)
@@ -85,8 +84,12 @@ func RunMatch(p1 *player.Player, p2 *player.Player, gameOver chan bool) {
 					gameOver <- true
 					return
 				}
+				//check for extra opportunities. if NONE, toggle turns
+				hunterCurrCell := payload.GetCapturePayload().HunterDestCell.CellIndex
+				if !hasExtraTargets(p1, hunterCurrCell, gameMap) {
+					isPlayerRedTurn = false
+				}
 			}
-			isPlayerRedTurn = false
 		} else {
 			//IT'S PLAYER 2 (BLACK's) TURN
 			var rawBytes []byte
@@ -111,15 +114,14 @@ func RunMatch(p1 *player.Player, p2 *player.Player, gameOver chan bool) {
 				return
 			}
 
-			//CHECK MESSAGE TYPE EQUALs "move"
+			//if MESSAGE TYPE == "move"
 			if payload.GetMovePayload() != nil {
 				result := handleMovePiece(&payload, gameMap, p2, p1)
 				if !result {
 					gameOver <- true
 					return
 				}
-				m := hasExtraTargets(p2, payload.GetMovePayload().DestCell.CellIndex, gameMap)
-				log.Println(p2.Name, "has enemy", m)
+				isPlayerRedTurn = true
 			} else if payload.GetCapturePayload() != nil {
 				//if MESSAGE TYPE == "capture"
 				result := handleCapturePiece(&payload, gameMap, p2, p1)
@@ -131,9 +133,13 @@ func RunMatch(p1 *player.Player, p2 *player.Player, gameOver chan bool) {
 					gameOver <- true
 					return
 				}
+				//check for extra opportunities, if NONE, toggle turns
+				hunterCurrCell := payload.GetCapturePayload().HunterDestCell.CellIndex
+				if !hasExtraTargets(p1, hunterCurrCell, gameMap) {
+					isPlayerRedTurn = false
+				}
 			}
-			//TODO ELSE IF MESSAGE_TYPE == "CAPTURE", VALIDATE CAPTURE HERE
-			isPlayerRedTurn = true
+			// .. go to top
 		}
 	}
 }

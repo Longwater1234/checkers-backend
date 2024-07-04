@@ -41,6 +41,7 @@ func runMatch() {
 				// ...
 				p2.SendMessage(rawBytes) // forward to player 2
 				// Reset player 1 timer
+                player1Timer.Stop()
 				player1Timer.Reset(20 * time.Second)
 			} else {
 				// IT'S PLAYER 2 (black) TURN
@@ -49,6 +50,7 @@ func runMatch() {
 				// ...
 				p1.SendMessage(rawBytes) // forward to player 1
 				// Reset player 2 timer
+                player1Timer.Stop()
 				player2Timer.Reset(20 * time.Second)
 			}
 		}

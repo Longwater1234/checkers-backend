@@ -115,7 +115,7 @@ func listenForJoins() {
 			}(p1, p2)
 
 		case <-t.C:
-			// timeout reached. No other player joined! Goodbye!
+			// timeout reached. No other player joined! Goodbye p1!
 			t.Stop()
 			p1.SendMessage(&game.BasePayload{
 				Notice: "No other players at this moment. Try again later!",
