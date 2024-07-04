@@ -144,7 +144,7 @@ func RunMatch(p1 *player.Player, p2 *player.Player, gameOver chan bool) {
 	}
 }
 
-// checkEndGame in the match between Player `p` and `opponent`
+// checkEndGame returns TRUE if we got a winner, and marks the end of game
 func checkEndGame(p *player.Player, opponent *player.Player) bool {
 	if len(opponent.Pieces) == 0 {
 		//`opponent` has lost, `p` has won! game over
