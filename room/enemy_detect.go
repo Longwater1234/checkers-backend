@@ -3,7 +3,6 @@ package room
 import (
 	"checkers-backend/game"
 	"checkers-backend/player"
-	"log"
 )
 
 // isEvenCellRow determines wheter given cell_index is on even Row
@@ -82,7 +81,6 @@ func collectFrontLHS(p *player.Player, cellIdx int32, gameMap map[int32]*game.Pi
 	// does enemy piece have EMPTY cell behind it?
 	_, existBack := gameMap[cellBehindEnemy]
 	enemyOpenBehind = !existBack
-	log.Println("hasEnemyAhead", hasEnemyAhead, "enemyOpenBehind", enemyOpenBehind)
 	return hasEnemyAhead && enemyOpenBehind
 }
 
