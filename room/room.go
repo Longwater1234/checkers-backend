@@ -37,12 +37,12 @@ func RunMatch(p1 *player.Player, p2 *player.Player, gameOver chan bool) {
 	})
 
 	var isPlayerRedTurn = true            // Who turn is it now? RED always starts.
-	var gameMap = generateGameMap(p1, p2) // map of cell index --> pieces
+	var gameMap = generateGameMap(p1, p2) // map of cell index --> pieces. Capacity 24
 
 	//START GAME MAIN LOOP
 	for {
 		if isPlayerRedTurn {
-			//IT'S PLAYER 1 (red's) TURN
+			// ============= IT'S PLAYER 1 (RED's) TURN =============//
 			var rawBytes []byte
 			if err := websocket.Message.Receive(p1.Conn, &rawBytes); err != nil {
 				log.Println(p1.Name, "disconnected. Cause:", err)
@@ -67,16 +67,16 @@ func RunMatch(p1 *player.Player, p2 *player.Player, gameOver chan bool) {
 
 			//if MESSAGE TYPE == "move"
 			if payload.GetMovePayload() != nil {
-				result := handleMovePiece(&payload, gameMap, p1, p2)
-				if !result {
+				valid := handleMovePiece(&payload, gameMap, p1, p2)
+				if !valid {
 					gameOver <- true
 					return
 				}
 				isPlayerRedTurn = false
 			} else if payload.GetCapturePayload() != nil {
 				//if MESSAGE TYPE == "capture"
-				result := handleCapturePiece(&payload, gameMap, p1, p2)
-				if !result {
+				valid := handleCapturePiece(&payload, gameMap, p1, p2)
+				if !valid {
 					gameOver <- true
 					return
 				}
@@ -91,7 +91,7 @@ func RunMatch(p1 *player.Player, p2 *player.Player, gameOver chan bool) {
 				}
 			}
 		} else {
-			//IT'S PLAYER 2 (BLACK's) TURN
+			// ============= IT'S PLAYER 2 (BLACK's) TURN =============//
 			var rawBytes []byte
 			if err := websocket.Message.Receive(p2.Conn, &rawBytes); err != nil {
 				log.Println(p1.Name, "disconnected. Cause:", err.Error())
@@ -116,16 +116,16 @@ func RunMatch(p1 *player.Player, p2 *player.Player, gameOver chan bool) {
 
 			//if MESSAGE TYPE == "move"
 			if payload.GetMovePayload() != nil {
-				result := handleMovePiece(&payload, gameMap, p2, p1)
-				if !result {
+				valid := handleMovePiece(&payload, gameMap, p2, p1)
+				if !valid {
 					gameOver <- true
 					return
 				}
 				isPlayerRedTurn = true
 			} else if payload.GetCapturePayload() != nil {
 				//if MESSAGE TYPE == "capture"
-				result := handleCapturePiece(&payload, gameMap, p2, p1)
-				if !result {
+				valid := handleCapturePiece(&payload, gameMap, p2, p1)
+				if !valid {
 					gameOver <- true
 					return
 				}
@@ -135,8 +135,8 @@ func RunMatch(p1 *player.Player, p2 *player.Player, gameOver chan bool) {
 				}
 				//check for extra opportunities, if NONE, toggle turns
 				hunterCurrCell := payload.GetCapturePayload().HunterDestCell.CellIndex
-				if !hasExtraTargets(p1, hunterCurrCell, gameMap) {
-					isPlayerRedTurn = false
+				if !hasExtraTargets(p2, hunterCurrCell, gameMap) {
+					isPlayerRedTurn = true
 				}
 			}
 			// .. go to top
