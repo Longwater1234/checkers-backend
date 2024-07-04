@@ -20,7 +20,8 @@ Server for SpaceCheckers game. Written entirely using only Go's standard library
 
 ### Relation between Pieces on Checkboard
 
-- This is when a piece is on EVEN row of cells. The number denotes the cell_index difference between two pieces
+- When a piece is on EVEN row of cells. The number denotes the cell_index _delta_ between two pieces.
+
 ```
 4         3
  \       /   
@@ -32,7 +33,7 @@ Server for SpaceCheckers game. Written entirely using only Go's standard library
 
 ```
 
-- This is when a piece is on ODD row of cells.
+- When a piece is on ODD row of cells.
 ```
 5         4
  \       /   

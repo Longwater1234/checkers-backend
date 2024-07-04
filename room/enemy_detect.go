@@ -3,7 +3,6 @@ package room
 import (
 	"checkers-backend/game"
 	"checkers-backend/player"
-	"log"
 )
 
 // isEvenCellRow determines wheter given cell_index is on even Row
@@ -17,30 +16,33 @@ func awayFromEdge(pos *game.Vec2) bool {
 	return pos.X > 0 && pos.X < 7*game.SIZE_CELL && pos.Y > 0 && pos.Y < 7*game.SIZE_CELL
 }
 
-// hasExtraTargets returns TRUE if there are nearby targets (4 sides of cellIdx) for player `p` to capture. (NOT entire board)
+// hasExtraTargets returns TRUE if `p` has extra nearby targets (4 sides) to capture. (NOT entire board)
 func hasExtraTargets(p *player.Player, cellIdx int32, gameMap map[int32]*game.Piece) bool {
 	//var hasExtra = false
 	piecePtr, exists := gameMap[cellIdx]
 	if !exists || !p.HasThisPiece(piecePtr.Id) {
-		log.Println("i am here exists")
 		return false
 	}
-	log.Println("i am after exists")
-	if ok := collectFrontLHS(p, cellIdx, gameMap); ok {
-		return ok
+	if collectFrontLHS(p, cellIdx, gameMap) || collectFrontRHS(p, cellIdx, gameMap) {
+		return true
 	}
 
+	if piecePtr.IsKing {
+		if collectBehindLHS(p, cellIdx, gameMap) || collectBehindRHS(p, cellIdx, gameMap) {
+			return true
+		}
+	}
 	return false
 }
 
-// collectFrontLHS checks whether there is an enemy on LHS of this player `p`
+// collectFrontLHS checks whether there is an enemy on NorthWest of this player `p`
 func collectFrontLHS(p *player.Player, cellIdx int32, gameMap map[int32]*game.Piece) bool {
 	piecePtr := gameMap[cellIdx]
 	//check LHS (north west)
 	if p.Name == game.TeamColor_TEAM_RED.String() && piecePtr.Pos.X == 0 {
 		return false
 	}
-	if p.Name == game.TeamColor_TEAM_BLACK.String() && piecePtr.Pos.Y >= 7*game.SIZE_CELL {
+	if p.Name == game.TeamColor_TEAM_BLACK.String() && piecePtr.Pos.X >= 7*game.SIZE_CELL {
 		return false
 	}
 	var deltaForward int32 = 4
@@ -76,6 +78,144 @@ func collectFrontLHS(p *player.Player, cellIdx int32, gameMap map[int32]*game.Pi
 	}
 
 	// does enemy piece have EMPTY cell behind it?
+	_, existBack := gameMap[cellBehindEnemy]
+	enemyOpenBehind = !existBack
+	return hasEnemyAhead && enemyOpenBehind
+}
+
+// collectFrontRHS checks whether there is an enemy on NorthEast of this player `p`
+func collectFrontRHS(p *player.Player, cellIdx int32, gameMap map[int32]*game.Piece) bool {
+	piecePtr := gameMap[cellIdx]
+	if p.Name == game.TeamColor_TEAM_RED.String() && piecePtr.Pos.X == 0 {
+		return false
+	}
+	if p.Name == game.TeamColor_TEAM_BLACK.String() && piecePtr.Pos.X >= 7*game.SIZE_CELL {
+		return false
+	}
+	var deltaForward int32 = 3
+	var deltaBehindEnemy int32 = 4
+
+	hasEnemyAhead := false
+	enemyOpenBehind := false // does enemy piece have EMPTY cell behind it?
+
+	if isEvenCellRow(cellIdx) {
+		deltaForward, deltaBehindEnemy = deltaBehindEnemy, deltaForward
+	}
+	var mSign int32 = +1 // direction. up +1, down -1
+
+	// if player piece is Black (PLAYER 2)
+	if p.Name == game.TeamColor_TEAM_BLACK.String() {
+		mSign = -1
+		deltaForward, deltaBehindEnemy = deltaBehindEnemy, deltaForward
+	}
+	var cellAheadIdx int32 = cellIdx + (deltaForward * mSign)
+	if cellAheadIdx > 32 || cellAheadIdx < 1 {
+		return false
+	}
+
+	pieceAhead, existFront := gameMap[cellAheadIdx] // north east
+	hasEnemyAhead = existFront && !p.HasThisPiece(pieceAhead.Id)
+	if existFront && !awayFromEdge(&pieceAhead.Pos) {
+		return false
+	}
+
+	cellBehindEnemy := cellIdx + (deltaBehindEnemy * mSign) + (deltaForward * mSign) // south west
+	if cellBehindEnemy > 32 || cellBehindEnemy < 1 {
+		return false
+	}
+
+	_, existBack := gameMap[cellBehindEnemy]
+	enemyOpenBehind = !existBack
+	return hasEnemyAhead && enemyOpenBehind
+}
+
+// collectBehindRHS checks whether there is an enemy on (SOUTH EAST). Only for KING pieces
+func collectBehindRHS(p *player.Player, cellIdx int32, gameMap map[int32]*game.Piece) bool {
+	piecePtr := gameMap[cellIdx]
+	if p.Name == game.TeamColor_TEAM_RED.String() && piecePtr.Pos.X > 7*game.SIZE_CELL {
+		return false
+	}
+	if p.Name == game.TeamColor_TEAM_BLACK.String() && piecePtr.Pos.X == 0 {
+		return false
+	}
+	var deltaForward int32 = 5
+	var deltaBehindEnemy int32 = 4
+
+	hasEnemyAhead := false
+	enemyOpenBehind := false // does enemy piece have EMPTY cell behind it?
+
+	if isEvenCellRow(cellIdx) {
+		deltaForward, deltaBehindEnemy = deltaBehindEnemy, deltaForward
+	}
+	var mSign int32 = +1 // direction. up +1, down -1
+
+	// if player piece is Black (PLAYER 2)
+	if p.Name == game.TeamColor_TEAM_BLACK.String() {
+		mSign = -1
+		deltaForward, deltaBehindEnemy = deltaBehindEnemy, deltaForward
+	}
+	var cellAheadIdx int32 = cellIdx - (deltaForward * mSign)
+	if cellAheadIdx > 32 || cellAheadIdx < 1 {
+		return false
+	}
+
+	pieceAhead, existFront := gameMap[cellAheadIdx] // north east
+	hasEnemyAhead = existFront && !p.HasThisPiece(pieceAhead.Id)
+	if existFront && !awayFromEdge(&pieceAhead.Pos) {
+		return false
+	}
+
+	cellBehindEnemy := cellIdx - (deltaBehindEnemy * mSign) - (deltaForward * mSign) // south west
+	if cellBehindEnemy > 32 || cellBehindEnemy < 1 {
+		return false
+	}
+
+	_, existBack := gameMap[cellBehindEnemy]
+	enemyOpenBehind = !existBack
+	return hasEnemyAhead && enemyOpenBehind
+}
+
+// collectBehindLHS checks whether there is an enemy on (SOUTH WEST). Only for KING pieces
+func collectBehindLHS(p *player.Player, cellIdx int32, gameMap map[int32]*game.Piece) bool {
+	piecePtr := gameMap[cellIdx]
+	if p.Name == game.TeamColor_TEAM_RED.String() && piecePtr.Pos.X > 7*game.SIZE_CELL {
+		return false
+	}
+	if p.Name == game.TeamColor_TEAM_BLACK.String() && piecePtr.Pos.X == 0 {
+		return false
+	}
+	var deltaForward int32 = 4
+	var deltaBehindEnemy int32 = 3
+
+	hasEnemyAhead := false
+	enemyOpenBehind := false // does enemy piece have EMPTY cell behind it?
+
+	if isEvenCellRow(cellIdx) {
+		deltaForward, deltaBehindEnemy = deltaBehindEnemy, deltaForward
+	}
+	var mSign int32 = +1 // direction. up +1, down -1
+
+	// if player piece is Black (PLAYER 2)
+	if p.Name == game.TeamColor_TEAM_BLACK.String() {
+		mSign = -1
+		deltaForward, deltaBehindEnemy = deltaBehindEnemy, deltaForward
+	}
+	var cellAheadIdx int32 = cellIdx - (deltaForward * mSign)
+	if cellAheadIdx > 32 || cellAheadIdx < 1 {
+		return false
+	}
+
+	pieceAhead, existFront := gameMap[cellAheadIdx] // north east
+	hasEnemyAhead = existFront && !p.HasThisPiece(pieceAhead.Id)
+	if existFront && !awayFromEdge(&pieceAhead.Pos) {
+		return false
+	}
+
+	cellBehindEnemy := cellIdx - (deltaBehindEnemy * mSign) - (deltaForward * mSign) // south west
+	if cellBehindEnemy > 32 || cellBehindEnemy < 1 {
+		return false
+	}
+
 	_, existBack := gameMap[cellBehindEnemy]
 	enemyOpenBehind = !existBack
 	return hasEnemyAhead && enemyOpenBehind
