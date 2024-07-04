@@ -5,8 +5,8 @@ import (
 	"checkers-backend/player"
 )
 
-// handleCapturePiece made by Player `p` against `opponent`. Returns TRUE if all is OK. Else returns FALSE.
-func handleCapturePiece(basePayload *game.BasePayload, gameMap map[int32]*game.Piece, p, opponent *player.Player) bool {
+// processCapturePiece made by Player `p` against `opponent`. Returns TRUE if all is OK. Else returns FALSE.
+func processCapturePiece(basePayload *game.BasePayload, gameMap map[int32]*game.Piece, p, opponent *player.Player) bool {
 	success := validateCapture(basePayload.GetCapturePayload(), gameMap, opponent)
 	if !success {
 		p.SendMessage(&game.BasePayload{
@@ -32,7 +32,7 @@ func handleCapturePiece(basePayload *game.BasePayload, gameMap map[int32]*game.P
 	return true
 }
 
-// validateCapture and updates map if VALID when opponent's piece is attacked by current player
+// validateCapture and updates map if VALID when player `p` attacks by opponent's piece
 func validateCapture(captureReq *game.CapturePayload, gameMap map[int32]*game.Piece, opponent *player.Player) bool {
 	if captureReq.GetDetails() == nil || captureReq.GetHunterDestCell() == nil {
 		return false

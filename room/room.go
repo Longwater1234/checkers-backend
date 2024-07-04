@@ -67,7 +67,7 @@ func RunMatch(p1 *player.Player, p2 *player.Player, gameOver chan bool) {
 
 			//if MESSAGE TYPE == "move"
 			if payload.GetMovePayload() != nil {
-				valid := handleMovePiece(&payload, gameMap, p1, p2)
+				valid := processMovePiece(&payload, gameMap, p1, p2)
 				if !valid {
 					gameOver <- true
 					return
@@ -75,7 +75,7 @@ func RunMatch(p1 *player.Player, p2 *player.Player, gameOver chan bool) {
 				isPlayerRedTurn = false
 			} else if payload.GetCapturePayload() != nil {
 				//if MESSAGE TYPE == "capture"
-				valid := handleCapturePiece(&payload, gameMap, p1, p2)
+				valid := processCapturePiece(&payload, gameMap, p1, p2)
 				if !valid {
 					gameOver <- true
 					return
@@ -116,7 +116,7 @@ func RunMatch(p1 *player.Player, p2 *player.Player, gameOver chan bool) {
 
 			//if MESSAGE TYPE == "move"
 			if payload.GetMovePayload() != nil {
-				valid := handleMovePiece(&payload, gameMap, p2, p1)
+				valid := processMovePiece(&payload, gameMap, p2, p1)
 				if !valid {
 					gameOver <- true
 					return
@@ -124,7 +124,7 @@ func RunMatch(p1 *player.Player, p2 *player.Player, gameOver chan bool) {
 				isPlayerRedTurn = true
 			} else if payload.GetCapturePayload() != nil {
 				//if MESSAGE TYPE == "capture"
-				valid := handleCapturePiece(&payload, gameMap, p2, p1)
+				valid := processCapturePiece(&payload, gameMap, p2, p1)
 				if !valid {
 					gameOver <- true
 					return

@@ -73,3 +73,14 @@ func (p *Piece) MoveCapture(destPos *Vec2) bool {
 	}
 	return true
 }
+
+// IsEvenCellRow determines wheter given cell_index is on even Row
+func IsEvenCellRow(cellIdx int32) bool {
+	rowNumber := 9 - (cellIdx-1)/4
+	return (rowNumber%2 == 0)
+}
+
+// AwayFromEdge returns TRUE if given position is NOT on any edge of board
+func AwayFromEdge(pos *Vec2) bool {
+	return pos.X > 0 && pos.X < 7*SIZE_CELL && pos.Y > 0 && pos.Y < 7*SIZE_CELL
+}

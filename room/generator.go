@@ -9,8 +9,8 @@ import (
 )
 
 const (
-	numRows          = 8      // checker cells rows
-	numCols          = 8      // checker cell columns
+	numRows          = 8      // checker rows
+	numCols          = 8      // checker columns
 	upperLimit int16 = 0x7FFF //piece ID max value (short_max)
 )
 
