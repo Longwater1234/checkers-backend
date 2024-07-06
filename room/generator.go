@@ -29,7 +29,7 @@ func generateGameMap(p1 *player.Player, p2 *player.Player) map[int32]*game.Piece
 					X: float32(col%numRows) * game.SIZE_CELL,
 					Y: float32(row) * game.SIZE_CELL,
 				}
-				if row < 3 {
+				if row < 3 && iterBlack != len(p2.Pieces) {
 					//BLACK PIECES
 					gameMap[counter] = &game.Piece{
 						Id:         p2.Pieces[iterBlack],
@@ -38,7 +38,7 @@ func generateGameMap(p1 *player.Player, p2 *player.Player) map[int32]*game.Piece
 						PieceColor: game.Piece_Black,
 					}
 					iterBlack++
-				} else if row > 4 {
+				} else if row > 4 && iterRed != len(p1.Pieces) {
 					//RED PIECES
 					gameMap[counter] = &game.Piece{
 						Id:         p1.Pieces[iterRed],

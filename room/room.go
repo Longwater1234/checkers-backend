@@ -4,6 +4,7 @@ import (
 	"checkers-backend/game"
 	"checkers-backend/player"
 	"log"
+	"time"
 
 	"golang.org/x/net/websocket"
 	"google.golang.org/protobuf/proto"
@@ -67,7 +68,6 @@ func RunMatch(p1 *player.Player, p2 *player.Player, gameOver chan bool) {
 
 			//if MESSAGE TYPE == "move"
 			if payload.GetMovePayload() != nil {
-				log.Println("movePayload", payload.GetMovePayload().String())
 				valid := processMovePiece(&payload, gameMap, p1, p2)
 				if !valid {
 					gameOver <- true
@@ -82,6 +82,7 @@ func RunMatch(p1 *player.Player, p2 *player.Player, gameOver chan bool) {
 					return
 				}
 				if checkEndGame(p1, p2) {
+					time.Sleep(100 * time.Millisecond)
 					gameOver <- true
 					return
 				}
@@ -117,7 +118,6 @@ func RunMatch(p1 *player.Player, p2 *player.Player, gameOver chan bool) {
 
 			//if MESSAGE TYPE == "move"
 			if payload.GetMovePayload() != nil {
-				log.Println("movePayload", payload.GetMovePayload().String())
 				valid := processMovePiece(&payload, gameMap, p2, p1)
 				if !valid {
 					gameOver <- true
@@ -141,12 +141,12 @@ func RunMatch(p1 *player.Player, p2 *player.Player, gameOver chan bool) {
 					isPlayerRedTurn = true
 				}
 			}
-			// .. go to top
+			// .. return to top
 		}
 	}
 }
 
-// checkEndGame returns TRUE if we got a winner, and marks the end of game
+// checkEndGame determines if game should end, returns TRUE if we got a winner
 func checkEndGame(p *player.Player, opponent *player.Player) bool {
 	if len(opponent.Pieces) == 0 {
 		//`opponent` has lost, `p` has won! game over
