@@ -34,8 +34,8 @@ func processMovePiece(payload *game.BasePayload, gameMap map[int32]*game.Piece, 
 
 // validateAndUpdateMap after player's "MOVE" and update gameMap. Returns TRUE if successful, else FALSE
 func validateAndUpdateMap(payload *game.MovePayload, gameMap map[int32]*game.Piece) bool {
-	destCell := payload.GetDestCell()
-	if destCell == nil {
+	destCellPtr := payload.GetDestCell()
+	if destCellPtr == nil {
 		return false
 	}
 	srcCell := payload.GetSourceCell()
@@ -47,19 +47,19 @@ func validateAndUpdateMap(payload *game.MovePayload, gameMap map[int32]*game.Pie
 	}
 
 	//check if destCell already has a Piece or not
-	_, hasValue := gameMap[destCell.CellIndex]
+	_, hasValue := gameMap[destCellPtr.CellIndex]
 	if hasValue {
 		return false
 	}
 
 	success := piecePtr.MoveSimple(&game.Vec2{
-		X: destCell.GetX(),
-		Y: destCell.GetY(),
+		X: destCellPtr.GetX(),
+		Y: destCellPtr.GetY(),
 	})
 	if !success {
 		return false
 	}
-	delete(gameMap, srcCell)                    // set old location empty!
-	gameMap[destCell.GetCellIndex()] = piecePtr // fill in the new location
+	delete(gameMap, srcCell)                       // set old location empty!
+	gameMap[destCellPtr.GetCellIndex()] = piecePtr // fill in the new location
 	return true
 }

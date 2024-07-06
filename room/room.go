@@ -38,7 +38,7 @@ func RunMatch(p1 *player.Player, p2 *player.Player, gameOver chan bool) {
 	})
 
 	var isPlayerRedTurn = true            // Who turn is it now? RED always starts.
-	var gameMap = generateGameMap(p1, p2) // map of cell index --> pieces. Capacity 24
+	var gameMap = generateGameMap(p1, p2) // map of cell index --> pieces.
 
 	//START GAME MAIN LOOP
 	for {
