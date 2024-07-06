@@ -56,13 +56,13 @@ func collectFrontLHS(p *player.Player, cellIdx int32, gameMap map[int32]*game.Pi
 		return false
 	}
 
-	pieceAhead, existFront := gameMap[cellAheadIdx] // north west
+	pieceAhead, existFront := gameMap[cellAheadIdx] // north west (of hunter)
 	hasEnemyAhead = existFront && !p.HasThisPiece(pieceAhead.Id)
 	if existFront && !game.AwayFromEdge(&pieceAhead.Pos) {
 		return false
 	}
 
-	cellBehindEnemy := cellIdx + (deltaBehindEnemy * mSign) + (deltaForward * mSign) // south east
+	cellBehindEnemy := cellIdx + (deltaBehindEnemy * mSign) + (deltaForward * mSign) // south east (of enemy)
 	if cellBehindEnemy > 32 || cellBehindEnemy < 1 {
 		return false
 	}
@@ -86,7 +86,7 @@ func collectFrontRHS(p *player.Player, cellIdx int32, gameMap map[int32]*game.Pi
 	var deltaBehindEnemy int32 = 4
 
 	hasEnemyAhead := false
-	enemyOpenBehind := false // does enemy piece have EMPTY cell behind it?
+	enemyOpenBehind := false //is there an EMPTY cell behind enemy?
 
 	if game.IsEvenCellRow(cellIdx) {
 		deltaForward, deltaBehindEnemy = deltaBehindEnemy, deltaForward
@@ -109,7 +109,7 @@ func collectFrontRHS(p *player.Player, cellIdx int32, gameMap map[int32]*game.Pi
 		return false
 	}
 
-	cellBehindEnemy := cellIdx + (deltaBehindEnemy * mSign) + (deltaForward * mSign) // south west
+	cellBehindEnemy := cellIdx + (deltaBehindEnemy * mSign) + (deltaForward * mSign) // south west (of enemy)
 	if cellBehindEnemy > 32 || cellBehindEnemy < 1 {
 		return false
 	}
@@ -119,7 +119,7 @@ func collectFrontRHS(p *player.Player, cellIdx int32, gameMap map[int32]*game.Pi
 	return hasEnemyAhead && enemyOpenBehind
 }
 
-// collectBehindRHS returns true ONLY IF there is an enemy on (SOUTH EAST). Only for KING pieces
+// collectBehindRHS returns true ONLY IF there is an enemy on (SOUTH EAST) of player. Only for KING pieces
 func collectBehindRHS(king *player.Player, cellIdx int32, gameMap map[int32]*game.Piece) bool {
 	piecePtr := gameMap[cellIdx]
 	if king.Name == game.TeamColor_TEAM_RED.String() && piecePtr.Pos.X > 7*game.SIZE_CELL {
@@ -132,12 +132,12 @@ func collectBehindRHS(king *player.Player, cellIdx int32, gameMap map[int32]*gam
 	var deltaBehindEnemy int32 = 4
 
 	hasEnemyAhead := false
-	enemyOpenBehind := false // does enemy piece have EMPTY cell behind it?
+	enemyOpenBehind := false //is there an EMPTY cell behind enemy?
 
 	if game.IsEvenCellRow(cellIdx) {
 		deltaForward, deltaBehindEnemy = deltaBehindEnemy, deltaForward
 	}
-	var mSign int32 = +1 // direction. up +1, down -1
+	var mSign int32 = +1 // direction
 
 	// if player piece is Black (PLAYER 2)
 	if king.Name == game.TeamColor_TEAM_BLACK.String() {
@@ -165,7 +165,7 @@ func collectBehindRHS(king *player.Player, cellIdx int32, gameMap map[int32]*gam
 	return hasEnemyAhead && enemyOpenBehind
 }
 
-// collectBehindLHS returns true ONLY IF there is an enemy on (SOUTH WEST). Only for KING pieces
+// collectBehindLHS returns true ONLY IF there is an enemy on (SOUTH WEST) of player. Only for KING pieces
 func collectBehindLHS(king *player.Player, cellIdx int32, gameMap map[int32]*game.Piece) bool {
 	piecePtr := gameMap[cellIdx]
 	if king.Name == game.TeamColor_TEAM_RED.String() && piecePtr.Pos.X > 7*game.SIZE_CELL {
@@ -178,12 +178,12 @@ func collectBehindLHS(king *player.Player, cellIdx int32, gameMap map[int32]*gam
 	var deltaBehindEnemy int32 = 3
 
 	hasEnemyAhead := false
-	enemyOpenBehind := false // does enemy piece have EMPTY cell behind it?
+	enemyOpenBehind := false //is there an EMPTY cell behind enemy?
 
 	if game.IsEvenCellRow(cellIdx) {
 		deltaForward, deltaBehindEnemy = deltaBehindEnemy, deltaForward
 	}
-	var mSign int32 = +1 // direction. up +1, down -1
+	var mSign int32 = +1 // direction
 
 	// if player piece is Black (PLAYER 2)
 	if king.Name == game.TeamColor_TEAM_BLACK.String() {
