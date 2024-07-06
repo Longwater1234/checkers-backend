@@ -3,59 +3,171 @@ package room
 import (
 	"checkers-backend/game"
 	"checkers-backend/player"
-	"crypto/rand"
 	"log"
-	"math/big"
+	"time"
 
-	_ "github.com/goccy/go-json"
+	"golang.org/x/net/websocket"
+	"google.golang.org/protobuf/proto"
 )
 
-const upperLimit int16 = 0x7FFF //random ID max value (short_max)
-
-func StartMatch(p1 *player.Player, p2 *player.Player, gamOver chan bool) {
+// RunMatch between the two players `p1` and `p2`. If match ends, send signal through `gameOver` channel
+func RunMatch(p1 *player.Player, p2 *player.Player, gameOver chan bool) {
 	log.Println("🟢 Match has begun!")
 
-	//make random pieceId's for player 1
-	for i := 0; i < len(p1.Pieces); i++ {
-		val, err := rand.Int(rand.Reader, big.NewInt(int64(upperLimit)))
-		if err != nil {
-			gamOver <- true
-			log.Panic("cannot generate random number", err)
-		}
-		p1.Pieces[i] = int16(val.Int64())
-	}
+	//make random pieceId's for both
+	generatePlayerPieces(p1, p2, gameOver)
 
-	//make pieces for player 2
-	for i := 0; i < len(p2.Pieces); i++ {
-		val, err := rand.Int(rand.Reader, big.NewInt(int64(upperLimit)))
-		if err != nil {
-			gamOver <- true
-			log.Panic("cannot generate random number", err)
-		}
-		p2.Pieces[i] = int16(val.Int64())
-	}
-
-	p1.SendMessage(&game.StartPayload{
-		BasePayload: game.BasePayload{
-			MessageType: game.START,
+	p1.SendMessage(&game.BasePayload{
+		Notice: "Opponent joined. Make your first move!",
+		Inner: &game.BasePayload_Start{
+			Start: &game.StartPayload{
+				PiecesRed:   p1.Pieces,
+				PiecesBlack: p2.Pieces,
+			},
 		},
-		PiecesRed:   p1.Pieces,
-		PiecesBlack: p2.Pieces,
-		Notice:      "Opponent joined. Make your first move!",
 	})
 
-	p2.SendMessage(&game.StartPayload{
-		BasePayload: game.BasePayload{
-			MessageType: game.START,
+	p2.SendMessage(&game.BasePayload{
+		Notice: "Match has begun. Waiting for RED to move!",
+		Inner: &game.BasePayload_Start{
+			Start: &game.StartPayload{
+				PiecesRed:   p1.Pieces,
+				PiecesBlack: p2.Pieces,
+			},
 		},
-		PiecesRed:   p1.Pieces,
-		PiecesBlack: p2.Pieces,
-		Notice:      "Match has begun. Waiting for RED to move!",
 	})
 
-	// default starts with RED (player 1)
-	var isPlayerRedTurn = true
+	var isPlayerRedTurn = true            // Who turn is it now? RED always starts.
+	var gameMap = generateGameMap(p1, p2) // map of cell index --> pieces.
 
-	log.Println("playerREdturn", isPlayerRedTurn)
+	//START GAME MAIN LOOP
+	for {
+		if isPlayerRedTurn {
+			// ============= IT'S PLAYER 1 (RED's) TURN =============//
+			var rawBytes []byte
+			if err := websocket.Message.Receive(p1.Conn, &rawBytes); err != nil {
+				log.Println(p1.Name, "disconnected. Cause:", err)
+				p2.SendMessage(&game.BasePayload{
+					Notice: "Opponent has left the game!",
+					Inner: &game.BasePayload_ExitPayload{
+						ExitPayload: &game.ExitPayload{
+							FromTeam: game.TeamColor_TEAM_RED,
+						},
+					},
+				})
+				gameOver <- true
+				return
+			}
 
+			var payload game.BasePayload
+			if err := proto.Unmarshal(rawBytes, &payload); err != nil {
+				log.Println("failed to parse protobuf", err)
+				gameOver <- true
+				return
+			}
+
+			//if MESSAGE TYPE == "move"
+			if payload.GetMovePayload() != nil {
+				valid := processMovePiece(&payload, gameMap, p1, p2)
+				if !valid {
+					gameOver <- true
+					return
+				}
+				isPlayerRedTurn = false
+			} else if payload.GetCapturePayload() != nil {
+				//if MESSAGE TYPE == "capture"
+				valid := processCapturePiece(&payload, gameMap, p1, p2)
+				if !valid {
+					gameOver <- true
+					return
+				}
+				if checkEndGame(p1, p2) {
+					time.Sleep(100 * time.Millisecond)
+					gameOver <- true
+					return
+				}
+				//check for extra opportunities. if NONE, toggle turns
+				currentCell := payload.GetCapturePayload().HunterDestCell.CellIndex
+				if !hasExtraTargets(p1, currentCell, gameMap) {
+					isPlayerRedTurn = false
+				}
+			}
+		} else {
+			// ============= IT'S PLAYER 2 (BLACK's) TURN =============//
+			var rawBytes []byte
+			if err := websocket.Message.Receive(p2.Conn, &rawBytes); err != nil {
+				log.Println(p1.Name, "disconnected. Cause:", err.Error())
+				p1.SendMessage(&game.BasePayload{
+					Notice: "Opponent has left the game!",
+					Inner: &game.BasePayload_ExitPayload{
+						ExitPayload: &game.ExitPayload{
+							FromTeam: game.TeamColor_TEAM_BLACK,
+						},
+					},
+				})
+				gameOver <- true
+				return
+			}
+
+			var payload game.BasePayload
+			if err := proto.Unmarshal(rawBytes, &payload); err != nil {
+				log.Println("failed to parse protobuf", err)
+				gameOver <- true
+				return
+			}
+
+			//if MESSAGE TYPE == "move"
+			if payload.GetMovePayload() != nil {
+				valid := processMovePiece(&payload, gameMap, p2, p1)
+				if !valid {
+					gameOver <- true
+					return
+				}
+				isPlayerRedTurn = true
+			} else if payload.GetCapturePayload() != nil {
+				//if MESSAGE TYPE == "capture"
+				valid := processCapturePiece(&payload, gameMap, p2, p1)
+				if !valid {
+					gameOver <- true
+					return
+				}
+				if checkEndGame(p2, p1) {
+					gameOver <- true
+					return
+				}
+				//check for extra opportunities, if NONE, toggle turns
+				hunterCurrCell := payload.GetCapturePayload().HunterDestCell.CellIndex
+				if !hasExtraTargets(p2, hunterCurrCell, gameMap) {
+					isPlayerRedTurn = true
+				}
+			}
+			// .. return to top
+		}
+	}
+}
+
+// checkEndGame determines if game should end, returns TRUE if we got a winner
+func checkEndGame(p *player.Player, opponent *player.Player) bool {
+	if len(opponent.Pieces) == 0 {
+		//`opponent` has lost, `p` has won! game over
+		p.SendMessage(&game.BasePayload{
+			Notice: "Congrats! You won! GAME OVER",
+			Inner: &game.BasePayload_WinlosePayload{
+				WinlosePayload: &game.WinLosePayload{
+					Winner: game.TeamColor_TEAM_UNSPECIFIED, //TODO fix me
+				},
+			},
+		})
+		opponent.SendMessage(&game.BasePayload{
+			Notice: "Sorry! You lost! GAME OVER",
+			Inner: &game.BasePayload_WinlosePayload{
+				WinlosePayload: &game.WinLosePayload{
+					Winner: game.TeamColor_TEAM_UNSPECIFIED, //TODO fix me
+				},
+			},
+		})
+		log.Println("🏆 We got a winner!", p.Name, " has won!")
+		return true
+	}
+	return false
 }

@@ -10,46 +10,45 @@ import (
 	"os"
 	"strconv"
 	"sync/atomic"
-
-	_ "github.com/goccy/go-json"
+	"time"
 
 	"golang.org/x/net/websocket"
 )
 
-var SERVER_VERSION = "1.0.0"
+var SERVER_VERSION = "2024.6.0"
 
-const customMaxPayload int = 2 << 10 //2KB
+const maxRequestSize int = 2 << 10 //2KB
 
 var numPlayers atomic.Uint32             // total number of LIVE players
-var lobby = make(chan *player.Player, 1) // waiting room for players
+var lobby = make(chan *player.Player, 2) // waiting room for players
 
-// wsHandler assigns name to Player and redirects to Lobby
+// wsHandler handles every new WS connection and redirects Player to Lobby
 func wsHandler(ws *websocket.Conn) {
-	ws.MaxPayloadBytes = customMaxPayload
+	ws.MaxPayloadBytes = maxRequestSize
 	defer ws.Close()
 
 	var clientIp = ws.Request().RemoteAddr
 
 	p := &player.Player{
 		Conn:   ws,
-		Pieces: make([]int16, 12),
+		Pieces: make([]int32, 12),
 		Dead:   make(chan bool, 1),
 	}
 	defer close(p.Dead)
 
-	//for each pair joining, the 1st will be player 1 (RED)
+	//for each pair joining, the First will always be RED
 	if numPlayers.Load()%2 == 0 {
-		p.Name = player.RED.SimpleName()
+		p.Name = game.TeamColor_TEAM_RED.String()
 	} else {
-		p.Name = player.BLACK.SimpleName()
+		p.Name = game.TeamColor_TEAM_BLACK.String()
 	}
 	numPlayers.Add(1)
-	lobby <- p //send player to lobby
+	lobby <- p
 
 	log.Println("Someone connected", clientIp, "Total players:", numPlayers.Load())
-	<-p.Dead                   //block until player exits
+	<-p.Dead                   // block until player exits
 	numPlayers.Add(^uint32(0)) // if player exits, minus 1
-	log.Println(clientIp, p.Name, "just left the game. Total players:", numPlayers.Load())
+	log.Println(p.Name, "just left the game. Total players:", numPlayers.Load())
 }
 
 func main() {
@@ -60,7 +59,7 @@ func main() {
 	port := strconv.Itoa(portNum)
 
 	http.HandleFunc("/", func(writer http.ResponseWriter, r *http.Request) {
-		fmt.Fprintf(writer, `<p>This is a socket game server. Dial ws://%s:%s/game </p>`, r.URL.Host, port)
+		fmt.Fprintf(writer, `<p>This is a socket server. Dial ws://%s:%s/game </p>`, r.URL.Host, port)
 	})
 	http.Handle("/game", websocket.Handler(wsHandler))
 
@@ -72,36 +71,63 @@ func main() {
 // Keep Listening for new players joining lobby
 func listenForJoins() {
 	for {
-		log.Println("LOBBY:", "cap", cap(lobby), "len", len(lobby))
+		//welcome 1st player
 		p1 := <-lobby
-
-		p1.SendMessage(&game.WelcomePayload{
-			BasePayload: game.BasePayload{
-				MessageType: game.WELCOME,
-			},
-			MyTeam: player.RED,
+		log.Println("LOBBY:", "cap", cap(lobby), "len", len(lobby))
+		var msgOne = &game.BasePayload{
 			Notice: "Connected. You are Team RED. Waiting for opponent...",
-		})
-
-		p2 := <-lobby //waiting for 2nd player to join
-		p2.SendMessage(&game.WelcomePayload{
-			BasePayload: game.BasePayload{
-				MessageType: game.WELCOME,
+			Inner: &game.BasePayload_Welcome{
+				Welcome: &game.WelcomePayload{
+					MyTeam:        game.TeamColor_TEAM_RED,
+					ServerVersion: SERVER_VERSION,
+				},
 			},
-			Notice: "Connected. You are Team BLACK. Match is starting!",
-			MyTeam: player.BLACK,
-		})
+		}
+		p1.SendMessage(msgOne)
 
-		//start the match in new goroutine
-		go func(p1 *player.Player, p2 *player.Player) {
-			gameOver := make(chan bool, 1)
-			room.StartMatch(p1, p2, gameOver)
-			//block until match ends
-			<-gameOver
-			log.Println("🔴 GAME OVER!")
+		//waiting for 2nd player to join (TIMEOUT at 30 seconds)
+		t := time.NewTimer(30 * time.Second)
+		select {
+		case p2 := <-lobby:
+			t.Stop()
+			// welcome 2nd player
+			var msgTwo = &game.BasePayload{
+				Notice: "Connected. You are Team BLACK. Match is starting!",
+				Inner: &game.BasePayload_Welcome{
+					Welcome: &game.WelcomePayload{
+						MyTeam: game.TeamColor_TEAM_BLACK,
+					},
+				},
+			}
+			p2.SendMessage(msgTwo)
+
+			//start the match in new goroutine
+			go func(p1, p2 *player.Player) {
+				//Sleep necessary for [p2] Client to process prev message
+				time.Sleep(100 * time.Millisecond)
+				gameOver := make(chan bool, 1)
+				room.RunMatch(p1, p2, gameOver)
+				<-gameOver //block until match ends
+				log.Println("🔴 GAME OVER!")
+				close(gameOver)
+				p1.Dead <- true
+				p2.Dead <- true
+			}(p1, p2)
+
+		case <-t.C:
+			// timeout reached. No other player joined! Goodbye p1!
+			t.Stop()
+			p1.SendMessage(&game.BasePayload{
+				Notice: "No other players at this moment. Try again later!",
+				Inner: &game.BasePayload_ExitPayload{
+					ExitPayload: &game.ExitPayload{
+						FromTeam: game.TeamColor_TEAM_UNSPECIFIED,
+					},
+				},
+			})
 			p1.Dead <- true
-			p2.Dead <- true
-		}(p1, p2)
+		}
+		// goto TOP... wait for another pair to join.
 	}
 
 }
