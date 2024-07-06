@@ -32,7 +32,7 @@ func processCapturePiece(basePayload *game.BasePayload, gameMap map[int32]*game.
 	return true
 }
 
-// validateCapture and updates map if VALID when player `p` attacks by opponent's piece
+// validateCapture when player `p` attacks by opponent's piece. returns TRUE if valid, else FALSE
 func validateCapture(captureReq *game.CapturePayload, gameMap map[int32]*game.Piece, opponent *player.Player) bool {
 	if captureReq.GetDetails() == nil || captureReq.GetHunterDestCell() == nil {
 		return false
