@@ -67,6 +67,7 @@ func RunMatch(p1 *player.Player, p2 *player.Player, gameOver chan bool) {
 
 			//if MESSAGE TYPE == "move"
 			if payload.GetMovePayload() != nil {
+				log.Println("movePayload", payload.GetMovePayload().String())
 				valid := processMovePiece(&payload, gameMap, p1, p2)
 				if !valid {
 					gameOver <- true
@@ -85,8 +86,8 @@ func RunMatch(p1 *player.Player, p2 *player.Player, gameOver chan bool) {
 					return
 				}
 				//check for extra opportunities. if NONE, toggle turns
-				hunterCurrCell := payload.GetCapturePayload().HunterDestCell.CellIndex
-				if !hasExtraTargets(p1, hunterCurrCell, gameMap) {
+				currentCell := payload.GetCapturePayload().HunterDestCell.CellIndex
+				if !hasExtraTargets(p1, currentCell, gameMap) {
 					isPlayerRedTurn = false
 				}
 			}
@@ -116,6 +117,7 @@ func RunMatch(p1 *player.Player, p2 *player.Player, gameOver chan bool) {
 
 			//if MESSAGE TYPE == "move"
 			if payload.GetMovePayload() != nil {
+				log.Println("movePayload", payload.GetMovePayload().String())
 				valid := processMovePiece(&payload, gameMap, p2, p1)
 				if !valid {
 					gameOver <- true
@@ -150,17 +152,17 @@ func checkEndGame(p *player.Player, opponent *player.Player) bool {
 		//`opponent` has lost, `p` has won! game over
 		p.SendMessage(&game.BasePayload{
 			Notice: "Congrats! You won! GAME OVER",
-			Inner: &game.BasePayload_ExitPayload{
-				ExitPayload: &game.ExitPayload{
-					FromTeam: game.TeamColor_TEAM_UNSPECIFIED,
+			Inner: &game.BasePayload_WinlosePayload{
+				WinlosePayload: &game.WinLosePayload{
+					Winner: game.TeamColor_TEAM_UNSPECIFIED, //TODO fix me
 				},
 			},
 		})
 		opponent.SendMessage(&game.BasePayload{
 			Notice: "Sorry! You lost! GAME OVER",
-			Inner: &game.BasePayload_ExitPayload{
-				ExitPayload: &game.ExitPayload{
-					FromTeam: game.TeamColor_TEAM_UNSPECIFIED,
+			Inner: &game.BasePayload_WinlosePayload{
+				WinlosePayload: &game.WinLosePayload{
+					Winner: game.TeamColor_TEAM_UNSPECIFIED, //TODO fix me
 				},
 			},
 		})
