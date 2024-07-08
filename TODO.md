@@ -4,7 +4,7 @@
 - [ ] Client needs to check if server version is not NEWER than its own SPECIFIED
 - [ ] Extra endpoint for live server metrics
 - [ ] Add timeout after every move. 20 seconds or 10 seconds
-
+- [ ] try avoid deadlocks
 
 ## timer example 
 
