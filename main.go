@@ -15,7 +15,7 @@ import (
 	"golang.org/x/net/websocket"
 )
 
-var SERVER_VERSION = "2024.6.0"
+const SERVER_VERSION = "2024.7.0"
 
 const maxRequestSize int = 2 << 10 //2KB
 

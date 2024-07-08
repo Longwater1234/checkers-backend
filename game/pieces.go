@@ -1,6 +1,8 @@
 package game
 
 import (
+	"checkers-backend/player"
+	"log"
 	"math"
 )
 
@@ -83,4 +85,30 @@ func IsEvenCellRow(cellIdx int32) bool {
 // AwayFromEdge returns TRUE if given position is NOT on any edge of board
 func AwayFromEdge(pos *Vec2) bool {
 	return pos.X > 0 && pos.X < 7*SIZE_CELL && pos.Y > 0 && pos.Y < 7*SIZE_CELL
+}
+
+// CheckEndGame determines if game should end, returns TRUE if we got a winner
+func CheckEndGame(p *player.Player, opponent *player.Player) bool {
+	if len(opponent.Pieces) == 0 {
+		//`opponent` has lost, `p` has won! game over
+		p.SendMessage(&BasePayload{
+			Notice: "Congrats! You won! GAME OVER",
+			Inner: &BasePayload_WinlosePayload{
+				WinlosePayload: &WinLosePayload{
+					Winner: TeamColor_TEAM_UNSPECIFIED, //TODO fix me
+				},
+			},
+		})
+		opponent.SendMessage(&BasePayload{
+			Notice: "Sorry! You lost! GAME OVER",
+			Inner: &BasePayload_WinlosePayload{
+				WinlosePayload: &WinLosePayload{
+					Winner: TeamColor_TEAM_UNSPECIFIED, //TODO fix me
+				},
+			},
+		})
+		log.Println("🏆 We got a winner!", p.Name, " has won!")
+		return true
+	}
+	return false
 }
