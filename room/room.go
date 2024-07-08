@@ -68,6 +68,7 @@ func RunMatch(p1 *player.Player, p2 *player.Player, gameOver chan bool) {
 
 			//if MESSAGE TYPE == "move"
 			if payload.GetMovePayload() != nil {
+				log.Println("move", payload.GetMovePayload().String())
 				valid := processMovePiece(&payload, gameMap, p1, p2)
 				if !valid {
 					gameOver <- true
@@ -76,12 +77,13 @@ func RunMatch(p1 *player.Player, p2 *player.Player, gameOver chan bool) {
 				isPlayerRedTurn = false
 			} else if payload.GetCapturePayload() != nil {
 				//if MESSAGE TYPE == "capture"
+				log.Println("move", payload.GetMovePayload().String())
 				valid := processCapturePiece(&payload, gameMap, p1, p2)
 				if !valid {
 					gameOver <- true
 					return
 				}
-				if checkEndGame(p1, p2) {
+				if game.CheckEndGame(p1, p2) {
 					time.Sleep(100 * time.Millisecond)
 					gameOver <- true
 					return
@@ -90,6 +92,8 @@ func RunMatch(p1 *player.Player, p2 *player.Player, gameOver chan bool) {
 				currentCell := payload.GetCapturePayload().HunterDestCell.CellIndex
 				if !hasExtraTargets(p1, currentCell, gameMap) {
 					isPlayerRedTurn = false
+				} else {
+					isPlayerRedTurn = true
 				}
 			}
 		} else {
@@ -118,6 +122,7 @@ func RunMatch(p1 *player.Player, p2 *player.Player, gameOver chan bool) {
 
 			//if MESSAGE TYPE == "move"
 			if payload.GetMovePayload() != nil {
+				log.Println("move", payload.GetMovePayload().String())
 				valid := processMovePiece(&payload, gameMap, p2, p1)
 				if !valid {
 					gameOver <- true
@@ -126,12 +131,14 @@ func RunMatch(p1 *player.Player, p2 *player.Player, gameOver chan bool) {
 				isPlayerRedTurn = true
 			} else if payload.GetCapturePayload() != nil {
 				//if MESSAGE TYPE == "capture"
+				log.Println("move", payload.GetCapturePayload().String())
 				valid := processCapturePiece(&payload, gameMap, p2, p1)
 				if !valid {
 					gameOver <- true
 					return
 				}
-				if checkEndGame(p2, p1) {
+				if game.CheckEndGame(p2, p1) {
+					time.Sleep(100 * time.Millisecond)
 					gameOver <- true
 					return
 				}
@@ -139,35 +146,11 @@ func RunMatch(p1 *player.Player, p2 *player.Player, gameOver chan bool) {
 				hunterCurrCell := payload.GetCapturePayload().HunterDestCell.CellIndex
 				if !hasExtraTargets(p2, hunterCurrCell, gameMap) {
 					isPlayerRedTurn = true
+				} else {
+					isPlayerRedTurn = false
 				}
 			}
 			// .. return to top
 		}
 	}
-}
-
-// checkEndGame determines if game should end, returns TRUE if we got a winner
-func checkEndGame(p *player.Player, opponent *player.Player) bool {
-	if len(opponent.Pieces) == 0 {
-		//`opponent` has lost, `p` has won! game over
-		p.SendMessage(&game.BasePayload{
-			Notice: "Congrats! You won! GAME OVER",
-			Inner: &game.BasePayload_WinlosePayload{
-				WinlosePayload: &game.WinLosePayload{
-					Winner: game.TeamColor_TEAM_UNSPECIFIED, //TODO fix me
-				},
-			},
-		})
-		opponent.SendMessage(&game.BasePayload{
-			Notice: "Sorry! You lost! GAME OVER",
-			Inner: &game.BasePayload_WinlosePayload{
-				WinlosePayload: &game.WinLosePayload{
-					Winner: game.TeamColor_TEAM_UNSPECIFIED, //TODO fix me
-				},
-			},
-		})
-		log.Println("🏆 We got a winner!", p.Name, " has won!")
-		return true
-	}
-	return false
 }
