@@ -93,6 +93,7 @@ func RunMatch(p1 *player.Player, p2 *player.Player, gameOver chan bool) {
 				if !hasExtraTargets(p1, currentCell, gameMap) {
 					isPlayerRedTurn = false
 				} else {
+					log.Println(p1.Name, " have extra targets!")
 					isPlayerRedTurn = true
 				}
 			}
@@ -147,6 +148,7 @@ func RunMatch(p1 *player.Player, p2 *player.Player, gameOver chan bool) {
 				if !hasExtraTargets(p2, hunterCurrCell, gameMap) {
 					isPlayerRedTurn = true
 				} else {
+					log.Println(p2.Name, " have extra targets!")
 					isPlayerRedTurn = false
 				}
 			}
