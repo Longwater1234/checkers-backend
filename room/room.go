@@ -84,7 +84,7 @@ func RunMatch(p1 *player.Player, p2 *player.Player, gameOver chan bool) {
 					return
 				}
 				if game.CheckEndGame(p1, p2) {
-					time.Sleep(200 * time.Millisecond)
+					time.Sleep(3 * time.Second)
 					gameOver <- true
 					return
 				}
@@ -139,7 +139,7 @@ func RunMatch(p1 *player.Player, p2 *player.Player, gameOver chan bool) {
 					return
 				}
 				if game.CheckEndGame(p2, p1) {
-					time.Sleep(200 * time.Millisecond)
+					time.Sleep(3 * time.Second)
 					gameOver <- true
 					return
 				}
