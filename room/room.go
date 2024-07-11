@@ -90,14 +90,14 @@ func RunMatch(p1 *player.Player, p2 *player.Player, gameOver chan bool) {
 				}
 				//check for extra opportunities. if NONE, toggle turns
 				currentCell := payload.GetCapturePayload().HunterDestCell.CellIndex
-				if !HasExtraTargets(p1, currentCell, gameMap) {
-					isPlayerRedTurn = false
-				} else {
+				if hasExtraTargets(p1, currentCell, gameMap) {
 					log.Println(p1.Name, " have extra targets!")
-					isPlayerRedTurn = true
+					isPlayerRedTurn = true // still my turn
+					continue
 				}
+				isPlayerRedTurn = false
 			}
-		} else {
+		} else if !isPlayerRedTurn {
 			// ============= IT'S PLAYER 2 (BLACK's) TURN =============//
 			var rawBytes []byte
 			if err := websocket.Message.Receive(p2.Conn, &rawBytes); err != nil {
@@ -145,12 +145,12 @@ func RunMatch(p1 *player.Player, p2 *player.Player, gameOver chan bool) {
 				}
 				//check for extra opportunities, if NONE, toggle turns
 				hunterCurrCell := payload.GetCapturePayload().HunterDestCell.CellIndex
-				if !HasExtraTargets(p2, hunterCurrCell, gameMap) {
-					isPlayerRedTurn = true
-				} else {
+				if hasExtraTargets(p2, hunterCurrCell, gameMap) {
 					log.Println(p2.Name, " have extra targets!")
-					isPlayerRedTurn = false
+					isPlayerRedTurn = false // still my turn
+					continue
 				}
+				isPlayerRedTurn = true
 			}
 			// .. return to top
 		}

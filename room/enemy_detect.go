@@ -5,9 +5,9 @@ import (
 	"checkers-backend/player"
 )
 
-// HasExtraTargets returns TRUE if `hunter` has EXTRA nearby targets (ANY 4 sides) to capture (NOT entire board).
-// This should be called only AFTER `handleCapture` by player `hunter` is successful
-func HasExtraTargets(hunter *player.Player, currCell int32, gameMap map[int32]*game.Piece) bool {
+// hasExtraTargets returns TRUE if `hunter` has EXTRA nearby targets (ANY 4 sides) to capture (NOT entire board).
+// This should be called only AFTER `handleCapture` by player `hunter` is valid
+func hasExtraTargets(hunter *player.Player, currCell int32, gameMap map[int32]*game.Piece) bool {
 	piecePtr, exists := gameMap[currCell]
 	if !exists || !hunter.HasThisPiece(piecePtr.Id) {
 		return false
