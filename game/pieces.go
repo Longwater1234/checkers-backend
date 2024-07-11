@@ -27,7 +27,7 @@ type Piece struct {
 	PieceColor PieceType // either red or black
 }
 
-// When a piece is moved diagonally to given `destPos`. Returns TRUE if move is successful, else FALSE
+// MoveSimple actually moves this piece diagonally to given `destPos` by 1 cell. Returns TRUE if successful
 func (p *Piece) MoveSimple(destPos *Vec2) bool {
 	var deltaX = float64(destPos.X - p.Pos.X)
 	var deltaY = float64(destPos.Y - p.Pos.Y)
@@ -51,8 +51,7 @@ func (p *Piece) MoveSimple(destPos *Vec2) bool {
 	return true
 }
 
-// When capturing opponent, Move this piece by 2 cells diagonally to the given `destPos`. Returns TRUE
-// if success, else FALSE
+// MoveCapture actually moves this piece by 2 cells diagonally to the given `destPos`. Returns TRUE if success
 func (p *Piece) MoveCapture(destPos *Vec2) bool {
 	var deltaX = float64(destPos.X - p.Pos.X)
 	var deltaY = float64(destPos.Y - p.Pos.Y)
@@ -76,10 +75,10 @@ func (p *Piece) MoveCapture(destPos *Vec2) bool {
 	return true
 }
 
-// IsEvenCellRow determines wheter given cell_index is on even Row
+// IsEvenCellRow determines whether given `cellIdx` is on even Row
 func IsEvenCellRow(cellIdx int32) bool {
 	rowNumber := 9 - (cellIdx-1)/4
-	return (rowNumber%2 == 0)
+	return rowNumber%2 == 0
 }
 
 // AwayFromEdge returns TRUE if given position is NOT on any edge of board
