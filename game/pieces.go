@@ -81,8 +81,8 @@ func IsEvenCellRow(cellIdx int32) bool {
 	return rowNumber%2 == 0
 }
 
-// AwayFromEdge returns TRUE if given position is NOT on any edge of board
-func AwayFromEdge(pos *Vec2) bool {
+// IsAwayFromEdge returns TRUE if given position is NOT on any edge of board
+func IsAwayFromEdge(pos *Vec2) bool {
 	return pos.X > 0 && pos.X < 7*SIZE_CELL && pos.Y > 0 && pos.Y < 7*SIZE_CELL
 }
 
