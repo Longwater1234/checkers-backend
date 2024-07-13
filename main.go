@@ -17,7 +17,7 @@ import (
 
 const SERVER_VERSION = "2024.7.0"
 
-const maxRequestSize int = 2 << 10 //2KB
+const maxRequestSize int = 1 << 10 //1KB
 
 var numPlayers atomic.Uint32             // total number of LIVE players
 var lobby = make(chan *player.Player, 2) // waiting room for players

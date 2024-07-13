@@ -83,18 +83,19 @@ func RunMatch(p1 *player.Player, p2 *player.Player, gameOver chan bool) {
 					gameOver <- true
 					return
 				}
-				if game.CheckEndGame(p1, p2) {
-					time.Sleep(100 * time.Millisecond)
+				if game.HasWinner(p1, p2) {
+					time.Sleep(3 * time.Second)
 					gameOver <- true
 					return
 				}
 				//check for extra opportunities. if NONE, toggle turns
-				currentCell := payload.GetCapturePayload().Destination.CellIndex
-				if !hasExtraTargets(p1, currentCell, gameMap) {
-					isPlayerRedTurn = false
-				} else {
-					isPlayerRedTurn = true
+				currentCell := payload.GetCapturePayload().HunterDestCell.CellIndex
+				if hasExtraTargets(p1, currentCell, gameMap) {
+					log.Println(p1.Name, " have extra targets!")
+					isPlayerRedTurn = true // still my turn
+					continue
 				}
+				isPlayerRedTurn = false
 			}
 		} else if !isPlayerRedTurn {
 			// ============= IT'S PLAYER 2 (BLACK's) TURN =============//
@@ -137,18 +138,19 @@ func RunMatch(p1 *player.Player, p2 *player.Player, gameOver chan bool) {
 					gameOver <- true
 					return
 				}
-				if game.CheckEndGame(p2, p1) {
-					time.Sleep(100 * time.Millisecond)
+				if game.HasWinner(p2, p1) {
+					time.Sleep(3 * time.Second)
 					gameOver <- true
 					return
 				}
 				//check for extra opportunities, if NONE, toggle turns
-				hunterCurrCell := payload.GetCapturePayload().Destination.CellIndex
-				if !hasExtraTargets(p2, hunterCurrCell, gameMap) {
-					isPlayerRedTurn = true
-				} else {
-					isPlayerRedTurn = false
+				hunterCurrCell := payload.GetCapturePayload().HunterDestCell.CellIndex
+				if hasExtraTargets(p2, hunterCurrCell, gameMap) {
+					log.Println(p2.Name, " have extra targets!")
+					isPlayerRedTurn = false // still my turn
+					continue
 				}
+				isPlayerRedTurn = true
 			}
 			// .. return to top
 		}
