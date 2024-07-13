@@ -89,7 +89,7 @@ func RunMatch(p1 *player.Player, p2 *player.Player, gameOver chan bool) {
 					return
 				}
 				//check for extra opportunities. if NONE, toggle turns
-				currentCell := payload.GetCapturePayload().HunterDestCell.CellIndex
+				currentCell := payload.GetCapturePayload().Destination.CellIndex
 				if hasExtraTargets(p1, currentCell, gameMap) {
 					log.Println(p1.Name, " have extra targets!")
 					isPlayerRedTurn = true // still my turn
@@ -144,7 +144,7 @@ func RunMatch(p1 *player.Player, p2 *player.Player, gameOver chan bool) {
 					return
 				}
 				//check for extra opportunities, if NONE, toggle turns
-				hunterCurrCell := payload.GetCapturePayload().HunterDestCell.CellIndex
+				hunterCurrCell := payload.GetCapturePayload().Destination.CellIndex
 				if hasExtraTargets(p2, hunterCurrCell, gameMap) {
 					log.Println(p2.Name, " have extra targets!")
 					isPlayerRedTurn = false // still my turn
