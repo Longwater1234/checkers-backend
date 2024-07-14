@@ -92,7 +92,7 @@ func RunMatch(p1 *player.Player, p2 *player.Player, gameOver chan bool) {
 				currentCell := payload.GetCapturePayload().Destination.CellIndex
 				if hasExtraTargets(p1, currentCell, gameMap) {
 					log.Println(p1.Name, " have extra targets!")
-					isPlayerRedTurn = true // still my turn
+					//isPlayerRedTurn = true // still my turn
 					continue
 				}
 				isPlayerRedTurn = false
@@ -147,7 +147,7 @@ func RunMatch(p1 *player.Player, p2 *player.Player, gameOver chan bool) {
 				hunterCurrCell := payload.GetCapturePayload().Destination.CellIndex
 				if hasExtraTargets(p2, hunterCurrCell, gameMap) {
 					log.Println(p2.Name, " have extra targets!")
-					isPlayerRedTurn = false // still my turn
+					//isPlayerRedTurn = false // still my turn
 					continue
 				}
 				isPlayerRedTurn = true
