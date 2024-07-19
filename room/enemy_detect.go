@@ -3,6 +3,7 @@ package room
 import (
 	"checkers-backend/game"
 	"checkers-backend/player"
+	"log"
 )
 
 // hasExtraTargets returns TRUE if `hunter` has EXTRA nearby targets (ANY 4 sides) to capture (NOT entire board).
@@ -69,6 +70,7 @@ func collectFrontLHS(p *player.Player, cellIdx int32, gameMap map[int32]*game.Pi
 	// does enemy piece have EMPTY cell behind it?
 	_, existBack := gameMap[cellBehindEnemy]
 	enemyOpenBehind = !existBack
+	log.Println("collectFrontLHS", "hasEnemyAhead", hasEnemyAhead, "enemyOpenBehind", enemyOpenBehind)
 	return hasEnemyAhead && enemyOpenBehind
 }
 
@@ -115,6 +117,7 @@ func collectFrontRHS(p *player.Player, cellIdx int32, gameMap map[int32]*game.Pi
 	// does enemy piece have EMPTY cell behind it?
 	_, existBack := gameMap[cellBehindEnemy]
 	enemyOpenBehind = !existBack
+	log.Println("collectFrontRHS", "hasEnemyAhead", hasEnemyAhead, "enemyOpenBehind", enemyOpenBehind)
 	return hasEnemyAhead && enemyOpenBehind
 }
 
@@ -161,6 +164,7 @@ func collectBehindRHS(king *player.Player, cellIdx int32, gameMap map[int32]*gam
 	// does enemy piece have EMPTY cell behind it?
 	_, existBack := gameMap[cellBehindEnemy]
 	enemyOpenBehind = !existBack
+	log.Println("collectBehindRHS", "hasEnemyAhead", hasEnemyAhead, "enemyOpenBehind", enemyOpenBehind)
 	return hasEnemyAhead && enemyOpenBehind
 }
 
@@ -207,5 +211,6 @@ func collectBehindLHS(king *player.Player, cellIdx int32, gameMap map[int32]*gam
 	// does enemy piece have EMPTY cell behind it?
 	_, existBack := gameMap[cellBehindEnemy]
 	enemyOpenBehind = !existBack
+	log.Println("collectBehindLHS", "hasEnemyAhead", hasEnemyAhead, "enemyOpenBehind", enemyOpenBehind)
 	return hasEnemyAhead && enemyOpenBehind
 }
