@@ -94,7 +94,11 @@ func RunMatch(p1 *player.Player, p2 *player.Player, gameOver chan bool) {
 					gameOver <- true
 					return
 				}
-				//check for extra opportunities. if NONE, toggle turns
+				for k, v := range gameMap {
+					fmt.Printf("%d -> %+v\n", k, v)
+				}
+				fmt.Println()
+				//check for extra opportunities for p1. if NONE, toggle turns
 				currentCell := payload.GetCapturePayload().Destination.CellIndex
 				if hasExtraTargets(p1, currentCell, gameMap) {
 					log.Println(p1.Name, " have extra targets!")
@@ -148,7 +152,11 @@ func RunMatch(p1 *player.Player, p2 *player.Player, gameOver chan bool) {
 					gameOver <- true
 					return
 				}
-				//check for extra opportunities, if NONE, toggle turns
+				for k, v := range gameMap {
+					fmt.Printf("%d -> %+v\n", k, v)
+				}
+				fmt.Println()
+				//check for extra opportunities for p2. if NONE, toggle turns
 				hunterCurrCell := payload.GetCapturePayload().Destination.CellIndex
 				if hasExtraTargets(p2, hunterCurrCell, gameMap) {
 					log.Println(p2.Name, " have extra targets!")

@@ -10,6 +10,7 @@ import (
 // This should be called only AFTER `handleCapture` by player `hunter` is valid
 func hasExtraTargets(hunter *player.Player, currCell int32, gameMap map[int32]*game.Piece) bool {
 	piecePtr, exists := gameMap[currCell]
+	log.Println("currentCell cellIdx", currCell)
 	if !exists || !hunter.HasThisPiece(piecePtr.Id) {
 		return false
 	}
@@ -49,9 +50,10 @@ func collectFrontLHS(p *player.Player, cellIdx int32, gameMap map[int32]*game.Pi
 	// if player piece is Black (PLAYER 2)
 	if p.Name == game.TeamColor_TEAM_BLACK.String() {
 		mSign = -1
-		deltaForward, deltaBehindEnemy = deltaBehindEnemy, deltaForward
+		deltaBehindEnemy, deltaForward = deltaForward, deltaBehindEnemy
 	}
 	var cellAheadIdx int32 = cellIdx + (deltaForward * mSign)
+	log.Println("cellAhedIdx left", cellAheadIdx)
 	if cellAheadIdx > 32 || cellAheadIdx < 1 {
 		return false
 	}
@@ -100,9 +102,10 @@ func collectFrontRHS(p *player.Player, cellIdx int32, gameMap map[int32]*game.Pi
 	// if piece is Black (PLAYER 2)
 	if p.Name == game.TeamColor_TEAM_BLACK.String() {
 		mSign = -1
-		deltaForward, deltaBehindEnemy = deltaBehindEnemy, deltaForward
+		deltaBehindEnemy, deltaForward = deltaForward, deltaBehindEnemy
 	}
 	var cellAheadIdx int32 = cellIdx + (deltaForward * mSign)
+	log.Println("cellAhedIdx right", cellAheadIdx)
 	if cellAheadIdx > 32 || cellAheadIdx < 1 {
 		return false
 	}
