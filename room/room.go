@@ -3,6 +3,7 @@ package room
 import (
 	"checkers-backend/game"
 	"checkers-backend/player"
+	"fmt"
 	"log"
 	"time"
 
@@ -39,6 +40,11 @@ func RunMatch(p1 *player.Player, p2 *player.Player, gameOver chan bool) {
 
 	var isPlayerRedTurn = true            // Who turn is it now? RED always starts.
 	var gameMap = generateGameMap(p1, p2) // map of cell index --> pieces.
+
+	for k, v := range gameMap {
+		fmt.Printf("%d -> %+v\n", k, v)
+	}
+	fmt.Println()
 
 	//START GAME MAIN LOOP
 	for {
@@ -92,7 +98,6 @@ func RunMatch(p1 *player.Player, p2 *player.Player, gameOver chan bool) {
 				currentCell := payload.GetCapturePayload().Destination.CellIndex
 				if hasExtraTargets(p1, currentCell, gameMap) {
 					log.Println(p1.Name, " have extra targets!")
-					//isPlayerRedTurn = true // still my turn
 					continue
 				}
 				isPlayerRedTurn = false
@@ -147,7 +152,6 @@ func RunMatch(p1 *player.Player, p2 *player.Player, gameOver chan bool) {
 				hunterCurrCell := payload.GetCapturePayload().Destination.CellIndex
 				if hasExtraTargets(p2, hunterCurrCell, gameMap) {
 					log.Println(p2.Name, " have extra targets!")
-					//isPlayerRedTurn = false // still my turn
 					continue
 				}
 				isPlayerRedTurn = true

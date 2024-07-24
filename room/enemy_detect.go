@@ -38,8 +38,8 @@ func collectFrontLHS(p *player.Player, cellIdx int32, gameMap map[int32]*game.Pi
 	var deltaForward int32 = 4
 	var deltaBehindEnemy int32 = 5
 
-	hasEnemyAhead := false
-	enemyOpenBehind := false // does enemy piece have EMPTY cell behind it?
+	var hasEnemyAhead = false
+	var enemyOpenBehind = false // does enemy piece have EMPTY cell behind it?
 
 	if game.IsEvenCellRow(cellIdx) {
 		deltaForward, deltaBehindEnemy = deltaBehindEnemy, deltaForward
@@ -59,7 +59,7 @@ func collectFrontLHS(p *player.Player, cellIdx int32, gameMap map[int32]*game.Pi
 	pieceAhead, existFront := gameMap[cellAheadIdx] // north west (of hunter)
 	hasEnemyAhead = existFront && !p.HasThisPiece(pieceAhead.Id)
 	if existFront {
-		log.Printf("pieceAhead %+v", pieceAhead)
+		log.Printf("left pieceAhead %+v", pieceAhead)
 	}
 	if existFront && !game.IsAwayFromEdge(&pieceAhead.Pos) {
 		return false
@@ -110,7 +110,7 @@ func collectFrontRHS(p *player.Player, cellIdx int32, gameMap map[int32]*game.Pi
 	pieceAhead, existFront := gameMap[cellAheadIdx] // north east
 	hasEnemyAhead = existFront && !p.HasThisPiece(pieceAhead.Id)
 	if existFront {
-		log.Printf("pieceAhead %+v", pieceAhead)
+		log.Printf("right pieceAhead %+v", pieceAhead)
 	}
 	if existFront && !game.IsAwayFromEdge(&pieceAhead.Pos) {
 		return false
@@ -160,7 +160,7 @@ func collectBehindRHS(king *player.Player, cellIdx int32, gameMap map[int32]*gam
 	pieceAhead, existFront := gameMap[cellAheadIdx] // north west (opposite direction)
 	hasEnemyAhead = existFront && !king.HasThisPiece(pieceAhead.Id)
 	if existFront {
-		log.Printf("pieceAhead %+v", pieceAhead)
+		log.Printf("behindRhs, pieceAhead %+v", pieceAhead)
 	}
 	if existFront && !game.IsAwayFromEdge(&pieceAhead.Pos) {
 		return false
@@ -210,7 +210,7 @@ func collectBehindLHS(king *player.Player, cellIdx int32, gameMap map[int32]*gam
 	pieceAhead, existFront := gameMap[cellAheadIdx] // north east (opposite direction)
 	hasEnemyAhead = existFront && !king.HasThisPiece(pieceAhead.Id)
 	if existFront {
-		log.Printf("pieceAhead %+v", pieceAhead)
+		log.Printf("behind left, pieceAhead %+v", pieceAhead)
 	}
 	if existFront && !game.IsAwayFromEdge(&pieceAhead.Pos) {
 		return false
