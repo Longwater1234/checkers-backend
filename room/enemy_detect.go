@@ -3,14 +3,12 @@ package room
 import (
 	"checkers-backend/game"
 	"checkers-backend/player"
-	"log"
 )
 
 // hasExtraTargets returns TRUE if `hunter` has EXTRA nearby targets (ANY 4 sides) to capture (NOT entire board).
 // This should be called only AFTER `handleCapture` by player `hunter` is valid
 func hasExtraTargets(hunter *player.Player, currCell int32, gameMap map[int32]*game.Piece) bool {
 	piecePtr, exists := gameMap[currCell]
-	log.Println("=========== ❤ currentCell cellIdx", currCell)
 	if !exists || !hunter.HasThisPiece(piecePtr.Id) {
 		return false
 	}
@@ -44,7 +42,6 @@ func collectFrontLHS(p *player.Player, cellIdx int32, gameMap map[int32]*game.Pi
 
 	if game.IsEvenCellRow(cellIdx) {
 		deltaForward, deltaBehindEnemy = deltaBehindEnemy, deltaForward
-		log.Println("collectFrontLHS 1", "deltaForward", deltaForward, "deltaBehindEnemy", deltaBehindEnemy)
 	}
 	var mSign int32 = +1 // direction. up +1, down -1
 
@@ -52,19 +49,14 @@ func collectFrontLHS(p *player.Player, cellIdx int32, gameMap map[int32]*game.Pi
 	if p.Name == game.TeamColor_TEAM_BLACK.String() {
 		mSign = -1
 		deltaBehindEnemy, deltaForward = deltaForward, deltaBehindEnemy
-		log.Println("collectFrontLHS 2", "deltaForward", deltaForward, "deltaBehindEnemy", deltaBehindEnemy)
 	}
 	var cellAheadIdx int32 = cellIdx + (deltaForward * mSign)
-	log.Println("cellAhedIdx left", cellAheadIdx)
 	if cellAheadIdx > 32 || cellAheadIdx < 1 {
 		return false
 	}
 
 	pieceAhead, existFront := gameMap[cellAheadIdx] // north west (of hunter)
 	hasEnemyAhead = existFront && !p.HasThisPiece(pieceAhead.Id)
-	if existFront {
-		log.Printf("left pieceAhead %+v", pieceAhead)
-	}
 	if existFront && !game.IsAwayFromEdge(&pieceAhead.Pos) {
 		return false
 	}
@@ -73,11 +65,9 @@ func collectFrontLHS(p *player.Player, cellIdx int32, gameMap map[int32]*game.Pi
 	if cellBehindEnemy > 32 || cellBehindEnemy < 1 {
 		return false
 	}
-
-	// does enemy piece have EMPTY cell behind it?
+	// does enemy piece have EMPTY cell behind?
 	_, existBack := gameMap[cellBehindEnemy]
 	enemyOpenBehind = !existBack
-	log.Println("collectFrontLHS", "hasEnemyAhead", hasEnemyAhead, "enemyOpenBehind", enemyOpenBehind)
 	return hasEnemyAhead && enemyOpenBehind
 }
 
@@ -107,16 +97,12 @@ func collectFrontRHS(p *player.Player, cellIdx int32, gameMap map[int32]*game.Pi
 		deltaBehindEnemy, deltaForward = deltaForward, deltaBehindEnemy
 	}
 	var cellAheadIdx int32 = cellIdx + (deltaForward * mSign)
-	log.Println("cellAhedIdx right", cellAheadIdx)
 	if cellAheadIdx > 32 || cellAheadIdx < 1 {
 		return false
 	}
 
 	pieceAhead, existFront := gameMap[cellAheadIdx] // north east
 	hasEnemyAhead = existFront && !p.HasThisPiece(pieceAhead.Id)
-	if existFront {
-		log.Printf("right pieceAhead %+v", pieceAhead)
-	}
 	if existFront && !game.IsAwayFromEdge(&pieceAhead.Pos) {
 		return false
 	}
@@ -125,10 +111,9 @@ func collectFrontRHS(p *player.Player, cellIdx int32, gameMap map[int32]*game.Pi
 	if cellBehindEnemy > 32 || cellBehindEnemy < 1 {
 		return false
 	}
-	// does enemy piece have EMPTY cell behind it?
+	// does enemy piece have EMPTY cell behind?
 	_, existBack := gameMap[cellBehindEnemy]
 	enemyOpenBehind = !existBack
-	log.Println("collectFrontRHS", "hasEnemyAhead", hasEnemyAhead, "enemyOpenBehind", enemyOpenBehind)
 	return hasEnemyAhead && enemyOpenBehind
 }
 
@@ -172,10 +157,9 @@ func collectBehindRHS(king *player.Player, cellIdx int32, gameMap map[int32]*gam
 	if cellBehindEnemy > 32 || cellBehindEnemy < 1 {
 		return false
 	}
-	// does enemy piece have EMPTY cell behind it?
+	// does enemy piece have EMPTY cell behind?
 	_, existBack := gameMap[cellBehindEnemy]
 	enemyOpenBehind = !existBack
-	log.Println("collectBehindRHS", "hasEnemyAhead", hasEnemyAhead, "enemyOpenBehind", enemyOpenBehind)
 	return hasEnemyAhead && enemyOpenBehind
 }
 
@@ -219,9 +203,8 @@ func collectBehindLHS(king *player.Player, cellIdx int32, gameMap map[int32]*gam
 	if cellBehindEnemy > 32 || cellBehindEnemy < 1 {
 		return false
 	}
-	// does enemy piece have EMPTY cell behind it?
+	// does enemy piece have EMPTY cell behind?
 	_, existBack := gameMap[cellBehindEnemy]
 	enemyOpenBehind = !existBack
-	log.Println("collectBehindLHS", "hasEnemyAhead", hasEnemyAhead, "enemyOpenBehind", enemyOpenBehind)
 	return hasEnemyAhead && enemyOpenBehind
 }
