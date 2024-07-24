@@ -23,6 +23,7 @@ Server for SpaceCheckers game. Written entirely using only Go's standard library
 - PLAYER 1 is always RED 🔴. PLAYER 2 IS always BLACK ⚫️
 - When a piece is on EVEN row of cells. The number denotes the cell_index _delta_ between two pieces.
 
+isEven : true, deltaForward = 4 , deltaBehindEnemy  =5
 ```
 4         3
  \       /   
