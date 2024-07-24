@@ -20,6 +20,17 @@ const (
 	Piece_Black
 )
 
+func (t PieceType) String() string {
+	switch t {
+	case Piece_Black:
+		return "Piece_Black"
+	case Piece_Red:
+		return "Piece_Red"
+	default:
+		return "unknown"
+	}
+}
+
 type Piece struct {
 	Id         int32     // unique piece id
 	IsKing     bool      // whether this piece is King
