@@ -81,18 +81,20 @@ func RunMatch(p1 *player.Player, p2 *player.Player, gameOver chan bool) {
 					gameOver <- true
 					return
 				}
-				if checkEndGame(p1, p2) {
-					time.Sleep(100 * time.Millisecond)
+				if game.HasWinner(p1, p2) {
+					time.Sleep(3 * time.Second)
 					gameOver <- true
 					return
 				}
-				//check for extra opportunities. if NONE, toggle turns
-				currentCell := payload.GetCapturePayload().HunterDestCell.CellIndex
-				if !hasExtraTargets(p1, currentCell, gameMap) {
-					isPlayerRedTurn = false
+				//check for extra opportunities for P1. if NONE, toggle turns
+				currentCell := payload.GetCapturePayload().Destination.CellIndex
+				if hasExtraTargets(p1, currentCell, gameMap) {
+					log.Println(p1.Name, " have extra targets!")
+					continue
 				}
+				isPlayerRedTurn = false
 			}
-		} else {
+		} else if !isPlayerRedTurn {
 			// ============= IT'S PLAYER 2 (BLACK's) TURN =============//
 			var rawBytes []byte
 			if err := websocket.Message.Receive(p2.Conn, &rawBytes); err != nil {
@@ -131,43 +133,20 @@ func RunMatch(p1 *player.Player, p2 *player.Player, gameOver chan bool) {
 					gameOver <- true
 					return
 				}
-				if checkEndGame(p2, p1) {
+				if game.HasWinner(p2, p1) {
+					time.Sleep(3 * time.Second)
 					gameOver <- true
 					return
 				}
-				//check for extra opportunities, if NONE, toggle turns
-				hunterCurrCell := payload.GetCapturePayload().HunterDestCell.CellIndex
-				if !hasExtraTargets(p2, hunterCurrCell, gameMap) {
-					isPlayerRedTurn = true
+				//check for extra opportunities for P2. if NONE, toggle turns
+				hunterCurrCell := payload.GetCapturePayload().Destination.CellIndex
+				if hasExtraTargets(p2, hunterCurrCell, gameMap) {
+					log.Println(p2.Name, " have extra targets!")
+					continue
 				}
+				isPlayerRedTurn = true
 			}
 			// .. return to top
 		}
 	}
-}
-
-// checkEndGame determines if game should end, returns TRUE if we got a winner
-func checkEndGame(p *player.Player, opponent *player.Player) bool {
-	if len(opponent.Pieces) == 0 {
-		//`opponent` has lost, `p` has won! game over
-		p.SendMessage(&game.BasePayload{
-			Notice: "Congrats! You won! GAME OVER",
-			Inner: &game.BasePayload_WinlosePayload{
-				WinlosePayload: &game.WinLosePayload{
-					Winner: game.TeamColor_TEAM_UNSPECIFIED, //TODO fix me
-				},
-			},
-		})
-		opponent.SendMessage(&game.BasePayload{
-			Notice: "Sorry! You lost! GAME OVER",
-			Inner: &game.BasePayload_WinlosePayload{
-				WinlosePayload: &game.WinLosePayload{
-					Winner: game.TeamColor_TEAM_UNSPECIFIED, //TODO fix me
-				},
-			},
-		})
-		log.Println("🏆 We got a winner!", p.Name, " has won!")
-		return true
-	}
-	return false
 }

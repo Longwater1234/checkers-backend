@@ -28,3 +28,4 @@ checkers-backend
 bin/
 *.prof
 .DS_Store
+*.zip

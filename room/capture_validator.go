@@ -34,7 +34,7 @@ func processCapturePiece(basePayload *game.BasePayload, gameMap map[int32]*game.
 
 // validateCapture when player `p` attacks by opponent's piece. returns TRUE if valid, else FALSE
 func validateCapture(captureReq *game.CapturePayload, gameMap map[int32]*game.Piece, opponent *player.Player) bool {
-	if captureReq.GetDetails() == nil || captureReq.GetHunterDestCell() == nil {
+	if captureReq.GetDetails() == nil || captureReq.GetDestination() == nil {
 		return false
 	}
 	hunterPieceId := captureReq.GetHunterPieceId()
@@ -56,7 +56,7 @@ func validateCapture(captureReq *game.CapturePayload, gameMap map[int32]*game.Pi
 	}
 
 	//check if destCell already has a Piece or not
-	destCell := captureReq.GetHunterDestCell()
+	destCell := captureReq.GetDestination()
 	_, hasValue := gameMap[destCell.GetCellIndex()]
 	if hasValue {
 		return false

@@ -15,9 +15,9 @@ import (
 	"golang.org/x/net/websocket"
 )
 
-var SERVER_VERSION = "2024.6.0"
+const SERVER_VERSION = "2024.7.0"
 
-const maxRequestSize int = 2 << 10 //2KB
+const maxRequestSize int = 1 << 10 //1KB
 
 var numPlayers atomic.Uint32             // total number of LIVE players
 var lobby = make(chan *player.Player, 2) // waiting room for players
@@ -104,7 +104,7 @@ func listenForJoins() {
 			//start the match in new goroutine
 			go func(p1, p2 *player.Player) {
 				//Sleep necessary for [p2] Client to process prev message
-				time.Sleep(100 * time.Millisecond)
+				time.Sleep(200 * time.Millisecond)
 				gameOver := make(chan bool, 1)
 				room.RunMatch(p1, p2, gameOver)
 				<-gameOver //block until match ends
