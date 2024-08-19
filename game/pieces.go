@@ -98,8 +98,8 @@ func IsAwayFromEdge(pos *Vec2) bool {
 }
 
 // HasWinner determines if `p` has won the match, and notifies both players if TRUE.
-func HasWinner(p *player.Player, opponent *player.Player) bool {
-	if len(opponent.Pieces) == 0 {
+func HasWinner(p *player.Player, opponent *player.Player, gameMap map[int32]*Piece) bool {
+	if len(opponent.Pieces) == 0 || hasZeroPossibleMoves(opponent, gameMap) {
 		//`opponent` has lost, `p` has won! game over
 		p.SendMessage(&BasePayload{
 			Notice: "Congrats! You won! GAME OVER",
@@ -119,6 +119,31 @@ func HasWinner(p *player.Player, opponent *player.Player) bool {
 		})
 		log.Println("🏆 We got a winner!", p.Name, " has won!")
 		return true
+	}
+	return false
+}
+
+// hasZeroPossibleMoves returns TRUE if player's only remaining piece CANNOT legally move in any direction.
+func hasZeroPossibleMoves(opponent *player.Player, gameMap map[int32]*Piece) bool {
+	if len(opponent.Pieces) != 1 {
+		return false
+	}
+
+	for cellIdx, v := range gameMap {
+		if v.IsKing {
+			return false
+		}
+		// only check when close to Edge, 1 row before end line
+		if v.Id == opponent.Pieces[0] {
+			_, hasEnemyAhead := gameMap[32]
+			if opponent.Name == TeamColor_TEAM_RED.String() && cellIdx == 28 && hasEnemyAhead {
+				return true
+			}
+			_, hasEnemyBelow := gameMap[1]
+			if opponent.Name == TeamColor_TEAM_BLACK.String() && cellIdx == 5 && hasEnemyBelow {
+				return true
+			}
+		}
 	}
 	return false
 }
