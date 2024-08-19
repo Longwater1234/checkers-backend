@@ -129,12 +129,12 @@ func hasZeroPossibleMoves(opponent *player.Player, gameMap map[int32]*Piece) boo
 		return false
 	}
 
-	for cellIdx, v := range gameMap {
-		if v.IsKing {
+	for cellIdx, piece := range gameMap {
+		if piece.IsKing {
 			return false
 		}
-		// only check when close to Edge, 1 row before end line
-		if v.Id == opponent.Pieces[0] {
+		// only check when close to North/South Edge, just 1 row before opponent's side
+		if piece.Id == opponent.Pieces[0] {
 			_, hasEnemyAhead := gameMap[32]
 			if opponent.Name == TeamColor_TEAM_RED.String() && cellIdx == 28 && hasEnemyAhead {
 				return true
