@@ -83,7 +83,7 @@ func RunMatch(p1 *player.Player, p2 *player.Player, gameOver chan bool) {
 					gameOver <- true
 					return
 				}
-				if game.HasWinner(p1, p2, gameMap) {
+				if game.HasWinner(p1, p2) {
 					time.Sleep(3 * time.Second)
 					gameOver <- true
 					return
@@ -137,7 +137,7 @@ func RunMatch(p1 *player.Player, p2 *player.Player, gameOver chan bool) {
 					gameOver <- true
 					return
 				}
-				if game.HasWinner(p2, p1, gameMap) {
+				if game.HasWinner(p2, p1) {
 					time.Sleep(3 * time.Second)
 					gameOver <- true
 					return
