@@ -100,7 +100,7 @@ func RunMatch(p1 *player.Player, p2 *player.Player, gameOver chan bool) {
 			// ============= IT'S PLAYER 2 (BLACK's) TURN =============//
 			var rawBytes []byte
 			if err := websocket.Message.Receive(p2.Conn, &rawBytes); err != nil {
-				log.Println(p1.Name, "disconnected. Cause:", err.Error())
+				log.Println(p2.Name, "disconnected. Cause:", err.Error())
 				p1.SendMessage(&game.BasePayload{
 					Notice: "Opponent has left the game!",
 					Inner: &game.BasePayload_ExitPayload{
