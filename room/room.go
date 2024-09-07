@@ -41,6 +41,7 @@ func RunMatch(p1 *player.Player, p2 *player.Player, gameOver chan bool) {
 	var gameMap = generateGameMap(p1, p2) // map of cell index --> pieces.
 
 	//START GAME MAIN LOOP
+	// --- top ---
 	for {
 		if isPlayerRedTurn {
 			// ============= IT'S PLAYER 1 (RED's) TURN =============//
