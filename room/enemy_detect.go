@@ -5,13 +5,14 @@ import (
 	"checkers-backend/player"
 )
 
-// hasExtraTargets returns TRUE if `hunter` has EXTRA nearby targets (ANY 4 sides) to capture (NOT entire board).
-// This should be called only AFTER `handleCapture` by player `hunter` is valid
+// hasExtraTargets returns TRUE if hunter's single Piece at `currCell` has EXTRA nearby targets to capture.
+// This should  be called only AFTER `handleCapture` by player `hunter` is successful
 func hasExtraTargets(hunter *player.Player, currCell int32, gameMap map[int32]*game.Piece) bool {
 	piecePtr, exists := gameMap[currCell]
 	if !exists || !hunter.HasThisPiece(piecePtr.Id) {
 		return false
 	}
+
 	if collectFrontLHS(hunter, currCell, gameMap) || collectFrontRHS(hunter, currCell, gameMap) {
 		return true
 	}
@@ -24,7 +25,7 @@ func hasExtraTargets(hunter *player.Player, currCell int32, gameMap map[int32]*g
 	return false
 }
 
-// collectFrontLHS returns true ONLY IF there is an enemy on NorthWest of  player `p`
+// collectFrontLHS returns true ONLY IF there is an enemy on NorthWest of  player `p` at currCell
 func collectFrontLHS(p *player.Player, cellIdx int32, gameMap map[int32]*game.Piece) bool {
 	piecePtr := gameMap[cellIdx]
 	//check LHS (north west)
@@ -71,7 +72,7 @@ func collectFrontLHS(p *player.Player, cellIdx int32, gameMap map[int32]*game.Pi
 	return hasEnemyAhead && enemyOpenBehind
 }
 
-// collectFrontRHS returns true ONLY IF there is an enemy on NorthEast of this player `p`
+// collectFrontRHS returns true ONLY IF there is an enemy on NorthEast of this player `p` at currCell
 func collectFrontRHS(p *player.Player, cellIdx int32, gameMap map[int32]*game.Piece) bool {
 	piecePtr := gameMap[cellIdx]
 	if p.Name == game.TeamColor_TEAM_RED.String() && piecePtr.Pos.X >= 7*game.SIZE_CELL {
