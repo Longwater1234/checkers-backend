@@ -77,6 +77,5 @@ func validateCapture(captureReq *game.CapturePayload, gameMap map[int32]*game.Pi
 	delete(gameMap, hunterSrc)                        // set hunter's old location empty!
 	delete(gameMap, preyCell)                         // set Prey's old location empty!
 	gameMap[destCell.GetCellIndex()] = hunterPiecePtr // move hunter to new location
-
 	return true
 }
