@@ -6,7 +6,7 @@ import (
 )
 
 // hasExtraTargets returns TRUE if hunter's single Piece at `currCell` has EXTRA nearby targets to capture.
-// This should  be called only AFTER `handleCapture` by player `hunter` is successful
+// This should be called only AFTER `handleCapture` by player `hunter` was successful
 func hasExtraTargets(hunter *player.Player, currCell int32, gameMap map[int32]*game.Piece) bool {
 	piecePtr, exists := gameMap[currCell]
 	if !exists || !hunter.HasThisPiece(piecePtr.Id) {
