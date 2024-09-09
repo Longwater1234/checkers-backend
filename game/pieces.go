@@ -20,17 +20,6 @@ const (
 	Piece_Black
 )
 
-func (t PieceType) String() string {
-	switch t {
-	case Piece_Black:
-		return "Piece_Black"
-	case Piece_Red:
-		return "Piece_Red"
-	default:
-		return "unknown"
-	}
-}
-
 type Piece struct {
 	Id         int32     // unique piece id
 	IsKing     bool      // whether this piece is King
@@ -86,7 +75,7 @@ func (p *Piece) MoveCapture(destPos *Vec2) bool {
 	return true
 }
 
-// IsEvenCellRow determines whether given `cellIdx` is on even Row
+// IsEvenCellRow determines whether given `cellIdx` is on even Row on the board
 func IsEvenCellRow(cellIdx int32) bool {
 	rowNumber := 9 - (cellIdx-1)/4
 	return rowNumber%2 == 0
