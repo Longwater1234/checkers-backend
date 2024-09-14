@@ -7,7 +7,8 @@ import (
 
 // processCapturePiece made by Player `p` against `opponent`. Returns TRUE if all is OK. Else returns FALSE.
 func processCapturePiece(basePayload *game.BasePayload, gameMap map[int32]*game.Piece, p, opponent *player.Player) bool {
-	success := validateCapture(basePayload.GetCapturePayload(), gameMap, opponent)
+	capturePayload := basePayload.GetCapturePayload()
+	success := validateCapture(capturePayload, gameMap)
 	if !success {
 		p.SendMessage(&game.BasePayload{
 			Notice: "Illegal move!",
@@ -27,13 +28,15 @@ func processCapturePiece(basePayload *game.BasePayload, gameMap map[int32]*game.
 		})
 		return false
 	}
-	// Else, forward the "CAPTURE" payload to opponent
+	//all is OK, Opponent loses 1 piece
+	preyPieceId := capturePayload.GetDetails().GetPreyPieceId()
+	opponent.LosePiece(preyPieceId)
 	opponent.SendMessage(basePayload)
 	return true
 }
 
-// validateCapture when player `p` attacks by opponent's piece. returns TRUE if valid, else FALSE
-func validateCapture(captureReq *game.CapturePayload, gameMap map[int32]*game.Piece, opponent *player.Player) bool {
+// validateCapture when player `p` attacks by opponent's piece, AND then updates gameMap. returns TRUE if success
+func validateCapture(captureReq *game.CapturePayload, gameMap map[int32]*game.Piece) bool {
 	if captureReq.GetDetails() == nil || captureReq.GetDestination() == nil {
 		return false
 	}
@@ -70,10 +73,8 @@ func validateCapture(captureReq *game.CapturePayload, gameMap map[int32]*game.Pi
 	if !success {
 		return false
 	}
-
 	delete(gameMap, hunterSrc)                        // set hunter's old location empty!
 	delete(gameMap, preyCell)                         // set Prey's old location empty!
 	gameMap[destCell.GetCellIndex()] = hunterPiecePtr // move hunter to new location
-	opponent.LosePiece(preyPieceId)                   // the opponent loses 1 piece
 	return true
 }
