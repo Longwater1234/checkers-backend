@@ -82,7 +82,6 @@ func listenForJoins() {
 				},
 			},
 		}
-		p1.Conn.SetDeadline(time.Now().Add(time.Second * 30))
 		p1.SendMessage(msgOne)
 
 		//waiting for 2nd player to join (TIMEOUT at 30 seconds)
