@@ -150,9 +150,9 @@ func RunMatch(p1 *player.Player, p2 *player.Player, gameOver chan bool) {
 				}
 				//check for extra opportunities for P2. if NONE, toggle turns
 				isKingNow := getKingStatusAfter(payload.GetCapturePayload(), gameMap)
-				hunterCurrCell := payload.GetCapturePayload().Destination.CellIndex
+				currentCell := payload.GetCapturePayload().Destination.CellIndex
 				var needCheck bool = isKingBefore == isKingNow
-				if needCheck && hasExtraTargets(p2, hunterCurrCell, gameMap) {
+				if needCheck && hasExtraTargets(p2, currentCell, gameMap) {
 					log.Println(p2.Name, " have extra targets!")
 					continue
 				}
