@@ -28,7 +28,6 @@ func wsHandler(ws *websocket.Conn) {
 	defer ws.Close()
 
 	var clientIp = ws.Request().RemoteAddr
-
 	p := &player.Player{
 		Conn:   ws,
 		Pieces: make([]int32, 12),
@@ -83,6 +82,7 @@ func listenForJoins() {
 				},
 			},
 		}
+		p1.Conn.SetDeadline(time.Now().Add(time.Second * 30))
 		p1.SendMessage(msgOne)
 
 		//waiting for 2nd player to join (TIMEOUT at 30 seconds)
@@ -103,7 +103,7 @@ func listenForJoins() {
 
 			//start the match in new goroutine
 			go func(p1, p2 *player.Player) {
-				//Sleep necessary for [p2] Client to process prev message
+				//Sleep required for [p2] Client to process prev message
 				time.Sleep(200 * time.Millisecond)
 				gameOver := make(chan bool, 1)
 				room.RunMatch(p1, p2, gameOver)
