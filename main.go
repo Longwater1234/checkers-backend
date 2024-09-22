@@ -4,6 +4,7 @@ import (
 	"checkers-backend/game"
 	"checkers-backend/player"
 	"checkers-backend/room"
+	"context"
 	"fmt"
 	"log"
 	"net/http"
@@ -82,13 +83,14 @@ func listenForJoins() {
 				},
 			},
 		}
+		ctx, cancel := context.WithTimeout(context.Background(), time.Second*30)
+		go p1.StartHeartBeat(ctx)
 		p1.SendMessage(msgOne)
 
 		//waiting for 2nd player to join (TIMEOUT at 30 seconds)
-		t := time.NewTimer(30 * time.Second)
 		select {
 		case p2 := <-lobby:
-			t.Stop()
+			cancel()
 			// welcome 2nd player
 			var msgTwo = &game.BasePayload{
 				Notice: "Connected. You are Team BLACK. Match is starting!",
@@ -113,9 +115,8 @@ func listenForJoins() {
 				p2.Dead <- true
 			}(p1, p2)
 
-		case <-t.C:
+		case <-ctx.Done():
 			// timeout reached. No other player joined! Goodbye p1!
-			t.Stop()
 			p1.SendMessage(&game.BasePayload{
 				Notice: "No other players at this moment. Try again later!",
 				Inner: &game.BasePayload_ExitPayload{
@@ -124,6 +125,11 @@ func listenForJoins() {
 					},
 				},
 			})
+			p1.Dead <- true
+
+		case <-p1.Quit:
+			//p1 has quit before match began
+			cancel()
 			p1.Dead <- true
 		}
 		// goto TOP... wait for another pair to join.
