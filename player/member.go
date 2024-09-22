@@ -51,10 +51,10 @@ func (p *Player) HasThisPiece(pieceId int32) bool {
 	return slices.Contains(p.Pieces, pieceId)
 }
 
-// StartHeartBeat keeps checking if this player is still connected (only when waiting for opponent)
+// StartHeartBeat keeps checking if this player is still connected (when waiting for opponent)
 func (p *Player) StartHeartBeat(ctx context.Context) {
 	tt := time.NewTicker(time.Second)
-	qq := make(chan bool, 1)
+	qq := make(chan bool)
 	p.Quit = qq
 	for {
 		select {

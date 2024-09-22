@@ -84,7 +84,7 @@ func listenForJoins() {
 			},
 		}
 		ctx, cancel := context.WithTimeout(context.Background(), time.Second*30)
-		p1.StartHeartBeat(ctx)
+		go p1.StartHeartBeat(ctx)
 		p1.SendMessage(msgOne)
 
 		//waiting for 2nd player to join (TIMEOUT at 30 seconds)
@@ -125,9 +125,12 @@ func listenForJoins() {
 					},
 				},
 			})
+			log.Println("timeout!", ctx.Err().Error())
 			p1.Dead <- true
 
 		case <-p1.Quit:
+			//p1 has quit before match began
+			cancel()
 			p1.Dead <- true
 		}
 		// goto TOP... wait for another pair to join.
