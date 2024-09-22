@@ -125,7 +125,6 @@ func listenForJoins() {
 					},
 				},
 			})
-			log.Println("timeout!", ctx.Err().Error())
 			p1.Dead <- true
 
 		case <-p1.Quit:
