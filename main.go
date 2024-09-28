@@ -29,10 +29,11 @@ func wsHandler(ws *websocket.Conn) {
 	defer ws.Close()
 
 	var clientIp = ws.Request().RemoteAddr
+	deadChan := make(chan bool, 1)
 	p := &player.Player{
 		Conn:   ws,
 		Pieces: make([]int32, 12),
-		Dead:   make(chan bool, 1),
+		Dead:   deadChan,
 	}
 	defer close(p.Dead)
 
@@ -46,7 +47,7 @@ func wsHandler(ws *websocket.Conn) {
 	lobby <- p
 
 	log.Println("Someone connected", clientIp, "Total players:", numPlayers.Load())
-	<-p.Dead                   // block until player exits
+	<-deadChan                 // block until player exits
 	numPlayers.Add(^uint32(0)) // if player exits, minus 1
 	log.Println(p.Name, "just left the game. Total players:", numPlayers.Load())
 }
@@ -128,7 +129,7 @@ func listenForJoins() {
 			p1.Dead <- true
 
 		case <-p1.Quit:
-			//p1 has quit before match began
+			//p1 has quit before match started
 			cancel()
 			p1.Dead <- true
 		}
