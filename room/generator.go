@@ -56,7 +56,7 @@ func generateGameMap(p1 *player.Player, p2 *player.Player) map[int32]*game.Piece
 }
 
 // GeneratePlayerPieces using Secure RNG for both player 1 (RED) and player 2 (BLACK)
-func generatePlayerPieces(p1 *player.Player, p2 *player.Player, gameOver chan bool) {
+func generatePlayerPieces(p1 *player.Player, p2 *player.Player, gameOver chan<- bool) {
 	for i := 0; i < len(p1.Pieces); i++ {
 		val, err := rand.Int(rand.Reader, big.NewInt(int64(upperLimit)))
 		if err != nil {
