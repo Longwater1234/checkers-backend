@@ -158,7 +158,7 @@ func RunMatch(p1 *player.Player, p2 *player.Player, gameOver chan<- bool) {
 				}
 				isPlayerRedTurn = true
 			}
-			// .. return to top
+			// ... return to top
 		}
 	}
 }
