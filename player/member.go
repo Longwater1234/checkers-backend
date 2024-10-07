@@ -13,7 +13,7 @@ import (
 type Player struct {
 	Conn   *websocket.Conn // client's WS connection
 	Name   string          // Name can only be RED or BLACK
-	Pieces []int32         // pieces IDs owned by this player. Max count 12
+	Pieces []int32         // pieces IDs owned by this player. Max size 12
 	Dead   chan<- bool     // to signal this player was kicked out or left AFTER match starts
 	Quit   <-chan bool     // to detect player has quit BEFORE match starts
 }
@@ -51,8 +51,8 @@ func (p *Player) HasThisPiece(pieceId int32) bool {
 	return slices.Contains(p.Pieces, pieceId)
 }
 
-// StartHeartBeat keeps checking if this player is still connected (when waiting for opponent)
-func (p *Player) StartHeartBeat(ctx context.Context) {
+// StartHeartbeat keeps checking (every second) if this player is still connected (when waiting for opponent)
+func (p *Player) StartHeartbeat(ctx context.Context) {
 	tt := time.NewTicker(time.Second)
 	qq := make(chan bool)
 	p.Quit = qq

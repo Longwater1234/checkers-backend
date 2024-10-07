@@ -16,12 +16,29 @@ import (
 	"golang.org/x/net/websocket"
 )
 
-const SERVER_VERSION = "2024.7.0"
-
+const SERVER_VERSION = "1.0.8"
 const maxRequestSize int = 1 << 10 //1KB
 
 var numPlayers atomic.Uint32             // total number of LIVE players
 var lobby = make(chan *player.Player, 2) // waiting room for players
+
+func main() {
+	portNum, err := strconv.Atoi(os.Getenv("PORT"))
+	if err != nil {
+		portNum = 9876
+	}
+	port := strconv.Itoa(portNum)
+
+	http.HandleFunc("/", func(writer http.ResponseWriter, r *http.Request) {
+		fmt.Fprintf(writer, `<p>This is a socket server. Dial ws://%s:%s/game </p>`, r.URL.Host, port)
+	})
+
+	http.Handle("/game", websocket.Handler(wsHandler))
+
+	go listenForJoins()
+	log.Println("Server listening at http://localhost:" + port)
+	log.Fatal(http.ListenAndServe(":"+port, nil))
+}
 
 // wsHandler handles every new WS connection and redirects Player to Lobby
 func wsHandler(ws *websocket.Conn) {
@@ -52,24 +69,7 @@ func wsHandler(ws *websocket.Conn) {
 	log.Println(p.Name, "just left the game. Total players:", numPlayers.Load())
 }
 
-func main() {
-	portNum, err := strconv.Atoi(os.Getenv("PORT"))
-	if err != nil {
-		portNum = 9876
-	}
-	port := strconv.Itoa(portNum)
-
-	http.HandleFunc("/", func(writer http.ResponseWriter, r *http.Request) {
-		fmt.Fprintf(writer, `<p>This is a socket server. Dial ws://%s:%s/game </p>`, r.URL.Host, port)
-	})
-	http.Handle("/game", websocket.Handler(wsHandler))
-
-	go listenForJoins()
-	log.Println("Server listening at http://localhost:" + port)
-	log.Fatal(http.ListenAndServe(":"+port, nil))
-}
-
-// Keep Listening for new players joining lobby
+// Keep Listening for new players joining lobby. Then forward a pair to new match room
 func listenForJoins() {
 	for {
 		//welcome 1st player
@@ -85,7 +85,7 @@ func listenForJoins() {
 			},
 		}
 		ctx, cancel := context.WithTimeout(context.Background(), time.Second*30)
-		go p1.StartHeartBeat(ctx)
+		go p1.StartHeartbeat(ctx)
 		p1.SendMessage(msgOne)
 
 		//waiting for 2nd player to join (TIMEOUT at 30 seconds)

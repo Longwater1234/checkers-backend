@@ -11,7 +11,7 @@ import (
 )
 
 // RunMatch between the two players `p1` and `p2`. If match ends, send signal through `gameOver` channel
-func RunMatch(p1 *player.Player, p2 *player.Player, gameOver chan bool) {
+func RunMatch(p1 *player.Player, p2 *player.Player, gameOver chan<- bool) {
 	log.Println("🟢 Match has begun!")
 
 	//make random pieceId's for both
@@ -45,7 +45,7 @@ func RunMatch(p1 *player.Player, p2 *player.Player, gameOver chan bool) {
 		if isPlayerRedTurn {
 			// ============= IT'S PLAYER 1 (RED's) TURN =============//
 			var rawBytes []byte
-			p1.Conn.SetReadDeadline(time.Now().Add(time.Second * 30))
+			p1.Conn.SetReadDeadline(time.Now().Add(time.Second * 40))
 			if err := websocket.Message.Receive(p1.Conn, &rawBytes); err != nil {
 				log.Println(p1.Name, "disconnected. Cause:", err)
 				p2.SendMessage(&game.BasePayload{
@@ -69,7 +69,7 @@ func RunMatch(p1 *player.Player, p2 *player.Player, gameOver chan bool) {
 
 			//if MESSAGE TYPE == "move"
 			if payload.GetMovePayload() != nil {
-				log.Println("move", payload.GetMovePayload().String())
+				//log.Println("move", payload.GetMovePayload().String())
 				valid := processMovePiece(&payload, gameMap, p1, p2)
 				if !valid {
 					gameOver <- true
@@ -78,7 +78,7 @@ func RunMatch(p1 *player.Player, p2 *player.Player, gameOver chan bool) {
 				isPlayerRedTurn = false
 			} else if payload.GetCapturePayload() != nil {
 				//if MESSAGE TYPE == "capture"
-				log.Println("capture", payload.GetCapturePayload().String())
+				//log.Println("capture", payload.GetCapturePayload().String())
 				isKingBefore := getKingStatusBefore(payload.GetCapturePayload(), gameMap)
 				valid := processCapturePiece(&payload, gameMap, p1, p2)
 				if !valid {
@@ -103,7 +103,7 @@ func RunMatch(p1 *player.Player, p2 *player.Player, gameOver chan bool) {
 		} else if !isPlayerRedTurn {
 			// ============= IT'S PLAYER 2 (BLACK's) TURN =============//
 			var rawBytes []byte
-			p2.Conn.SetReadDeadline(time.Now().Add(time.Second * 30))
+			p2.Conn.SetReadDeadline(time.Now().Add(time.Second * 40))
 			if err := websocket.Message.Receive(p2.Conn, &rawBytes); err != nil {
 				log.Println(p2.Name, "disconnected. Cause:", err.Error())
 				p1.SendMessage(&game.BasePayload{
@@ -127,7 +127,7 @@ func RunMatch(p1 *player.Player, p2 *player.Player, gameOver chan bool) {
 
 			//if MESSAGE TYPE == "move"
 			if payload.GetMovePayload() != nil {
-				log.Println("move", payload.GetMovePayload().String())
+				//log.Println("move", payload.GetMovePayload().String())
 				valid := processMovePiece(&payload, gameMap, p2, p1)
 				if !valid {
 					gameOver <- true
@@ -136,7 +136,7 @@ func RunMatch(p1 *player.Player, p2 *player.Player, gameOver chan bool) {
 				isPlayerRedTurn = true
 			} else if payload.GetCapturePayload() != nil {
 				//if MESSAGE TYPE == "capture"
-				log.Println("capture", payload.GetCapturePayload().String())
+				//log.Println("capture", payload.GetCapturePayload().String())
 				isKingBefore := getKingStatusBefore(payload.GetCapturePayload(), gameMap)
 				valid := processCapturePiece(&payload, gameMap, p2, p1)
 				if !valid {
