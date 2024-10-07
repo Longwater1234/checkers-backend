@@ -94,7 +94,7 @@ func HasWinner(p *player.Player, opponent *player.Player) bool {
 			Notice: "Congrats! You won! GAME OVER",
 			Inner: &BasePayload_WinlosePayload{
 				WinlosePayload: &WinLosePayload{
-					Winner: TeamColor_TEAM_UNSPECIFIED, //TODO fix me
+					Winner: TeamColor_TEAM_UNSPECIFIED,
 				},
 			},
 		})
@@ -102,7 +102,7 @@ func HasWinner(p *player.Player, opponent *player.Player) bool {
 			Notice: "Sorry! You lost! GAME OVER",
 			Inner: &BasePayload_WinlosePayload{
 				WinlosePayload: &WinLosePayload{
-					Winner: TeamColor_TEAM_UNSPECIFIED, //TODO fix me
+					Winner: TeamColor_TEAM_UNSPECIFIED,
 				},
 			},
 		})
