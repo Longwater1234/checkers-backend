@@ -47,7 +47,7 @@ func collectFrontLHS(p *player.Player, cellIdx int32, gameMap map[int32]*game.Pi
 	}
 	var mSign int32 = +1 // direction. up +1, down -1
 
-	// if player piece is Black (PLAYER 2)
+	// if player piece is Black (PLAYER 2), swap values
 	if p.Name == game.TeamColor_TEAM_BLACK.String() {
 		mSign = -1
 		deltaBehindEnemy, deltaForward = deltaForward, deltaBehindEnemy
@@ -94,7 +94,7 @@ func collectFrontRHS(p *player.Player, cellIdx int32, gameMap map[int32]*game.Pi
 	}
 	var mSign int32 = +1 // direction. up +1, down -1
 
-	// if piece is Black (PLAYER 2)
+	// if piece is Black (PLAYER 2), swap values
 	if p.Name == game.TeamColor_TEAM_BLACK.String() {
 		mSign = -1
 		deltaBehindEnemy, deltaForward = deltaForward, deltaBehindEnemy
@@ -140,7 +140,7 @@ func collectBehindRHS(king *player.Player, cellIdx int32, gameMap map[int32]*gam
 	}
 	var mSign int32 = +1 // direction
 
-	// if player piece is Black (PLAYER 2)
+	// if player piece is Black (PLAYER 2), swap values
 	if king.Name == game.TeamColor_TEAM_BLACK.String() {
 		mSign = -1
 		deltaForward, deltaBehindEnemy = deltaBehindEnemy, deltaForward
@@ -150,7 +150,7 @@ func collectBehindRHS(king *player.Player, cellIdx int32, gameMap map[int32]*gam
 		return false
 	}
 
-	pieceAhead, existFront := gameMap[cellAheadIdx] // north-west (opposite direction)
+	pieceAhead, existFront := gameMap[cellAheadIdx] // north-west (from behind)
 	hasEnemyAhead = existFront && !king.HasThisPiece(pieceAhead.Id)
 	if existFront && !game.IsAwayFromEdge(&pieceAhead.Pos) {
 		return false
@@ -179,14 +179,14 @@ func collectBehindLHS(king *player.Player, cellIdx int32, gameMap map[int32]*gam
 	var deltaBehindEnemy int32 = 4
 
 	var hasEnemyAhead = false
-	var enemyOpenBehind = false //is there an EMPTY cell behind enemy?
+	var enemyOpenBehind = false // have EMPTY cell behind enemy?
 
 	if game.IsEvenCellRow(cellIdx) {
 		deltaForward, deltaBehindEnemy = deltaBehindEnemy, deltaForward
 	}
 	var mSign int32 = +1 // direction. +1 forward, -1 back
 
-	// if player piece is Black (PLAYER 2)
+	// if player piece is Black (PLAYER 2), do swap
 	if king.Name == game.TeamColor_TEAM_BLACK.String() {
 		mSign = -1
 		deltaForward, deltaBehindEnemy = deltaBehindEnemy, deltaForward
@@ -196,7 +196,7 @@ func collectBehindLHS(king *player.Player, cellIdx int32, gameMap map[int32]*gam
 		return false
 	}
 
-	pieceAhead, existFront := gameMap[cellAheadIdx] // north-east (opposite direction)
+	pieceAhead, existFront := gameMap[cellAheadIdx] // north-east (from behind)
 	hasEnemyAhead = existFront && !king.HasThisPiece(pieceAhead.Id)
 	if existFront && !game.IsAwayFromEdge(&pieceAhead.Pos) {
 		return false

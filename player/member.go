@@ -14,11 +14,11 @@ type Player struct {
 	Conn   *websocket.Conn // client's WS connection
 	Name   string          // Name can only be RED or BLACK
 	Pieces []int32         // pieces IDs owned by this player. Max size 12
-	Dead   chan<- bool     // to signal this player was kicked out or left AFTER match starts
-	Quit   <-chan bool     // to detect player has quit BEFORE match starts
+	Dead   chan<- bool     // to SEND signal this player left AFTER match starts
+	Quit   <-chan bool     // to RECEIVE signal this player has quit BEFORE match starts
 }
 
-// pingCodec is used to send Ping msg to client
+// pingCodec is used to send PING to client
 var pingCodec = websocket.Codec{Marshal: func(v interface{}) (data []byte, payloadType byte, err error) {
 	return nil, websocket.PingFrame, nil
 }}
