@@ -16,11 +16,11 @@ import (
 	"golang.org/x/net/websocket"
 )
 
-const SERVER_VERSION = "1.0.8"
-const maxRequestSize int = 1 << 10 //1KB
+const SERVER_VERSION = "1.0.9"
+const maxRequestSize int = 1 << 10 // 1KB
 
 var numPlayers atomic.Uint32             // total number of LIVE players
-var lobby = make(chan *player.Player, 2) // waiting room for players
+var lobby = make(chan *player.Player, 1) // waiting room for players
 
 func main() {
 	portNum, err := strconv.Atoi(os.Getenv("PORT"))
@@ -36,7 +36,7 @@ func main() {
 	http.Handle("/game", websocket.Handler(wsHandler))
 
 	go listenForJoins()
-	log.Println("Server listening at http://localhost:" + port)
+	log.Println("Server listening at http://127.0.0.1:" + port)
 	log.Fatal(http.ListenAndServe(":"+port, nil))
 }
 
