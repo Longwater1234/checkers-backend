@@ -24,10 +24,10 @@ type Piece struct {
 	Id         int32     // unique piece id
 	IsKing     bool      // whether this piece is King
 	Pos        Vec2      // current piece position
-	PieceColor PieceType // either red or black
+	PieceColor PieceType // either RED or BLACK
 }
 
-// MoveSimple actually moves this piece diagonally to given `destination` by 1 cell. Returns TRUE if successful
+// MoveSimple actually moves this piece diagonally to given destination by 1 cell. Returns TRUE if successful
 func (p *Piece) MoveSimple(dest *Vec2) bool {
 	var deltaX = float64(dest.X - p.Pos.X)
 	var deltaY = float64(dest.Y - p.Pos.Y)
@@ -51,7 +51,7 @@ func (p *Piece) MoveSimple(dest *Vec2) bool {
 	return true
 }
 
-// MoveCapture (during attacking) moves this piece by 2 cells diagonally to the given `destination`. Returns TRUE if ok
+// MoveCapture (when attacking) moves this piece by 2 cells diagonally to the given `destination`. Returns TRUE if ok
 func (p *Piece) MoveCapture(dest *Vec2) bool {
 	var deltaX = float64(dest.X - p.Pos.X)
 	var deltaY = float64(dest.Y - p.Pos.Y)
@@ -89,7 +89,7 @@ func IsAwayFromEdge(pos *Vec2) bool {
 // HasWinner returns TRUE if `p` has won the match against `opponent`, then notifies both players.
 func HasWinner(p *player.Player, opponent *player.Player) bool {
 	if len(opponent.Pieces) == 0 {
-		//`opponent` has lost, `p` has won! game over
+		// Meaning `opponent` has lost, `p` has won! Game over
 		p.SendMessage(&BasePayload{
 			Notice: "Congrats! You won! GAME OVER",
 			Inner: &BasePayload_WinlosePayload{
