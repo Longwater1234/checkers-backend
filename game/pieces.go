@@ -6,7 +6,7 @@ import (
 	"math"
 )
 
-const SIZE_CELL float32 = 75.0 //length of single square cell
+const SIZE_CELL = 75.0 // length of single square cell
 
 type Vec2 struct {
 	X float32 // x position
@@ -27,12 +27,12 @@ type Piece struct {
 	PieceColor PieceType // either red or black
 }
 
-// MoveSimple actually moves this piece diagonally to given `destPos` by 1 cell. Returns TRUE if successful
-func (p *Piece) MoveSimple(destPos *Vec2) bool {
-	var deltaX = float64(destPos.X - p.Pos.X)
-	var deltaY = float64(destPos.Y - p.Pos.Y)
+// MoveSimple actually moves this piece diagonally to given `destination` by 1 cell. Returns TRUE if successful
+func (p *Piece) MoveSimple(dest *Vec2) bool {
+	var deltaX = float64(dest.X - p.Pos.X)
+	var deltaY = float64(dest.Y - p.Pos.Y)
 
-	if math.Abs(deltaX) != float64(SIZE_CELL) || math.Abs(deltaY) != float64(SIZE_CELL) {
+	if math.Abs(deltaX) != SIZE_CELL || math.Abs(deltaY) != SIZE_CELL {
 		return false
 	}
 	if p.PieceColor == Piece_Red && deltaY > 0 && !p.IsKing {
@@ -42,21 +42,21 @@ func (p *Piece) MoveSimple(destPos *Vec2) bool {
 		return false
 	}
 
-	p.Pos.X = destPos.X
-	p.Pos.Y = destPos.Y
-	if (p.PieceColor == Piece_Red && destPos.Y == 0) ||
-		(p.PieceColor == Piece_Black && destPos.Y == 7*SIZE_CELL) {
+	p.Pos.X = dest.X
+	p.Pos.Y = dest.Y
+	if (p.PieceColor == Piece_Red && dest.Y == 0) ||
+		(p.PieceColor == Piece_Black && dest.Y == 7*SIZE_CELL) {
 		p.IsKing = true
 	}
 	return true
 }
 
-// MoveCapture actually moves this piece by 2 cells diagonally to the given `destPos`. Returns TRUE if success
-func (p *Piece) MoveCapture(destPos *Vec2) bool {
-	var deltaX = float64(destPos.X - p.Pos.X)
-	var deltaY = float64(destPos.Y - p.Pos.Y)
+// MoveCapture (during attacking) moves this piece by 2 cells diagonally to the given `destination`. Returns TRUE if ok
+func (p *Piece) MoveCapture(dest *Vec2) bool {
+	var deltaX = float64(dest.X - p.Pos.X)
+	var deltaY = float64(dest.Y - p.Pos.Y)
 
-	if math.Abs(deltaX) != float64(2*SIZE_CELL) || math.Abs(deltaY) != float64(2*SIZE_CELL) {
+	if math.Abs(deltaX) != 2*SIZE_CELL || math.Abs(deltaY) != 2*SIZE_CELL {
 		return false
 	}
 	if p.PieceColor == Piece_Red && deltaY > 0 && !p.IsKing {
@@ -66,16 +66,16 @@ func (p *Piece) MoveCapture(destPos *Vec2) bool {
 		return false
 	}
 
-	p.Pos.X = destPos.X
-	p.Pos.Y = destPos.Y
-	if (p.PieceColor == Piece_Red && destPos.Y == 0) ||
-		(p.PieceColor == Piece_Black && destPos.Y == 7*SIZE_CELL) {
+	p.Pos.X = dest.X
+	p.Pos.Y = dest.Y
+	if (p.PieceColor == Piece_Red && dest.Y == 0) ||
+		(p.PieceColor == Piece_Black && dest.Y == 7*SIZE_CELL) {
 		p.IsKing = true
 	}
 	return true
 }
 
-// IsEvenCellRow determines whether given `cellIdx` is on even Row on the board
+// IsEvenCellRow determines whether the CELL with given Index is on EVEN Row on the board
 func IsEvenCellRow(cellIdx int32) bool {
 	rowNumber := 9 - (cellIdx-1)/4
 	return rowNumber%2 == 0
@@ -86,7 +86,7 @@ func IsAwayFromEdge(pos *Vec2) bool {
 	return pos.X > 0 && pos.X < 7*SIZE_CELL && pos.Y > 0 && pos.Y < 7*SIZE_CELL
 }
 
-// HasWinner determines if `p` has won the match against `opponent`, then notifies both players if TRUE.
+// HasWinner returns TRUE if `p` has won the match against `opponent`, then notifies both players.
 func HasWinner(p *player.Player, opponent *player.Player) bool {
 	if len(opponent.Pieces) == 0 {
 		//`opponent` has lost, `p` has won! game over
