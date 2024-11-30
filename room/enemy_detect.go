@@ -6,7 +6,7 @@ import (
 )
 
 // hasExtraTargets returns TRUE if hunter's single Piece at `currCell` has EXTRA nearby targets to capture.
-// This should be called only AFTER `handleCapture` by player `hunter` was successful
+// This should be called only AFTER `handleCapture` by player `hunter` is TRUE
 func hasExtraTargets(hunter *player.Player, currCell int32, gameMap map[int32]*game.Piece) bool {
 	piecePtr, exists := gameMap[currCell]
 	if !exists || !hunter.HasThisPiece(piecePtr.Id) {
@@ -39,7 +39,7 @@ func collectFrontLHS(p *player.Player, cellIdx int32, gameMap map[int32]*game.Pi
 	var deltaBehindEnemy int32 = 4
 
 	var hasEnemyAhead = false
-	var enemyOpenBehind = false // is there an EMPTY cell behind enemy?
+	var enemyOpenBehind = false // have EMPTY cell behind enemy?
 
 	if game.IsEvenCellRow(cellIdx) {
 		// do swap
