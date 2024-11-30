@@ -27,7 +27,7 @@ func processMovePiece(payload *game.BasePayload, gameMap map[int32]*game.Piece, 
 		})
 		return false
 	}
-	//Else, forward the "MOVE" payload to opponent
+	// All is OK, forward the "MOVE" payload to opponent
 	opponent.SendMessage(payload)
 	return true
 }
@@ -46,7 +46,7 @@ func validateAndUpdateMap(payload *game.MovePayload, gameMap map[int32]*game.Pie
 		return false
 	}
 
-	//check if destCell already has a Piece or not
+	// check whether destCell already has a Piece
 	_, hasValue := gameMap[destination.CellIndex]
 	if hasValue {
 		return false

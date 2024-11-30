@@ -40,6 +40,11 @@ func RunMatch(p1 *player.Player, p2 *player.Player, gameOver chan<- bool) {
 	var isPlayerRedTurn = true            // Who turn is it now? RED always starts.
 	var gameMap = generateGameMap(p1, p2) // map of cell index --> pieces.
 
+	// free used memory after match ends
+	defer func() {
+		clear(gameMap)
+	}()
+
 	//START GAME MAIN LOOP
 	for {
 		if isPlayerRedTurn {
@@ -90,10 +95,10 @@ func RunMatch(p1 *player.Player, p2 *player.Player, gameOver chan<- bool) {
 					gameOver <- true
 					return
 				}
-				//check for extra opportunities for P1. if NONE, toggle turns
 				isKingNow := getKingStatusAfter(payload.GetCapturePayload(), gameMap)
 				currentCell := payload.GetCapturePayload().Destination.CellIndex
 				var needCheck bool = isKingBefore == isKingNow
+				// CHECK for extra opportunities for P1. if NONE, toggle turns
 				if needCheck && hasExtraTargets(p1, currentCell, gameMap) {
 					log.Println(p1.Name, " have extra targets!")
 					continue

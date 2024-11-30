@@ -21,7 +21,7 @@ func generateGameMap(p1 *player.Player, p2 *player.Player) map[int32]*game.Piece
 	var iterRed = 0        //red pieces iterator
 	var iterBlack = 0      //black pieces iterator
 
-	// create pieces, and position them on checkerboard (in reverse)
+	// create pieces, and position them on checkerboard (from top -> down)
 	for row := 0; row < numRows; row++ {
 		for col := 0; col < numCols; col++ {
 			if (row+col)%2 != 0 {

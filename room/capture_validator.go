@@ -58,7 +58,7 @@ func validateCapture(captureReq *game.CapturePayload, gameMap map[int32]*game.Pi
 		return false
 	}
 
-	//check if destCell already has a Piece or not
+	// check whether destCell already has a Piece
 	destCell := captureReq.GetDestination()
 	_, hasValue := gameMap[destCell.GetCellIndex()]
 	if hasValue {
