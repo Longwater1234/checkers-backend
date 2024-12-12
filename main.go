@@ -52,7 +52,6 @@ func wsHandler(ws *websocket.Conn) {
 		Pieces: make([]int32, 12),
 		Dead:   deadChan,
 	}
-	defer close(p.Dead)
 
 	//for each pair joining, the First will always be RED
 	if numPlayers.Load()%2 == 0 {
