@@ -13,6 +13,8 @@ import (
 	"sync/atomic"
 	"time"
 
+	_ "net/http/pprof"
+
 	"golang.org/x/net/websocket"
 )
 
@@ -106,7 +108,7 @@ func listenForJoins() {
 			go func(p1, p2 *player.Player) {
 				//Sleep required for [p2] Client to process prev message
 				time.Sleep(200 * time.Millisecond)
-				gameOver := make(chan bool, 1)
+				gameOver := make(chan bool)
 				room.RunMatch(p1, p2, gameOver)
 				<-gameOver //block until match ends
 				log.Println("🔴 GAME OVER!")
