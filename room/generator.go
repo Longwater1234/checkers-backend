@@ -18,7 +18,7 @@ const (
 // generateGameMap creates the hashmap of cell_index --> Piece
 func generateGameMap(p1 *player.Player, p2 *player.Player) map[int32]*game.Piece {
 	var gameMap = make(map[int32]*game.Piece, 24)
-	var counter int32 = 32 //num of playable checker cells
+	var counter int32 = 32 //count of playable checker cells
 	var iterRed = 0        //red pieces iterator
 	var iterBlack = 0      //black pieces iterator
 
