@@ -15,7 +15,7 @@ func StartMatch(p1 *player.Player, p2 *player.Player, gameOver chan<- bool) {
 	log.Println("🟢 Match has begun!")
 
 	//make random pieceId's for both
-	generatePlayerPieces(p1, p2, gameOver)
+	generatePieces(p1, p2, gameOver)
 
 	p1.SendMessage(&game.BasePayload{
 		Notice: "Opponent joined. Make your first move!",

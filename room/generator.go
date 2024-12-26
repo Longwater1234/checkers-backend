@@ -5,16 +5,17 @@ import (
 	"checkers-backend/player"
 	"crypto/rand"
 	"log"
+	"math"
 	"math/big"
 )
 
 const (
-	numRows          = 8      // checker rows
-	numCols          = 8      // checker columns
-	upperLimit int16 = 0x7FFF //piece ID max value (short_max)
+	numRows          = 8             // checker rows
+	numCols          = 8             // checker columns
+	upperLimit int16 = math.MaxInt16 //piece ID max value (short_max)
 )
 
-// generateGameMap makes the hashmap of cell_index --> player Piece
+// generateGameMap creates the hashmap of cell_index --> Piece
 func generateGameMap(p1 *player.Player, p2 *player.Player) map[int32]*game.Piece {
 	var gameMap = make(map[int32]*game.Piece, 24)
 	var counter int32 = 32 //num of playable checker cells
@@ -55,10 +56,11 @@ func generateGameMap(p1 *player.Player, p2 *player.Player) map[int32]*game.Piece
 	return gameMap
 }
 
-// GeneratePlayerPieces using Secure RNG for both player 1 (RED) and player 2 (BLACK)
-func generatePlayerPieces(p1 *player.Player, p2 *player.Player, gameOver chan<- bool) {
+// generatePieces using Secure RNG for both player 1 (RED) and player 2 (BLACK)
+func generatePieces(p1 *player.Player, p2 *player.Player, gameOver chan<- bool) {
+	bigMax := big.NewInt(int64(upperLimit))
 	for i := 0; i < len(p1.Pieces); i++ {
-		val, err := rand.Int(rand.Reader, big.NewInt(int64(upperLimit)))
+		val, err := rand.Int(rand.Reader, bigMax)
 		if err != nil {
 			gameOver <- true
 			log.Panic("cannot generate random number", err)
@@ -67,7 +69,7 @@ func generatePlayerPieces(p1 *player.Player, p2 *player.Player, gameOver chan<- 
 	}
 
 	for i := 0; i < len(p2.Pieces); i++ {
-		val, err := rand.Int(rand.Reader, big.NewInt(int64(upperLimit)))
+		val, err := rand.Int(rand.Reader, bigMax)
 		if err != nil {
 			gameOver <- true
 			log.Panic("cannot generate random number", err)
