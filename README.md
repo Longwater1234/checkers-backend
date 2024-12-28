@@ -1,5 +1,5 @@
 # checkers-backend
-Server for SpaceCheckers game. Written entirely using only Go's standard library.
+Server for [SpaceCheckers](https://longwater1234.itch.io/spacecheckers) game, available on itch.io. Written entirely using only Go's standard library and protobuf lib.
 
 ## Requirements
 
