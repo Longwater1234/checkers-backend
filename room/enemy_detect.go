@@ -5,7 +5,7 @@ import (
 	"checkers-backend/player"
 )
 
-// hasExtraTargets returns TRUE if hunter's single Piece at `currCell` has EXTRA nearby targets to capture.
+// hasExtraTargets returns TRUE if hunter's single Piece at `currCell` has EXTRA nearby enemies to capture.
 // This should be called only AFTER `handleCapture` by player `hunter` is TRUE
 func hasExtraTargets(hunter *player.Player, currCell int32, gameMap map[int32]*game.Piece) bool {
 	piecePtr, exists := gameMap[currCell]

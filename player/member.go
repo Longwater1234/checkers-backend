@@ -18,7 +18,7 @@ type Player struct {
 	Quit   <-chan bool     // to RECEIVE signal this player has quit BEFORE match starts
 }
 
-// pingCodec is used to send PING to client
+// pingCodec is used to PING the client
 var pingCodec = websocket.Codec{Marshal: func(v interface{}) (data []byte, payloadType byte, err error) {
 	return nil, websocket.PingFrame, nil
 }}
