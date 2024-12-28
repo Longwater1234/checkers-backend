@@ -1,5 +1,6 @@
 # checkers-backend
-Server for [SpaceCheckers](https://longwater1234.itch.io/spacecheckers) game, available on itch.io. Written entirely using only Go's standard library and protobuf lib.
+
+Server for [SpaceCheckers](https://longwater1234.itch.io/spacecheckers) , a multiplayer checkers game for Windows and MacOS, available on itch.io. Written entirely using only Go's standard library and protobuf lib.
 
 ## Requirements
 
@@ -12,6 +13,6 @@ Server for [SpaceCheckers](https://longwater1234.itch.io/spacecheckers) game, av
 ```bash
     go build --ldflags="-s -w" .
 ```
+
 - Set ENV variable for `PORT` which the server will listen to.
 - If port not set, it will be default listen at 9876
-
