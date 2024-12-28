@@ -43,6 +43,8 @@ func StartMatch(p1 *player.Player, p2 *player.Player, gameOver chan<- bool) {
 	// free used memory after match ends
 	defer func() {
 		clear(gameMap)
+		p1.Pieces = nil
+		p2.Pieces = nil
 	}()
 
 	//START GAME MAIN LOOP
@@ -83,7 +85,6 @@ func StartMatch(p1 *player.Player, p2 *player.Player, gameOver chan<- bool) {
 				isPlayerRedTurn = false
 			} else if payload.GetCapturePayload() != nil {
 				//if MESSAGE TYPE == "capture"
-				//log.Println("capture", payload.GetCapturePayload().String())
 				isKingBefore := getKingStatusBefore(payload.GetCapturePayload(), gameMap)
 				valid := processCapturePiece(&payload, gameMap, p1, p2)
 				if !valid {
