@@ -51,7 +51,7 @@ func (p *Player) HasThisPiece(pieceId int32) bool {
 	return slices.Contains(p.Pieces, pieceId)
 }
 
-// StartHeartbeat keeps checking (every second) if this player is still connected (when waiting for opponent)
+// StartHeartbeat for checking (every second) if this Player is still connected (when waiting for opponent)
 func (p *Player) StartHeartbeat(ctx context.Context) {
 	tt := time.NewTicker(time.Second)
 	qq := make(chan bool)
@@ -60,11 +60,13 @@ func (p *Player) StartHeartbeat(ctx context.Context) {
 		select {
 		case <-tt.C:
 			if err := pingCodec.Send(p.Conn, nil); err != nil {
-				//This player has quit early
+				// This player has quit early
 				qq <- true
+				close(qq)
 				return
 			}
 		case <-ctx.Done():
+			// timeout waiting for [p2] expired
 			tt.Stop()
 			return
 		}
