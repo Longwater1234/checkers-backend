@@ -18,7 +18,7 @@ import (
 	"golang.org/x/net/websocket"
 )
 
-const SERVER_VERSION = "1.0.9"
+const ServerVersion = "1.0.9"
 const maxRequestSize int = 1 << 10 // 1KB
 
 var numPlayers atomic.Uint32             // total number of LIVE players
@@ -81,7 +81,7 @@ func listenForJoins() {
 			Inner: &game.BasePayload_Welcome{
 				Welcome: &game.WelcomePayload{
 					MyTeam:        game.TeamColor_TEAM_RED,
-					ServerVersion: SERVER_VERSION,
+					ServerVersion: ServerVersion,
 				},
 			},
 		}
@@ -112,7 +112,6 @@ func listenForJoins() {
 				room.StartMatch(p1, p2, gameOver)
 				<-gameOver //block until match ends
 				log.Println("🔴 GAME OVER!")
-				close(gameOver)
 				p1.Dead <- true
 				p2.Dead <- true
 			}(p1, p2)
