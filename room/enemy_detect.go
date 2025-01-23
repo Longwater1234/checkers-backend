@@ -45,14 +45,14 @@ func collectFrontLHS(p *player.Player, cellIdx int32, gameMap map[int32]*game.Pi
 		// do swap
 		deltaForward, deltaBehindEnemy = deltaBehindEnemy, deltaForward
 	}
-	var mSign int32 = +1 // direction. up +1, down -1
+	var direction int32 = +1 // up +1, down -1
 
 	// if player piece is Black (PLAYER 2), swap values
 	if p.Name == game.TeamColor_TEAM_BLACK.String() {
-		mSign = -1
+		direction = -1
 		deltaBehindEnemy, deltaForward = deltaForward, deltaBehindEnemy
 	}
-	var cellAheadIdx int32 = cellIdx + (deltaForward * mSign)
+	var cellAheadIdx int32 = cellIdx + (deltaForward * direction)
 	if cellAheadIdx > 32 || cellAheadIdx < 1 {
 		return false
 	}
@@ -63,7 +63,7 @@ func collectFrontLHS(p *player.Player, cellIdx int32, gameMap map[int32]*game.Pi
 		return false
 	}
 
-	cellBehindEnemy := cellIdx + (deltaBehindEnemy * mSign) + (deltaForward * mSign) // south-east (of enemy)
+	cellBehindEnemy := cellIdx + (deltaBehindEnemy * direction) + (deltaForward * direction) // south-east (of enemy)
 	if cellBehindEnemy > 32 || cellBehindEnemy < 1 {
 		return false
 	}
@@ -92,14 +92,14 @@ func collectFrontRHS(p *player.Player, cellIdx int32, gameMap map[int32]*game.Pi
 		//do swap
 		deltaBehindEnemy, deltaForward = deltaForward, deltaBehindEnemy
 	}
-	var mSign int32 = +1 // direction. up +1, down -1
+	var direction int32 = +1 // up +1, down -1
 
 	// if piece is Black (PLAYER 2), swap values
 	if p.Name == game.TeamColor_TEAM_BLACK.String() {
-		mSign = -1
+		direction = -1
 		deltaBehindEnemy, deltaForward = deltaForward, deltaBehindEnemy
 	}
-	var cellAheadIdx int32 = cellIdx + (deltaForward * mSign)
+	var cellAheadIdx int32 = cellIdx + (deltaForward * direction)
 	if cellAheadIdx > 32 || cellAheadIdx < 1 {
 		return false
 	}
@@ -110,7 +110,7 @@ func collectFrontRHS(p *player.Player, cellIdx int32, gameMap map[int32]*game.Pi
 		return false
 	}
 
-	cellBehindEnemy := cellIdx + (deltaBehindEnemy * mSign) + (deltaForward * mSign) // south-west (of enemy)
+	cellBehindEnemy := cellIdx + (deltaBehindEnemy * direction) + (deltaForward * direction) // south-west (of enemy)
 	if cellBehindEnemy > 32 || cellBehindEnemy < 1 {
 		return false
 	}
@@ -138,14 +138,14 @@ func collectBehindRHS(king *player.Player, cellIdx int32, gameMap map[int32]*gam
 	if game.IsEvenCellRow(cellIdx) {
 		deltaForward, deltaBehindEnemy = deltaBehindEnemy, deltaForward
 	}
-	var mSign int32 = +1 // direction
+	var direction int32 = +1 // for King it's reversed
 
 	// if player piece is Black (PLAYER 2), swap values
 	if king.Name == game.TeamColor_TEAM_BLACK.String() {
-		mSign = -1
+		direction = -1
 		deltaForward, deltaBehindEnemy = deltaBehindEnemy, deltaForward
 	}
-	var cellAheadIdx int32 = cellIdx - (deltaForward * mSign)
+	var cellAheadIdx int32 = cellIdx - (deltaForward * direction)
 	if cellAheadIdx > 32 || cellAheadIdx < 1 {
 		return false
 	}
@@ -156,7 +156,7 @@ func collectBehindRHS(king *player.Player, cellIdx int32, gameMap map[int32]*gam
 		return false
 	}
 
-	cellBehindEnemy := cellIdx - (deltaBehindEnemy * mSign) - (deltaForward * mSign) // south-east (of enemy)
+	cellBehindEnemy := cellIdx - (deltaBehindEnemy * direction) - (deltaForward * direction) // south-east (of enemy)
 	if cellBehindEnemy > 32 || cellBehindEnemy < 1 {
 		return false
 	}
@@ -184,14 +184,14 @@ func collectBehindLHS(king *player.Player, cellIdx int32, gameMap map[int32]*gam
 	if game.IsEvenCellRow(cellIdx) {
 		deltaForward, deltaBehindEnemy = deltaBehindEnemy, deltaForward
 	}
-	var mSign int32 = +1 // direction. +1 forward, -1 back
+	var direction int32 = +1 // for King it's reversed
 
 	// if player piece is Black (PLAYER 2), do swap
 	if king.Name == game.TeamColor_TEAM_BLACK.String() {
-		mSign = -1
+		direction = -1
 		deltaForward, deltaBehindEnemy = deltaBehindEnemy, deltaForward
 	}
-	var cellAheadIdx int32 = cellIdx - (deltaForward * mSign)
+	var cellAheadIdx int32 = cellIdx - (deltaForward * direction)
 	if cellAheadIdx > 32 || cellAheadIdx < 1 {
 		return false
 	}
@@ -202,7 +202,7 @@ func collectBehindLHS(king *player.Player, cellIdx int32, gameMap map[int32]*gam
 		return false
 	}
 
-	cellBehindEnemy := cellIdx - (deltaBehindEnemy * mSign) - (deltaForward * mSign) // south-west of enemy
+	cellBehindEnemy := cellIdx - (deltaBehindEnemy * direction) - (deltaForward * direction) // south-west of enemy
 	if cellBehindEnemy > 32 || cellBehindEnemy < 1 {
 		return false
 	}
