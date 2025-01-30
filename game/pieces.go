@@ -77,7 +77,7 @@ func (p *Piece) MoveCapture(dest *Vec2) bool {
 
 // IsEvenCellRow determines whether the CELL with given Index is on EVEN Row on the board
 func IsEvenCellRow(cellIdx int32) bool {
-	rowNumber := 9 - (cellIdx-1)/4
+	rowNumber := (32 - cellIdx) / 4
 	return rowNumber%2 == 0
 }
 
