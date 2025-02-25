@@ -38,10 +38,10 @@ func validateAndUpdateMap(payload *game.MovePayload, gameMap map[int32]*game.Pie
 	if destination == nil {
 		return false
 	}
-	srcCell := payload.GetSourceCell()
+	srcCellIdx := payload.GetSourceCell()
 	movingPieceId := payload.GetPieceId()
 
-	piecePtr, exists := gameMap[srcCell]
+	piecePtr, exists := gameMap[srcCellIdx]
 	if !exists || movingPieceId != piecePtr.Id {
 		return false
 	}
@@ -59,7 +59,7 @@ func validateAndUpdateMap(payload *game.MovePayload, gameMap map[int32]*game.Pie
 	if !success {
 		return false
 	}
-	delete(gameMap, srcCell)                       // set old location empty!
+	delete(gameMap, srcCellIdx)                    // set old location empty!
 	gameMap[destination.GetCellIndex()] = piecePtr // fill in the new location
 	return true
 }

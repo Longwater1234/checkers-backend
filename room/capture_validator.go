@@ -50,31 +50,31 @@ func validateCapture(captureReq *game.CapturePayload, gameMap map[int32]*game.Pi
 	}
 
 	preyPieceId := captureReq.GetDetails().PreyPieceId
-	preyCell := captureReq.GetDetails().PreyCellIdx
+	preyCellIdx := captureReq.GetDetails().PreyCellIdx
 
 	//check Prey params
-	preyPiecePtr, exists := gameMap[preyCell]
+	preyPiecePtr, exists := gameMap[preyCellIdx]
 	if !exists || preyPieceId != preyPiecePtr.Id {
 		return false
 	}
 
 	// check whether destCell already has a Piece
-	destCell := captureReq.GetDestination()
-	_, hasValue := gameMap[destCell.GetCellIndex()]
+	destination := captureReq.GetDestination()
+	_, hasValue := gameMap[destination.GetCellIndex()]
 	if hasValue {
 		return false
 	}
 
 	success := hunterPiecePtr.MoveCapture(&game.Vec2{
-		X: destCell.GetX(),
-		Y: destCell.GetY(),
+		X: destination.GetX(),
+		Y: destination.GetY(),
 	})
 
 	if !success {
 		return false
 	}
-	delete(gameMap, hunterSrc)                        // set hunter's old location empty!
-	delete(gameMap, preyCell)                         // set Prey's old location empty!
-	gameMap[destCell.GetCellIndex()] = hunterPiecePtr // move hunter to new location
+	delete(gameMap, hunterSrc)                           // set hunter's old location empty!
+	delete(gameMap, preyCellIdx)                         // set Prey's old location empty!
+	gameMap[destination.GetCellIndex()] = hunterPiecePtr // move hunter to new location
 	return true
 }
