@@ -54,7 +54,8 @@ func (p *Player) HasThisPiece(pieceId int32) bool {
 // StartHeartbeat for checking (every second) if this Player is still connected (when waiting for opponent)
 func (p *Player) StartHeartbeat(ctx context.Context) {
 	tt := time.NewTicker(time.Second)
-	qq := make(chan bool)
+	defer tt.Stop()
+	qq := make(chan bool, 1)
 	p.Quit = qq
 	for {
 		select {
