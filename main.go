@@ -75,7 +75,6 @@ func listenForJoins() {
 	for {
 		//welcome 1st player
 		p1 := <-lobby
-		log.Println("LOBBY:", "cap", cap(lobby), "len", len(lobby))
 		var msgOne = &game.BasePayload{
 			Notice: "Connected. You are Team RED. Waiting for opponent...",
 			Inner: &game.BasePayload_Welcome{
@@ -106,7 +105,7 @@ func listenForJoins() {
 
 			//start the match in new goroutine
 			go func(p1, p2 *player.Player) {
-				//Sleep required for [p2] Client to process prev message
+				//Sleep REQUIRED for [p2] Client to process prev message
 				time.Sleep(200 * time.Millisecond)
 				gameOver := make(chan bool)
 				room.StartMatch(p1, p2, gameOver)
@@ -129,7 +128,7 @@ func listenForJoins() {
 			p1.Dead <- true
 
 		case <-p1.Quit:
-			//p1 has quit before match started
+			//[p1] has quit before match started
 			cancel()
 			p1.Dead <- true
 		}
