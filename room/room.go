@@ -77,8 +77,7 @@ func StartMatch(p1 *player.Player, p2 *player.Player, gameOver chan<- bool) {
 			//if MESSAGE TYPE == "move"
 			if payload.GetMovePayload() != nil {
 				//log.Println("move", payload.GetMovePayload().String())
-				valid := processMovePiece(&payload, gameMap, p1, p2)
-				if !valid {
+				if valid := processMovePiece(&payload, gameMap, p1, p2); !valid {
 					gameOver <- true
 					return
 				}
@@ -86,8 +85,7 @@ func StartMatch(p1 *player.Player, p2 *player.Player, gameOver chan<- bool) {
 			} else if payload.GetCapturePayload() != nil {
 				//if MESSAGE TYPE == "capture"
 				isKingBefore := getKingStatusBefore(payload.GetCapturePayload(), gameMap)
-				valid := processCapturePiece(&payload, gameMap, p1, p2)
-				if !valid {
+				if valid := processCapturePiece(&payload, gameMap, p1, p2); !valid {
 					gameOver <- true
 					return
 				}

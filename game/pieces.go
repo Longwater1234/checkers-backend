@@ -51,7 +51,7 @@ func (p *Piece) MoveSimple(dest *Vec2) bool {
 	return true
 }
 
-// MoveCapture (when attacking) moves this piece by 2 cells diagonally to the given `destination`. Returns TRUE if success
+// MoveCapture (when attacking) moves this piece diagonally by 2 cells to the given `destination`. Returns TRUE if success
 func (p *Piece) MoveCapture(dest *Vec2) bool {
 	var deltaX = float64(dest.X - p.Pos.X)
 	var deltaY = float64(dest.Y - p.Pos.Y)

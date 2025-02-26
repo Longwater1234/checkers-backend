@@ -5,20 +5,20 @@ import (
 	"checkers-backend/player"
 )
 
-// hasExtraTargets returns TRUE if hunter's single Piece at `currCell` has EXTRA nearby enemies to capture.
-// This should be called only AFTER `handleCapture` by player `hunter` is TRUE
-func hasExtraTargets(hunter *player.Player, currCell int32, gameMap map[int32]*game.Piece) bool {
-	piecePtr, exists := gameMap[currCell]
+// hasExtraTargets returns TRUE if hunter's single Piece at `cellIdx` has EXTRA nearby enemies to capture.
+// This should be called only AFTER `handleCapture` by player `hunter` return TRUE
+func hasExtraTargets(hunter *player.Player, cellIdx int32, gameMap map[int32]*game.Piece) bool {
+	piecePtr, exists := gameMap[cellIdx]
 	if !exists || !hunter.HasThisPiece(piecePtr.Id) {
 		return false
 	}
 
-	if collectFrontLHS(hunter, currCell, gameMap) || collectFrontRHS(hunter, currCell, gameMap) {
+	if collectFrontLHS(hunter, cellIdx, gameMap) || collectFrontRHS(hunter, cellIdx, gameMap) {
 		return true
 	}
 
 	if piecePtr.IsKing {
-		if collectBehindLHS(hunter, currCell, gameMap) || collectBehindRHS(hunter, currCell, gameMap) {
+		if collectBehindLHS(hunter, cellIdx, gameMap) || collectBehindRHS(hunter, cellIdx, gameMap) {
 			return true
 		}
 	}
@@ -133,12 +133,12 @@ func collectBehindRHS(king *player.Player, cellIdx int32, gameMap map[int32]*gam
 	var deltaBehindEnemy int32 = 5
 
 	var hasEnemyAhead = false
-	var enemyOpenBehind = false //is there an EMPTY cell behind enemy?
+	var enemyOpenBehind = false // is there an EMPTY cell behind enemy?
 
 	if game.IsEvenCellRow(cellIdx) {
-		deltaForward, deltaBehindEnemy = deltaBehindEnemy, deltaForward
+		deltaForward, deltaBehindEnemy = deltaBehindEnemy, deltaForward // do swap
 	}
-	var direction int32 = +1 // for King it's reversed
+	var direction int32 = +1 // for King, it's reversed
 
 	// if player piece is Black (PLAYER 2), swap values
 	if king.Name == game.TeamColor_TEAM_BLACK.String() {
@@ -150,7 +150,7 @@ func collectBehindRHS(king *player.Player, cellIdx int32, gameMap map[int32]*gam
 		return false
 	}
 
-	pieceAhead, existFront := gameMap[cellAheadIdx] // north-west (from behind)
+	pieceAhead, existFront := gameMap[cellAheadIdx] // north-west (when facing behind)
 	hasEnemyAhead = existFront && !king.HasThisPiece(pieceAhead.Id)
 	if existFront && !game.IsAwayFromEdge(&pieceAhead.Pos) {
 		return false
@@ -196,7 +196,7 @@ func collectBehindLHS(king *player.Player, cellIdx int32, gameMap map[int32]*gam
 		return false
 	}
 
-	pieceAhead, existFront := gameMap[cellAheadIdx] // north-east (from behind)
+	pieceAhead, existFront := gameMap[cellAheadIdx] // north-east (when facing behind)
 	hasEnemyAhead = existFront && !king.HasThisPiece(pieceAhead.Id)
 	if existFront && !game.IsAwayFromEdge(&pieceAhead.Pos) {
 		return false
