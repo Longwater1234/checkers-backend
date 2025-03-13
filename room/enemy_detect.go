@@ -42,8 +42,7 @@ func collectFrontLHS(p *player.Player, cellIdx int32, gameMap map[int32]*game.Pi
 	var enemyOpenBehind = false // have EMPTY cell behind enemy?
 
 	if game.IsEvenCellRow(cellIdx) {
-		// do swap
-		deltaForward, deltaBehindEnemy = deltaBehindEnemy, deltaForward
+		deltaForward, deltaBehindEnemy = deltaBehindEnemy, deltaForward // swap values
 	}
 	var direction int32 = +1 // up +1, down -1
 
@@ -89,8 +88,7 @@ func collectFrontRHS(p *player.Player, cellIdx int32, gameMap map[int32]*game.Pi
 	var enemyOpenBehind = false // is there an EMPTY cell behind enemy?
 
 	if game.IsEvenCellRow(cellIdx) {
-		//do swap
-		deltaBehindEnemy, deltaForward = deltaForward, deltaBehindEnemy
+		deltaBehindEnemy, deltaForward = deltaForward, deltaBehindEnemy // do swap
 	}
 	var direction int32 = +1 // up +1, down -1
 
