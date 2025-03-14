@@ -105,7 +105,7 @@ func listenForJoins() {
 
 			//start the match in new goroutine
 			go func(p1, p2 *player.Player) {
-				//Sleep REQUIRED for [p2] Client to process prev message
+				//Sleep REQUIRED for [p2] client to process prev message
 				time.Sleep(200 * time.Millisecond)
 				gameOver := make(chan bool)
 				room.StartMatch(p1, p2, gameOver)

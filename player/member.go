@@ -27,7 +27,7 @@ var pingCodec = websocket.Codec{Marshal: func(v interface{}) (data []byte, paylo
 func (p *Player) SendMessage(payload proto.Message) {
 	bb, err := proto.Marshal(payload)
 	if err != nil {
-		log.Println("Failed to Marshal message", err)
+		log.Println("Failed to encode message", err)
 		p.Dead <- true
 	}
 	if err := websocket.Message.Send(p.Conn, bb); err != nil {

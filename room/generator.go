@@ -26,8 +26,7 @@ func generateGameMap(p1 *player.Player, p2 *player.Player) map[int32]*game.Piece
 	for row := 0; row < numRows; row++ {
 		for col := 0; col < numCols; col++ {
 			if (row+col)%2 == 0 {
-				// skip even-numbered cells
-				continue
+				continue // skip even-number cells
 			}
 			pos := game.Vec2{
 				X: float32(col%numRows) * game.SIZE_CELL,
