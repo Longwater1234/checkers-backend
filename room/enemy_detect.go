@@ -102,7 +102,7 @@ func collectFrontRHS(p *player.Player, cellIdx int32, gameMap map[int32]*game.Pi
 		return false
 	}
 
-	pieceAhead, existFront := gameMap[cellAheadIdx] // north-east
+	pieceAhead, existFront := gameMap[cellAheadIdx] // north-east of hunter
 	hasEnemyAhead = existFront && !p.HasThisPiece(pieceAhead.Id)
 	if existFront && !game.IsAwayFromEdge(&pieceAhead.Pos) {
 		return false

@@ -27,7 +27,7 @@ type Piece struct {
 	PieceColor PieceType // either RED or BLACK
 }
 
-// MoveSimple actually moves this piece diagonally to given destination by 1 cell. Returns TRUE if successful
+// MoveSimple does move this piece diagonally to given destination by 1 cell. Returns TRUE if successful
 func (p *Piece) MoveSimple(dest *Vec2) bool {
 	var deltaX = float64(dest.X - p.Pos.X)
 	var deltaY = float64(dest.Y - p.Pos.Y)
@@ -44,6 +44,7 @@ func (p *Piece) MoveSimple(dest *Vec2) bool {
 
 	p.Pos.X = dest.X
 	p.Pos.Y = dest.Y
+	// activate King if reached opposite end
 	if (p.PieceColor == Piece_Red && dest.Y == 0) ||
 		(p.PieceColor == Piece_Black && dest.Y == 7*SIZE_CELL) {
 		p.IsKing = true
@@ -68,6 +69,7 @@ func (p *Piece) MoveCapture(dest *Vec2) bool {
 
 	p.Pos.X = dest.X
 	p.Pos.Y = dest.Y
+	// activate King if reached opposite end
 	if (p.PieceColor == Piece_Red && dest.Y == 0) ||
 		(p.PieceColor == Piece_Black && dest.Y == 7*SIZE_CELL) {
 		p.IsKing = true
@@ -86,7 +88,7 @@ func IsAwayFromEdge(pos *Vec2) bool {
 	return pos.X > 0 && pos.X < 7*SIZE_CELL && pos.Y > 0 && pos.Y < 7*SIZE_CELL
 }
 
-// HasWinner returns TRUE if `p` has won the match against `opponent`, then notifies both players.
+// HasWinner returns TRUE if player `p` has won the match against `opponent`, then notifies both players.
 func HasWinner(p *player.Player, opponent *player.Player) bool {
 	if len(opponent.Pieces) == 0 {
 		// Meaning `opponent` has lost, `p` has won! Game over

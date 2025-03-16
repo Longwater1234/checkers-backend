@@ -19,7 +19,7 @@ type Player struct {
 }
 
 // pingCodec is used to PING the client
-var pingCodec = websocket.Codec{Marshal: func(v interface{}) (data []byte, payloadType byte, err error) {
+var pingCodec = websocket.Codec{Marshal: func(v any) (data []byte, payloadType byte, err error) {
 	return nil, websocket.PingFrame, nil
 }}
 
@@ -27,7 +27,7 @@ var pingCodec = websocket.Codec{Marshal: func(v interface{}) (data []byte, paylo
 func (p *Player) SendMessage(payload proto.Message) {
 	bb, err := proto.Marshal(payload)
 	if err != nil {
-		log.Println("Failed to Marshal message", err)
+		log.Println("Failed to encode message", err)
 		p.Dead <- true
 	}
 	if err := websocket.Message.Send(p.Conn, bb); err != nil {
