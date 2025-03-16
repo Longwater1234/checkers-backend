@@ -1,6 +1,8 @@
 # checkers-backend
 
-Server for my game [SpaceCheckers](https://longwater1234.itch.io/spacecheckers) , a multiplayer checkers game for Windows, MacOS and Linu, now available on itch.io. Written entirely using only Go's stdlib and protobuf lib. You can self-host this game server locally or on the cloud.
+Server for my game SpaceCheckers (closed-source), a multiplayer Checkers game for Windows, MacOS and Linux, [now available on itch.io](https://longwater1234.itch.io/spacecheckers). This game server is written entirely using only Go's stdlib and protobuf lib. 
+
+You can self-host this server locally, or in the Cloud, for use with the game client.
 
 ## Requirements
 
