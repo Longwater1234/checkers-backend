@@ -36,7 +36,7 @@ func (p *Player) SendMessage(payload proto.Message) {
 	}
 }
 
-// LosePiece removes captured `targetPieceId` from player's basket
+// LosePiece removes captured `targetPieceId` from player's ownership
 func (p *Player) LosePiece(targetPieceId int32) {
 	for i := 0; i < len(p.Pieces); i++ {
 		if p.Pieces[i] == targetPieceId {

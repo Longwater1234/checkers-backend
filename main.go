@@ -18,7 +18,7 @@ import (
 	"golang.org/x/net/websocket"
 )
 
-const ServerVersion = "1.0.9"
+const ServerVersion = "1.0.10"
 const maxRequestSize int = 1 << 10 // 1KB
 
 var numPlayers atomic.Uint32             // total number of LIVE players
@@ -32,7 +32,7 @@ func main() {
 	port := strconv.Itoa(portNum)
 
 	http.HandleFunc("/", func(writer http.ResponseWriter, r *http.Request) {
-		fmt.Fprintf(writer, `<p>This is a websocket server. Dial ws://%s:%s/game </p>`, r.URL.Host, port)
+		fmt.Fprintln(writer, `<p>This is a websocket server. Dial ws://{requestURI}/game </p>`)
 	})
 
 	http.Handle("/game", websocket.Handler(wsHandler))

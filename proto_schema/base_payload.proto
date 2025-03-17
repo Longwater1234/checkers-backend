@@ -64,7 +64,7 @@ message ExitPayload {
 message CapturePayload {
   // extra details about this capture
   message TargetDetails {
-    /** ID of the piece that is to be captured */
+    // ID of the piece that is to be captured
     int32 prey_piece_id = 1;
     // the cell Index hosting this target piece
     int32 prey_cell_idx = 2;
