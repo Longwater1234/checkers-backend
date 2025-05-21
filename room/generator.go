@@ -12,7 +12,7 @@ import (
 const (
 	numRows          = 8             // checker rows
 	numCols          = 8             // checker columns
-	upperLimit int16 = math.MaxInt16 //piece ID max value (short_max)
+	upperLimit int16 = math.MaxInt16 // piece ID max value (short_max)
 )
 
 // generateGameMap creates the hashmap of cell_index --> Piece
