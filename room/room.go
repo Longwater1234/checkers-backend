@@ -40,7 +40,7 @@ func StartMatch(p1 *player.Player, p2 *player.Player, gameOver chan<- bool) {
 	var isPlayerRedTurn = true            // Who turn is it now? RED always starts.
 	var gameMap = generateGameMap(p1, p2) // map of cell index --> pieces.
 
-	// free used memory after match ends
+	// free up memory after match ends
 	defer func() {
 		clear(gameMap)
 		p1.Pieces = nil
@@ -167,7 +167,7 @@ func StartMatch(p1 *player.Player, p2 *player.Player, gameOver chan<- bool) {
 	}
 }
 
-// getKingStatusBefore capturing the opponent. Returns TRUE if piece is King at given current Cell
+// getKingStatusBefore capturing the opponent. Returns TRUE if piece is King at its original Cell
 func getKingStatusBefore(capturePayload *game.CapturePayload, gameMap map[int32]*game.Piece) bool {
 	if capturePayload == nil || capturePayload.GetDetails() == nil {
 		return false

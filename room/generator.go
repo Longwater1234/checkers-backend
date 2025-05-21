@@ -60,7 +60,7 @@ func generateGameMap(p1 *player.Player, p2 *player.Player) map[int32]*game.Piece
 // generatePieces using secure RNG for the two players. If error occurs, send signal via gameOver channel
 func generatePieces(p1 *player.Player, p2 *player.Player, gameOver chan<- bool) {
 	bigMax := big.NewInt(int64(upperLimit))
-	for i := 0; i < len(p1.Pieces); i++ {
+	for i := range p1.Pieces {
 		val, err := rand.Int(rand.Reader, bigMax)
 		if err != nil {
 			gameOver <- true
@@ -69,7 +69,7 @@ func generatePieces(p1 *player.Player, p2 *player.Player, gameOver chan<- bool) 
 		p1.Pieces[i] = int32(val.Int64())
 	}
 
-	for i := 0; i < len(p2.Pieces); i++ {
+	for i := range p2.Pieces {
 		val, err := rand.Int(rand.Reader, bigMax)
 		if err != nil {
 			gameOver <- true

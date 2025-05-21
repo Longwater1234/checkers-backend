@@ -109,7 +109,7 @@ func listenForJoins() {
 				time.Sleep(200 * time.Millisecond)
 				gameOver := make(chan bool)
 				room.StartMatch(p1, p2, gameOver)
-				<-gameOver //block until match ends
+				<-gameOver // block until match ends
 				log.Println("🔴 GAME OVER!")
 				p1.Dead <- true
 				p2.Dead <- true
