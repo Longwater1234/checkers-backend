@@ -2,7 +2,7 @@
 
 Server for my game SpaceCheckers, a multiplayer Checkers game for Windows, MacOS and Linux, [now available on itch.io](https://longwater1234.itch.io/spacecheckers). The game is free to play, and gets updated regularly.
 
-You can self-host this server locally, or in the Cloud, for use with the game client.
+You can self-host this server locally, or in the Cloud, for use with the game client. The game client is [available on this repo](https://github.com/Longwater1234/space-checkers)
 
 ## Requirements
 
