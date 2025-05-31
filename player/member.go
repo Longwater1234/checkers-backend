@@ -36,9 +36,9 @@ func (p *Player) SendMessage(payload proto.Message) {
 	}
 }
 
-// LosePiece removes captured `targetPieceId` from player's basket
+// LosePiece removes captured `targetPieceId` from player's ownership
 func (p *Player) LosePiece(targetPieceId int32) {
-	for i := 0; i < len(p.Pieces); i++ {
+	for i := range p.Pieces {
 		if p.Pieces[i] == targetPieceId {
 			p.Pieces = slices.Delete(p.Pieces, i, i+1)
 			return
@@ -67,7 +67,7 @@ func (p *Player) StartHeartbeat(ctx context.Context) {
 				return
 			}
 		case <-ctx.Done():
-			// timeout waiting for [p2] expired
+			// timeout waiting for [p2] reached!
 			tt.Stop()
 			return
 		}

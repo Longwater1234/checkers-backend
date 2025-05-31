@@ -18,7 +18,7 @@ import (
 	"golang.org/x/net/websocket"
 )
 
-const ServerVersion = "1.0.9"
+const serverVersion = "1.0.10"
 const maxRequestSize int = 1 << 10 // 1KB
 
 var numPlayers atomic.Uint32             // total number of LIVE players
@@ -32,7 +32,7 @@ func main() {
 	port := strconv.Itoa(portNum)
 
 	http.HandleFunc("/", func(writer http.ResponseWriter, r *http.Request) {
-		fmt.Fprintf(writer, `<p>This is a websocket server. Dial ws://%s:%s/game </p>`, r.URL.Host, port)
+		fmt.Fprintln(writer, `<p>This is a websocket server. Dial ws://{requestURI}/game </p>`)
 	})
 
 	http.Handle("/game", websocket.Handler(wsHandler))
@@ -80,7 +80,7 @@ func listenForJoins() {
 			Inner: &game.BasePayload_Welcome{
 				Welcome: &game.WelcomePayload{
 					MyTeam:        game.TeamColor_TEAM_RED,
-					ServerVersion: ServerVersion,
+					ServerVersion: serverVersion,
 				},
 			},
 		}
@@ -109,7 +109,7 @@ func listenForJoins() {
 				time.Sleep(200 * time.Millisecond)
 				gameOver := make(chan bool)
 				room.StartMatch(p1, p2, gameOver)
-				<-gameOver //block until match ends
+				<-gameOver // block until match ends
 				log.Println("🔴 GAME OVER!")
 				p1.Dead <- true
 				p2.Dead <- true

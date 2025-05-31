@@ -5,8 +5,8 @@ import (
 	"checkers-backend/player"
 )
 
-// hasExtraTargets returns TRUE if hunter's single Piece at `cellIdx` has EXTRA nearby enemies to capture.
-// This should be called only AFTER `handleCapture` by player `hunter` return TRUE
+// hasExtraTargets returns TRUE if hunter's single Piece at `cell_idx` has EXTRA nearby enemies to capture.
+// This should be called only AFTER `processCapturePiece` by hunter is TRUE
 func hasExtraTargets(hunter *player.Player, cellIdx int32, gameMap map[int32]*game.Piece) bool {
 	piecePtr, exists := gameMap[cellIdx]
 	if !exists || !hunter.HasThisPiece(piecePtr.Id) {
@@ -118,7 +118,7 @@ func collectFrontRHS(p *player.Player, cellIdx int32, gameMap map[int32]*game.Pi
 	return hasEnemyAhead && enemyOpenBehind
 }
 
-// collectBehindRHS returns true ONLY IF there is an enemy on (SOUTH EAST) of piece. (Only for KING pieces)
+// collectBehindRHS returns true ONLY IF there is an enemy on SOUTH EAST of piece. (Only for KING pieces)
 func collectBehindRHS(king *player.Player, cellIdx int32, gameMap map[int32]*game.Piece) bool {
 	piecePtr := gameMap[cellIdx]
 	if king.Name == game.TeamColor_TEAM_RED.String() && piecePtr.Pos.X == 0 {
@@ -164,7 +164,7 @@ func collectBehindRHS(king *player.Player, cellIdx int32, gameMap map[int32]*gam
 	return hasEnemyAhead && enemyOpenBehind
 }
 
-// collectBehindLHS returns true ONLY IF there is an enemy on (SOUTH WEST) of player. Only for KING pieces
+// collectBehindLHS returns true ONLY IF there is an enemy on SOUTH WEST of player. Only for KING pieces
 func collectBehindLHS(king *player.Player, cellIdx int32, gameMap map[int32]*game.Piece) bool {
 	piecePtr := gameMap[cellIdx]
 	if king.Name == game.TeamColor_TEAM_RED.String() && piecePtr.Pos.X > 7*game.SIZE_CELL {
