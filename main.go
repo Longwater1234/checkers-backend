@@ -18,7 +18,7 @@ import (
 	"golang.org/x/net/websocket"
 )
 
-const serverVersion = "1.0.10"
+const serverVersion = "1.0.11"
 const maxRequestSize int = 1 << 10 // 1KB
 
 var numPlayers atomic.Uint32             // total number of LIVE players
