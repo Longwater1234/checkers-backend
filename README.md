@@ -14,6 +14,11 @@ You can self-host this server locally, or in the Cloud, for use with the game cl
 
 ```bash
     go build --ldflags="-s -w" .
+```
+
+- Start the server with the following command:
+
+```bash
     ./checkers-backend
 ```
 
