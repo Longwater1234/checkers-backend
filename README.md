@@ -17,8 +17,7 @@ You can self-host this server locally, or in the Cloud, for use with the game cl
     ./checkers-backend
 ```
 
-- Set ENV variable for `PORT` which the server will listen to.
-- If port not set, it will be default listen at 9876.
+- You can set ENV variable for `PORT` which the server will listen to. Default 9876
 - Alternatively, you can use the provided Dockerfile.
 
 ## License
