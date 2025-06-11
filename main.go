@@ -18,7 +18,7 @@ import (
 	"golang.org/x/net/websocket"
 )
 
-const serverVersion = "1.0.11"
+const serverVersion = "1.0.12"
 const maxRequestSize int = 1 << 10 // 1KB
 
 var numPlayers atomic.Uint32             // total number of LIVE players
@@ -107,7 +107,7 @@ func listenForJoins() {
 			go func(p1, p2 *player.Player) {
 				//Sleep REQUIRED for [p2] client to process prev message
 				time.Sleep(200 * time.Millisecond)
-				gameOver := make(chan bool)
+				gameOver := make(chan bool, 1)
 				room.StartMatch(p1, p2, gameOver)
 				<-gameOver // block until match ends
 				log.Println("🔴 GAME OVER!")
