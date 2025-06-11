@@ -42,6 +42,7 @@ func StartMatch(p1 *player.Player, p2 *player.Player, gameOver chan<- bool) {
 
 	// free up memory after match ends
 	defer func() {
+		gameOver <- true // just in case I forget!
 		clear(gameMap)
 		p1.Pieces = nil
 		p2.Pieces = nil
