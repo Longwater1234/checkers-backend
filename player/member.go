@@ -68,7 +68,6 @@ func (p *Player) StartHeartbeat(ctx context.Context) {
 			}
 		case <-ctx.Done():
 			// timeout waiting for [p2] reached!
-			tt.Stop()
 			return
 		}
 
