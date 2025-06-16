@@ -1,0 +1,7 @@
+*.exe
+.idea/
+.vscode/
+.git/
+checkers-backend
+.DS_Store
+.github
