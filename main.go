@@ -103,7 +103,7 @@ func listenForJoins() {
 			}
 			p2.SendMessage(msgTwo)
 
-			//start the match in new goroutine
+			// start the match in new goroutine
 			go func(p1, p2 *player.Player) {
 				//Sleep REQUIRED for [p2] client to process prev message
 				time.Sleep(200 * time.Millisecond)

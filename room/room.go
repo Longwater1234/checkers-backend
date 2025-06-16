@@ -40,8 +40,9 @@ func StartMatch(p1 *player.Player, p2 *player.Player, gameOver chan<- bool) {
 	var isPlayerRedTurn = true            // Who turn is it now? RED always starts.
 	var gameMap = generateGameMap(p1, p2) // map of cell index --> pieces.
 
-	// free up memory after match ends
+	// cleanup after match ends
 	defer func() {
+		close(gameOver)
 		clear(gameMap)
 		p1.Pieces = nil
 		p2.Pieces = nil
