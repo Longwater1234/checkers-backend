@@ -55,7 +55,7 @@ func wsHandler(ws *websocket.Conn) {
 		Dead:   deadChan,
 	}
 
-	//for each pair joining, the First will always be RED
+	// for each pair joining, the First will always be RED
 	if numPlayers.Load()%2 == 0 {
 		p.Name = game.TeamColor_TEAM_RED.String()
 	} else {
