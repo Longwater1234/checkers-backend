@@ -56,7 +56,7 @@ func generateGameMap(p1 *player.Player, p2 *player.Player) map[int32]*game.Piece
 	return gameMap
 }
 
-// generatePieces using secure RNG for the two players.
+// generatePieces using secure RNG for the two players. You MUST handle the error
 func generatePieces(p1 *player.Player, p2 *player.Player) error {
 	bigMax := big.NewInt(int64(upperLimit))
 	for i := range p1.Pieces {

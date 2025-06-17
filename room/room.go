@@ -78,7 +78,7 @@ func StartMatch(p1 *player.Player, p2 *player.Player, gameOver chan<- bool) {
 				return
 			}
 
-			//if MESSAGE TYPE == "move"
+			// if MESSAGE_TYPE == "move"
 			if payload.GetMovePayload() != nil {
 				//log.Println("move", payload.GetMovePayload().String())
 				if valid := processMovePiece(&payload, gameMap, p1, p2); !valid {
@@ -87,7 +87,7 @@ func StartMatch(p1 *player.Player, p2 *player.Player, gameOver chan<- bool) {
 				}
 				isPlayerRedTurn = false
 			} else if payload.GetCapturePayload() != nil {
-				//if MESSAGE TYPE == "capture"
+				// MESSAGE_TYPE == "capture"
 				isKingBefore := getKingStatusBefore(payload.GetCapturePayload(), gameMap)
 				if valid := processCapturePiece(&payload, gameMap, p1, p2); !valid {
 					gameOver <- true
@@ -133,21 +133,19 @@ func StartMatch(p1 *player.Player, p2 *player.Player, gameOver chan<- bool) {
 				return
 			}
 
-			//if MESSAGE TYPE == "move"
+			// if MESSAGE_TYPE == "move"
 			if payload.GetMovePayload() != nil {
 				//log.Println("move", payload.GetMovePayload().String())
-				valid := processMovePiece(&payload, gameMap, p2, p1)
-				if !valid {
+				if valid := processMovePiece(&payload, gameMap, p2, p1); !valid {
 					gameOver <- true
 					return
 				}
 				isPlayerRedTurn = true
 			} else if payload.GetCapturePayload() != nil {
-				//if MESSAGE TYPE == "capture"
-				//log.Println("capture", payload.GetCapturePayload().String())
+				// MESSAGE_TYPE == "capture"
+				// log.Println("capture", payload.GetCapturePayload().String())
 				isKingBefore := getKingStatusBefore(payload.GetCapturePayload(), gameMap)
-				valid := processCapturePiece(&payload, gameMap, p2, p1)
-				if !valid {
+				if valid := processCapturePiece(&payload, gameMap, p2, p1); !valid {
 					gameOver <- true
 					return
 				}
@@ -156,7 +154,7 @@ func StartMatch(p1 *player.Player, p2 *player.Player, gameOver chan<- bool) {
 					gameOver <- true
 					return
 				}
-				//check for extra opportunities for P2. if NONE, toggle turns
+				// check for extra opportunities for P2. if NONE, toggle turns
 				isKingNow := getKingStatusAfter(payload.GetCapturePayload(), gameMap)
 				currentCell := payload.GetCapturePayload().Destination.CellIndex
 				var needCheck bool = isKingBefore == isKingNow
