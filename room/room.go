@@ -51,12 +51,12 @@ func StartMatch(p1 *player.Player, p2 *player.Player, gameOver chan<- bool) {
 		p2.Pieces = nil
 	}()
 
-	// MAIN GAME LOOP (each player has MAX 40 sec to respond)
+	// MAIN GAME LOOP (each player has MAX 30 sec to respond)
 	for {
 		if isPlayerRedTurn {
 			// ============= IT'S PLAYER 1 (RED's) TURN =============//
 			var rawBytes []byte
-			p1.Conn.SetReadDeadline(time.Now().Add(time.Second * 40))
+			p1.Conn.SetReadDeadline(time.Now().Add(time.Second * 30))
 			if err := websocket.Message.Receive(p1.Conn, &rawBytes); err != nil {
 				log.Println(p1.Name, "disconnected. Cause:", err)
 				p2.SendMessage(&game.BasePayload{
@@ -101,7 +101,7 @@ func StartMatch(p1 *player.Player, p2 *player.Player, gameOver chan<- bool) {
 				isKingNow := getKingStatusAfter(payload.GetCapturePayload(), gameMap)
 				currentCell := payload.GetCapturePayload().Destination.CellIndex
 				var needCheck bool = isKingBefore == isKingNow
-				// CHECK for extra opportunities for P1. if NONE, toggle turns
+				// CHECK for extra opportunities for P1. if none, toggle turns
 				if needCheck && hasExtraTargets(p1, currentCell, gameMap) {
 					log.Println(p1.Name, " has extra targets!")
 					continue
@@ -111,7 +111,7 @@ func StartMatch(p1 *player.Player, p2 *player.Player, gameOver chan<- bool) {
 		} else if !isPlayerRedTurn {
 			// ============= IT'S PLAYER 2 (BLACK's) TURN =============//
 			var rawBytes []byte
-			p2.Conn.SetReadDeadline(time.Now().Add(time.Second * 40))
+			p2.Conn.SetReadDeadline(time.Now().Add(time.Second * 30))
 			if err := websocket.Message.Receive(p2.Conn, &rawBytes); err != nil {
 				log.Println(p2.Name, "disconnected. Cause:", err.Error())
 				p1.SendMessage(&game.BasePayload{
