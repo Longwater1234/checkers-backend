@@ -5,7 +5,7 @@ import (
 	"checkers-backend/player"
 )
 
-// processMovePiece made by Player `p` against `opponent`. Returns TRUE if all is OK. Else returns FALSE.
+// processMovePiece made by Player `p` against `opponent`. Returns TRUE only if all is OK.
 func processMovePiece(payload *game.BasePayload, gameMap map[int32]*game.Piece, p, opponent *player.Player) bool {
 	success := validateAndUpdateMap(payload.GetMovePayload(), gameMap)
 	if !success {
@@ -29,10 +29,10 @@ func processMovePiece(payload *game.BasePayload, gameMap map[int32]*game.Piece, 
 	}
 	// All is OK, forward the "MOVE" payload to opponent
 	opponent.SendMessage(payload)
-	return true
+	return success
 }
 
-// validateAndUpdateMap after player's "MOVE" and update gameMap. Returns TRUE if successful, else FALSE
+// validateAndUpdateMap after player's "MOVE" and update gameMap. Returns TRUE only if all is ok.
 func validateAndUpdateMap(payload *game.MovePayload, gameMap map[int32]*game.Piece) bool {
 	destination := payload.GetDestination()
 	if destination == nil {
@@ -61,5 +61,5 @@ func validateAndUpdateMap(payload *game.MovePayload, gameMap map[int32]*game.Pie
 	}
 	delete(gameMap, srcCellIdx)                    // set old location empty!
 	gameMap[destination.GetCellIndex()] = piecePtr // fill in the new location
-	return true
+	return success
 }

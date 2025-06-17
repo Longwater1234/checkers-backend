@@ -21,9 +21,9 @@ const (
 )
 
 type Piece struct {
-	Id         int32     // unique piece id
+	Id         int32     // random unique piece id
 	IsKing     bool      // whether this piece is King
-	Pos        Vec2      // current piece position
+	Pos        Vec2      // piece current position
 	PieceColor PieceType // either RED or BLACK
 }
 
@@ -79,8 +79,8 @@ func (p *Piece) MoveCapture(dest *Vec2) bool {
 
 // IsEvenCellRow determines whether the CELL with given Index is on EVEN Row on the board
 func IsEvenCellRow(cellIdx int32) bool {
-	rowNumber := (32 - cellIdx) / 4
-	return rowNumber%2 == 0
+	rowNum := (32 - cellIdx) / 4
+	return rowNum%2 == 0
 }
 
 // IsAwayFromEdge returns TRUE if given position is NOT on any edge of board
@@ -88,7 +88,7 @@ func IsAwayFromEdge(pos *Vec2) bool {
 	return pos.X > 0 && pos.X < 7*SIZE_CELL && pos.Y > 0 && pos.Y < 7*SIZE_CELL
 }
 
-// HasWinner returns TRUE if player `p` has won the match against `opponent`, then notifies both players.
+// HasWinner returns TRUE if player `p` has beaten `opponent`, which then notifies both players.
 func HasWinner(p *player.Player, opponent *player.Player) bool {
 	if len(opponent.Pieces) == 0 {
 		// Meaning `opponent` has lost, `p` has won! Game over

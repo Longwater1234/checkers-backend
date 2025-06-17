@@ -14,8 +14,11 @@ import (
 func StartMatch(p1 *player.Player, p2 *player.Player, gameOver chan<- bool) {
 	log.Println("🟢 Match has begun!")
 
-	//make random pieceId's for both
-	generatePieces(p1, p2, gameOver)
+	//make random pieceId's for both players
+	if errx := generatePieces(p1, p2); errx != nil {
+		gameOver <- true
+		log.Panic("cannot generate pieces", errx)
+	}
 
 	p1.SendMessage(&game.BasePayload{
 		Notice: "Opponent joined. Make your first move!",
@@ -37,7 +40,7 @@ func StartMatch(p1 *player.Player, p2 *player.Player, gameOver chan<- bool) {
 		},
 	})
 
-	var isPlayerRedTurn = true            // Who turn is it now? RED always starts.
+	var isPlayerRedTurn = true            // Whose turn is it now? RED always starts.
 	var gameMap = generateGameMap(p1, p2) // map of cell index --> pieces.
 
 	// cleanup after match ends
@@ -48,12 +51,12 @@ func StartMatch(p1 *player.Player, p2 *player.Player, gameOver chan<- bool) {
 		p2.Pieces = nil
 	}()
 
-	//START GAME MAIN LOOP
+	// MAIN GAME LOOP (each player has MAX 30 sec to respond)
 	for {
 		if isPlayerRedTurn {
 			// ============= IT'S PLAYER 1 (RED's) TURN =============//
 			var rawBytes []byte
-			p1.Conn.SetReadDeadline(time.Now().Add(time.Second * 40))
+			p1.Conn.SetReadDeadline(time.Now().Add(time.Second * 30))
 			if err := websocket.Message.Receive(p1.Conn, &rawBytes); err != nil {
 				log.Println(p1.Name, "disconnected. Cause:", err)
 				p2.SendMessage(&game.BasePayload{
@@ -75,7 +78,7 @@ func StartMatch(p1 *player.Player, p2 *player.Player, gameOver chan<- bool) {
 				return
 			}
 
-			//if MESSAGE TYPE == "move"
+			// MESSAGE_TYPE == "move"
 			if payload.GetMovePayload() != nil {
 				//log.Println("move", payload.GetMovePayload().String())
 				if valid := processMovePiece(&payload, gameMap, p1, p2); !valid {
@@ -84,7 +87,7 @@ func StartMatch(p1 *player.Player, p2 *player.Player, gameOver chan<- bool) {
 				}
 				isPlayerRedTurn = false
 			} else if payload.GetCapturePayload() != nil {
-				//if MESSAGE TYPE == "capture"
+				// MESSAGE_TYPE == "capture"
 				isKingBefore := getKingStatusBefore(payload.GetCapturePayload(), gameMap)
 				if valid := processCapturePiece(&payload, gameMap, p1, p2); !valid {
 					gameOver <- true
@@ -98,7 +101,7 @@ func StartMatch(p1 *player.Player, p2 *player.Player, gameOver chan<- bool) {
 				isKingNow := getKingStatusAfter(payload.GetCapturePayload(), gameMap)
 				currentCell := payload.GetCapturePayload().Destination.CellIndex
 				var needCheck bool = isKingBefore == isKingNow
-				// CHECK for extra opportunities for P1. if NONE, toggle turns
+				// CHECK for extra opportunities for P1. if none, toggle turns
 				if needCheck && hasExtraTargets(p1, currentCell, gameMap) {
 					log.Println(p1.Name, " has extra targets!")
 					continue
@@ -108,7 +111,7 @@ func StartMatch(p1 *player.Player, p2 *player.Player, gameOver chan<- bool) {
 		} else if !isPlayerRedTurn {
 			// ============= IT'S PLAYER 2 (BLACK's) TURN =============//
 			var rawBytes []byte
-			p2.Conn.SetReadDeadline(time.Now().Add(time.Second * 40))
+			p2.Conn.SetReadDeadline(time.Now().Add(time.Second * 30))
 			if err := websocket.Message.Receive(p2.Conn, &rawBytes); err != nil {
 				log.Println(p2.Name, "disconnected. Cause:", err.Error())
 				p1.SendMessage(&game.BasePayload{
@@ -130,21 +133,19 @@ func StartMatch(p1 *player.Player, p2 *player.Player, gameOver chan<- bool) {
 				return
 			}
 
-			//if MESSAGE TYPE == "move"
+			// MESSAGE_TYPE == "move"
 			if payload.GetMovePayload() != nil {
 				//log.Println("move", payload.GetMovePayload().String())
-				valid := processMovePiece(&payload, gameMap, p2, p1)
-				if !valid {
+				if valid := processMovePiece(&payload, gameMap, p2, p1); !valid {
 					gameOver <- true
 					return
 				}
 				isPlayerRedTurn = true
 			} else if payload.GetCapturePayload() != nil {
-				//if MESSAGE TYPE == "capture"
-				//log.Println("capture", payload.GetCapturePayload().String())
+				// MESSAGE_TYPE == "capture"
+				// log.Println("capture", payload.GetCapturePayload().String())
 				isKingBefore := getKingStatusBefore(payload.GetCapturePayload(), gameMap)
-				valid := processCapturePiece(&payload, gameMap, p2, p1)
-				if !valid {
+				if valid := processCapturePiece(&payload, gameMap, p2, p1); !valid {
 					gameOver <- true
 					return
 				}
@@ -153,7 +154,7 @@ func StartMatch(p1 *player.Player, p2 *player.Player, gameOver chan<- bool) {
 					gameOver <- true
 					return
 				}
-				//check for extra opportunities for P2. if NONE, toggle turns
+				// check for extra opportunities for P2. if NONE, toggle turns
 				isKingNow := getKingStatusAfter(payload.GetCapturePayload(), gameMap)
 				currentCell := payload.GetCapturePayload().Destination.CellIndex
 				var needCheck bool = isKingBefore == isKingNow
