@@ -40,7 +40,7 @@ func StartMatch(p1 *player.Player, p2 *player.Player, gameOver chan<- bool) {
 		},
 	})
 
-	var isPlayerRedTurn = true            // Who turn is it now? RED always starts.
+	var isPlayerRedTurn = true            // Whose turn is it now? RED always starts.
 	var gameMap = generateGameMap(p1, p2) // map of cell index --> pieces.
 
 	// cleanup after match ends
@@ -51,7 +51,7 @@ func StartMatch(p1 *player.Player, p2 *player.Player, gameOver chan<- bool) {
 		p2.Pieces = nil
 	}()
 
-	//START GAME MAIN LOOP
+	// MAIN GAME LOOP (each player has MAX 40 sec to respond)
 	for {
 		if isPlayerRedTurn {
 			// ============= IT'S PLAYER 1 (RED's) TURN =============//
@@ -78,7 +78,7 @@ func StartMatch(p1 *player.Player, p2 *player.Player, gameOver chan<- bool) {
 				return
 			}
 
-			// if MESSAGE_TYPE == "move"
+			// MESSAGE_TYPE == "move"
 			if payload.GetMovePayload() != nil {
 				//log.Println("move", payload.GetMovePayload().String())
 				if valid := processMovePiece(&payload, gameMap, p1, p2); !valid {
@@ -133,7 +133,7 @@ func StartMatch(p1 *player.Player, p2 *player.Player, gameOver chan<- bool) {
 				return
 			}
 
-			// if MESSAGE_TYPE == "move"
+			// MESSAGE_TYPE == "move"
 			if payload.GetMovePayload() != nil {
 				//log.Println("move", payload.GetMovePayload().String())
 				if valid := processMovePiece(&payload, gameMap, p2, p1); !valid {

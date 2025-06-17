@@ -32,7 +32,7 @@ func processCapturePiece(basePayload *game.BasePayload, gameMap map[int32]*game.
 	preyPieceId := capturePayload.GetDetails().GetPreyPieceId()
 	opponent.LosePiece(preyPieceId)
 	opponent.SendMessage(basePayload)
-	return true
+	return success
 }
 
 // validateCapture when player `p` attacks by opponent's piece, AND then updates gameMap. returns TRUE if success
@@ -76,5 +76,5 @@ func validateCapture(captureReq *game.CapturePayload, gameMap map[int32]*game.Pi
 	delete(gameMap, hunterSrc)                           // set hunter's old location empty!
 	delete(gameMap, preyCellIdx)                         // set Prey's old location empty!
 	gameMap[destination.GetCellIndex()] = hunterPiecePtr // move hunter to new location
-	return true
+	return success
 }

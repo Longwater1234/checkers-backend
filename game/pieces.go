@@ -88,7 +88,7 @@ func IsAwayFromEdge(pos *Vec2) bool {
 	return pos.X > 0 && pos.X < 7*SIZE_CELL && pos.Y > 0 && pos.Y < 7*SIZE_CELL
 }
 
-// HasWinner returns TRUE if player `p` has won the match against `opponent`, then notifies both players.
+// HasWinner returns TRUE if player `p` has beaten `opponent`, which then notifies both players.
 func HasWinner(p *player.Player, opponent *player.Player) bool {
 	if len(opponent.Pieces) == 0 {
 		// Meaning `opponent` has lost, `p` has won! Game over
