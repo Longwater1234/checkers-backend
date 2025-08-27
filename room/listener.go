@@ -10,7 +10,7 @@ import (
 
 const serverVersion = "1.0.13"
 
-// Keep Listening for new players joining lobby. Then forward a pair to new match room
+// ListenForJoins of new players entering lobby. Then forward a pair to new match room
 func ListenForJoins(lobby <-chan *player.Player) {
 	for {
 		//welcome 1st player
