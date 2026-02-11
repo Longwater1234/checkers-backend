@@ -52,7 +52,7 @@ func validateAndUpdateMap(payload *game.MovePayload, gameMap map[int32]*game.Pie
 		return false
 	}
 
-	success := piecePtr.MoveSimple(&game.Vec2{
+	success := piecePtr.MoveSimple(game.Vec2{
 		X: destination.GetX(),
 		Y: destination.GetY(),
 	})

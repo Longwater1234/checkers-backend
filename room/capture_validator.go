@@ -65,7 +65,7 @@ func validateCapture(captureReq *game.CapturePayload, gameMap map[int32]*game.Pi
 		return false
 	}
 
-	success := hunterPiecePtr.MoveCapture(&game.Vec2{
+	success := hunterPiecePtr.MoveCapture(game.Vec2{
 		X: destination.GetX(),
 		Y: destination.GetY(),
 	})

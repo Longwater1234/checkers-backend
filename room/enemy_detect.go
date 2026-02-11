@@ -58,7 +58,7 @@ func collectFrontLHS(p *player.Player, cellIdx int32, gameMap map[int32]*game.Pi
 
 	pieceAhead, existFront := gameMap[cellAheadIdx] // north-west (of hunter)
 	hasEnemyAhead = existFront && !p.HasThisPiece(pieceAhead.Id)
-	if existFront && !game.IsAwayFromEdge(&pieceAhead.Pos) {
+	if existFront && !game.IsAwayFromEdge(pieceAhead.Pos) {
 		return false
 	}
 
@@ -104,7 +104,7 @@ func collectFrontRHS(p *player.Player, cellIdx int32, gameMap map[int32]*game.Pi
 
 	pieceAhead, existFront := gameMap[cellAheadIdx] // north-east of hunter
 	hasEnemyAhead = existFront && !p.HasThisPiece(pieceAhead.Id)
-	if existFront && !game.IsAwayFromEdge(&pieceAhead.Pos) {
+	if existFront && !game.IsAwayFromEdge(pieceAhead.Pos) {
 		return false
 	}
 
@@ -150,7 +150,7 @@ func collectBehindRHS(king *player.Player, cellIdx int32, gameMap map[int32]*gam
 
 	pieceAhead, existFront := gameMap[cellAheadIdx] // north-west (when facing behind)
 	hasEnemyAhead = existFront && !king.HasThisPiece(pieceAhead.Id)
-	if existFront && !game.IsAwayFromEdge(&pieceAhead.Pos) {
+	if existFront && !game.IsAwayFromEdge(pieceAhead.Pos) {
 		return false
 	}
 
@@ -196,7 +196,7 @@ func collectBehindLHS(king *player.Player, cellIdx int32, gameMap map[int32]*gam
 
 	pieceAhead, existFront := gameMap[cellAheadIdx] // north-east (when facing behind)
 	hasEnemyAhead = existFront && !king.HasThisPiece(pieceAhead.Id)
-	if existFront && !game.IsAwayFromEdge(&pieceAhead.Pos) {
+	if existFront && !game.IsAwayFromEdge(pieceAhead.Pos) {
 		return false
 	}
 
