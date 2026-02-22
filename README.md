@@ -6,7 +6,7 @@ You can self-host this server locally, or in the Cloud, for use with the game cl
 
 ## Requirements
 
-- Golang 1.24 or newer. Get it from [official site](https://go.dev/dl/)
+- Golang 1.25 or newer. Get it from [official site](https://go.dev/dl/)
 
 ## How to build
 
