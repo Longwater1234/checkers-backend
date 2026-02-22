@@ -50,6 +50,25 @@ func StartMatch(p1 *player.Player, p2 *player.Player, gameOver chan<- bool) {
 	for {
 		if isPlayerRedTurn {
 			// ============= IT'S PLAYER 1 (RED's) TURN =============//
+			if !hasAnyPossibleMoves(p1, gameMap) {
+				log.Println(p1.Name, "has no possible moves. BLACK wins!")
+				winner := game.TeamColor_TEAM_BLACK
+				p2.SendMessage(&game.BasePayload{
+					Notice: "Opponent has no moves! You win! GAME OVER",
+					Inner: &game.BasePayload_WinlosePayload{
+						WinlosePayload: &game.WinLosePayload{Winner: winner},
+					},
+				})
+				p1.SendMessage(&game.BasePayload{
+					Notice: "You have no possible moves! You lose! GAME OVER",
+					Inner: &game.BasePayload_WinlosePayload{
+						WinlosePayload: &game.WinLosePayload{Winner: winner},
+					},
+				})
+				time.Sleep(3 * time.Second)
+				gameOver <- true
+				return
+			}
 			var rawBytes []byte
 			p1.Conn.SetReadDeadline(time.Now().Add(time.Second * 30))
 			if err := websocket.Message.Receive(p1.Conn, &rawBytes); err != nil {
@@ -105,6 +124,25 @@ func StartMatch(p1 *player.Player, p2 *player.Player, gameOver chan<- bool) {
 			}
 		} else if !isPlayerRedTurn {
 			// ============= IT'S PLAYER 2 (BLACK's) TURN =============//
+			if !hasAnyPossibleMoves(p2, gameMap) {
+				log.Println(p2.Name, "has no possible moves. RED wins!")
+				winner := game.TeamColor_TEAM_RED
+				p1.SendMessage(&game.BasePayload{
+					Notice: "Opponent has no moves! You win! GAME OVER",
+					Inner: &game.BasePayload_WinlosePayload{
+						WinlosePayload: &game.WinLosePayload{Winner: winner},
+					},
+				})
+				p2.SendMessage(&game.BasePayload{
+					Notice: "You have no possible moves! You lose! GAME OVER",
+					Inner: &game.BasePayload_WinlosePayload{
+						WinlosePayload: &game.WinLosePayload{Winner: winner},
+					},
+				})
+				time.Sleep(3 * time.Second)
+				gameOver <- true
+				return
+			}
 			var rawBytes []byte
 			p2.Conn.SetReadDeadline(time.Now().Add(time.Second * 30))
 			if err := websocket.Message.Receive(p2.Conn, &rawBytes); err != nil {

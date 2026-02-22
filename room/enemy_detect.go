@@ -164,6 +164,153 @@ func collectBehindRHS(king *player.Player, cellIdx int32, gameMap map[int32]*gam
 	return hasEnemyAhead && enemyOpenBehind
 }
 
+// hasAnyPossibleMoves returns TRUE if player `p` has at least one valid move (simple or capture) across ALL their pieces.
+// Call this BEFORE waiting for a player's move to detect a blocked/no-moves situation.
+func hasAnyPossibleMoves(p *player.Player, gameMap map[int32]*game.Piece) bool {
+	for cellIdx, piece := range gameMap {
+		if !p.HasThisPiece(piece.Id) {
+			continue
+		}
+		if canSimpleMoveFrontLHS(p, cellIdx, gameMap) || canSimpleMoveFrontRHS(p, cellIdx, gameMap) {
+			return true
+		}
+		if piece.IsKing {
+			if canSimpleMoveBackLHS(p, cellIdx, gameMap) || canSimpleMoveBackRHS(p, cellIdx, gameMap) {
+				return true
+			}
+		}
+		if collectFrontLHS(p, cellIdx, gameMap) || collectFrontRHS(p, cellIdx, gameMap) {
+			return true
+		}
+		if piece.IsKing {
+			if collectBehindLHS(p, cellIdx, gameMap) || collectBehindRHS(p, cellIdx, gameMap) {
+				return true
+			}
+		}
+	}
+	return false
+}
+
+// canSimpleMoveFrontLHS returns true if piece at cellIdx can make a simple 1-step move to the front-left diagonal
+func canSimpleMoveFrontLHS(p *player.Player, cellIdx int32, gameMap map[int32]*game.Piece) bool {
+	piecePtr := gameMap[cellIdx]
+	if p.Name == game.TeamColor_TEAM_RED.String() && piecePtr.Pos.X == 0 {
+		return false
+	}
+	if p.Name == game.TeamColor_TEAM_BLACK.String() && piecePtr.Pos.X >= 7*game.SIZE_CELL {
+		return false
+	}
+	var deltaForward int32 = 5
+	if game.IsEvenCellRow(cellIdx) {
+		deltaForward = 4
+	}
+	direction := int32(+1)
+	if p.Name == game.TeamColor_TEAM_BLACK.String() {
+		direction = -1
+		if game.IsEvenCellRow(cellIdx) {
+			deltaForward = 5
+		} else {
+			deltaForward = 4
+		}
+	}
+	cellAheadIdx := cellIdx + (deltaForward * direction)
+	if cellAheadIdx > 32 || cellAheadIdx < 1 {
+		return false
+	}
+	_, exists := gameMap[cellAheadIdx]
+	return !exists
+}
+
+// canSimpleMoveFrontRHS returns true if piece at cellIdx can make a simple 1-step move to the front-right diagonal
+func canSimpleMoveFrontRHS(p *player.Player, cellIdx int32, gameMap map[int32]*game.Piece) bool {
+	piecePtr := gameMap[cellIdx]
+	if p.Name == game.TeamColor_TEAM_RED.String() && piecePtr.Pos.X >= 7*game.SIZE_CELL {
+		return false
+	}
+	if p.Name == game.TeamColor_TEAM_BLACK.String() && piecePtr.Pos.X == 0 {
+		return false
+	}
+	var deltaForward int32 = 4
+	if game.IsEvenCellRow(cellIdx) {
+		deltaForward = 3
+	}
+	direction := int32(+1)
+	if p.Name == game.TeamColor_TEAM_BLACK.String() {
+		direction = -1
+		if game.IsEvenCellRow(cellIdx) {
+			deltaForward = 4
+		} else {
+			deltaForward = 3
+		}
+	}
+	cellAheadIdx := cellIdx + (deltaForward * direction)
+	if cellAheadIdx > 32 || cellAheadIdx < 1 {
+		return false
+	}
+	_, exists := gameMap[cellAheadIdx]
+	return !exists
+}
+
+// canSimpleMoveBackLHS returns true if King piece at cellIdx can make a simple 1-step backward move to back-left diagonal
+func canSimpleMoveBackLHS(king *player.Player, cellIdx int32, gameMap map[int32]*game.Piece) bool {
+	piecePtr := gameMap[cellIdx]
+	if king.Name == game.TeamColor_TEAM_RED.String() && piecePtr.Pos.X > 7*game.SIZE_CELL {
+		return false
+	}
+	if king.Name == game.TeamColor_TEAM_BLACK.String() && piecePtr.Pos.X == 0 {
+		return false
+	}
+	var deltaForward int32 = 3
+	if game.IsEvenCellRow(cellIdx) {
+		deltaForward = 4
+	}
+	direction := int32(+1)
+	if king.Name == game.TeamColor_TEAM_BLACK.String() {
+		direction = -1
+		if game.IsEvenCellRow(cellIdx) {
+			deltaForward = 3
+		} else {
+			deltaForward = 4
+		}
+	}
+	cellBehindIdx := cellIdx - (deltaForward * direction)
+	if cellBehindIdx > 32 || cellBehindIdx < 1 {
+		return false
+	}
+	_, exists := gameMap[cellBehindIdx]
+	return !exists
+}
+
+// canSimpleMoveBackRHS returns true if King piece at cellIdx can make a simple 1-step backward move to back-right diagonal
+func canSimpleMoveBackRHS(king *player.Player, cellIdx int32, gameMap map[int32]*game.Piece) bool {
+	piecePtr := gameMap[cellIdx]
+	if king.Name == game.TeamColor_TEAM_RED.String() && piecePtr.Pos.X == 0 {
+		return false
+	}
+	if king.Name == game.TeamColor_TEAM_BLACK.String() && piecePtr.Pos.X > 7*game.SIZE_CELL {
+		return false
+	}
+	var deltaForward int32 = 4
+	if game.IsEvenCellRow(cellIdx) {
+		deltaForward = 5
+	}
+	direction := int32(+1)
+	if king.Name == game.TeamColor_TEAM_BLACK.String() {
+		direction = -1
+		if game.IsEvenCellRow(cellIdx) {
+			deltaForward = 4
+		} else {
+			deltaForward = 5
+		}
+	}
+	cellBehindIdx := cellIdx - (deltaForward * direction)
+	if cellBehindIdx > 32 || cellBehindIdx < 1 {
+		return false
+	}
+	_, exists := gameMap[cellBehindIdx]
+	return !exists
+}
+
 // collectBehindLHS returns true ONLY IF there is an enemy on SOUTH WEST of player. Only for KING pieces
 func collectBehindLHS(king *player.Player, cellIdx int32, gameMap map[int32]*game.Piece) bool {
 	piecePtr := gameMap[cellIdx]
