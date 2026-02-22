@@ -99,7 +99,7 @@ func StartMatch(p1 *player.Player, p2 *player.Player, gameOver chan<- bool) {
 					return
 				}
 				isKingNow := getKingStatusAfter(payload.GetCapturePayload(), gameMap)
-				currentCell := payload.GetCapturePayload().Destination.CellIndex
+				currentCell := payload.GetCapturePayload().GetDestination().GetCellIndex()
 				var needCheck bool = isKingBefore == isKingNow
 				// CHECK for extra opportunities for P1. if none, toggle turns
 				if needCheck && hasExtraTargets(p1, currentCell, gameMap) {
@@ -156,7 +156,7 @@ func StartMatch(p1 *player.Player, p2 *player.Player, gameOver chan<- bool) {
 				}
 				// check for extra opportunities for P2. if NONE, toggle turns
 				isKingNow := getKingStatusAfter(payload.GetCapturePayload(), gameMap)
-				currentCell := payload.GetCapturePayload().Destination.CellIndex
+				currentCell := payload.GetCapturePayload().GetDestination().GetCellIndex()
 				var needCheck bool = isKingBefore == isKingNow
 				if needCheck && hasExtraTargets(p2, currentCell, gameMap) {
 					log.Println(p2.Name, " has extra targets!")
