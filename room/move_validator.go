@@ -47,7 +47,7 @@ func validateAndUpdateMap(payload *game.MovePayload, gameMap map[int32]*game.Pie
 	}
 
 	// check whether destCell already has a Piece
-	_, hasValue := gameMap[destination.CellIndex]
+	_, hasValue := gameMap[destination.GetCellIndex()]
 	if hasValue {
 		return false
 	}
