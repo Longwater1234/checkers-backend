@@ -28,7 +28,7 @@ type Piece struct {
 }
 
 // MoveSimple does move this piece diagonally to given destination by 1 cell. Returns TRUE if successful
-func (p *Piece) MoveSimple(dest *Vec2) bool {
+func (p *Piece) MoveSimple(dest Vec2) bool {
 	var deltaX = float64(dest.X - p.Pos.X)
 	var deltaY = float64(dest.Y - p.Pos.Y)
 
@@ -53,7 +53,7 @@ func (p *Piece) MoveSimple(dest *Vec2) bool {
 }
 
 // MoveCapture (when attacking) moves this piece diagonally by 2 cells to the given `destination`. Returns TRUE if success
-func (p *Piece) MoveCapture(dest *Vec2) bool {
+func (p *Piece) MoveCapture(dest Vec2) bool {
 	var deltaX = float64(dest.X - p.Pos.X)
 	var deltaY = float64(dest.Y - p.Pos.Y)
 
@@ -84,19 +84,23 @@ func IsEvenCellRow(cellIdx int32) bool {
 }
 
 // IsAwayFromEdge returns TRUE if given position is NOT on any edge of board
-func IsAwayFromEdge(pos *Vec2) bool {
+func IsAwayFromEdge(pos Vec2) bool {
 	return pos.X > 0 && pos.X < 7*SIZE_CELL && pos.Y > 0 && pos.Y < 7*SIZE_CELL
 }
 
-// HasWinner returns TRUE if player `p` has beaten `opponent`, which then notifies both players.
+// HasWinner returns TRUE if player `p` has beaten `opponent`, and then notifies both players.
 func HasWinner(p *player.Player, opponent *player.Player) bool {
 	if len(opponent.Pieces) == 0 {
 		// Meaning `opponent` has lost, `p` has won! Game over
+		var winner TeamColor = TeamColor_TEAM_RED
+		if p.Name == TeamColor_TEAM_BLACK.String() {
+			winner = TeamColor_TEAM_BLACK
+		}
 		p.SendMessage(&BasePayload{
 			Notice: "Congrats! You won! GAME OVER",
 			Inner: &BasePayload_WinlosePayload{
 				WinlosePayload: &WinLosePayload{
-					Winner: TeamColor_TEAM_UNSPECIFIED,
+					Winner: winner,
 				},
 			},
 		})
@@ -104,7 +108,7 @@ func HasWinner(p *player.Player, opponent *player.Player) bool {
 			Notice: "Sorry! You lost! GAME OVER",
 			Inner: &BasePayload_WinlosePayload{
 				WinlosePayload: &WinLosePayload{
-					Winner: TeamColor_TEAM_UNSPECIFIED,
+					Winner: winner,
 				},
 			},
 		})
