@@ -49,8 +49,8 @@ func validateCapture(captureReq *game.CapturePayload, gameMap map[int32]*game.Pi
 		return false
 	}
 
-	preyPieceId := captureReq.GetDetails().PreyPieceId
-	preyCellIdx := captureReq.GetDetails().PreyCellIdx
+	preyPieceId := captureReq.GetDetails().GetPreyCellIdx()
+	preyCellIdx := captureReq.GetDetails().GetPreyCellIdx()
 
 	//check Prey params
 	preyPiecePtr, exists := gameMap[preyCellIdx]
