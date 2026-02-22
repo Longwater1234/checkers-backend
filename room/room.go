@@ -20,24 +20,19 @@ func StartMatch(p1 *player.Player, p2 *player.Player, gameOver chan<- bool) {
 		log.Panic("cannot generate pieces", errx)
 	}
 
+	startPayload := &game.StartPayload{
+		PiecesRed:   p1.Pieces,
+		PiecesBlack: p2.Pieces,
+	}
+
 	p1.SendMessage(&game.BasePayload{
 		Notice: "Opponent joined. Make your first move!",
-		Inner: &game.BasePayload_Start{
-			Start: &game.StartPayload{
-				PiecesRed:   p1.Pieces,
-				PiecesBlack: p2.Pieces,
-			},
-		},
+		Inner:  &game.BasePayload_Start{Start: startPayload},
 	})
 
 	p2.SendMessage(&game.BasePayload{
 		Notice: "Match has begun. Waiting for RED to move!",
-		Inner: &game.BasePayload_Start{
-			Start: &game.StartPayload{
-				PiecesRed:   p1.Pieces,
-				PiecesBlack: p2.Pieces,
-			},
-		},
+		Inner:  &game.BasePayload_Start{Start: startPayload},
 	})
 
 	var isPlayerRedTurn = true            // Whose turn is it now? RED always starts.
