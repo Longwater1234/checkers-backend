@@ -20,7 +20,20 @@ func StartMatch(p1 *player.Player, p2 *player.Player, gameOver chan<- bool) {
 		log.Panic("cannot generate pieces", errx)
 	}
 
-	notifyMatchStart(p1, p2)
+	startPayload := &game.StartPayload{
+		PiecesRed:   p1.Pieces,
+		PiecesBlack: p2.Pieces,
+	}
+
+	p1.SendMessage(&game.BasePayload{
+		Notice: "Opponent joined. Make your first move!",
+		Inner:  &game.BasePayload_Start{Start: startPayload},
+	})
+
+	p2.SendMessage(&game.BasePayload{
+		Notice: "Match has begun. Waiting for RED to move!",
+		Inner:  &game.BasePayload_Start{Start: startPayload},
+	})
 
 	var isPlayerRedTurn = true            // Whose turn is it now? RED always starts.
 	var gameMap = generateGameMap(p1, p2) // map of cell index --> pieces.
@@ -162,24 +175,6 @@ func getKingStatusBefore(capturePayload *game.CapturePayload, gameMap map[int32]
 	} else {
 		return piecePtr.IsKing
 	}
-}
-
-// notifyMatchStart sends the initial game state to both players.
-func notifyMatchStart(p1, p2 *player.Player) {
-	startPayload := &game.StartPayload{
-		PiecesRed:   p1.Pieces,
-		PiecesBlack: p2.Pieces,
-	}
-
-	p1.SendMessage(&game.BasePayload{
-		Notice: "Opponent joined. Make your first move!",
-		Inner:  &game.BasePayload_Start{Start: startPayload},
-	})
-
-	p2.SendMessage(&game.BasePayload{
-		Notice: "Match has begun. Waiting for RED to move!",
-		Inner:  &game.BasePayload_Start{Start: startPayload},
-	})
 }
 
 // getKingStatusAfter capturing opponent.  Returns TRUE if piece is King at destination Cell
