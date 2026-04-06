@@ -8,7 +8,7 @@ import (
 // processCapturePiece made by Player `p` against `opponent`. Returns TRUE if all is OK. Else returns FALSE.
 func processCapturePiece(basePayload *game.BasePayload, gameMap map[int32]*game.Piece, p, opponent *player.Player) bool {
 	capturePayload := basePayload.GetCapturePayload()
-	success := validateCapture(capturePayload, gameMap)
+	success := validateAndDoCapture(capturePayload, gameMap)
 	if !success {
 		p.SendMessage(&game.BasePayload{
 			Notice: "Illegal move!",
@@ -35,8 +35,8 @@ func processCapturePiece(basePayload *game.BasePayload, gameMap map[int32]*game.
 	return success
 }
 
-// validateCapture when player `p` attacks by opponent's piece, AND then updates gameMap. returns TRUE if success
-func validateCapture(captureReq *game.CapturePayload, gameMap map[int32]*game.Piece) bool {
+// validateAndDoCapture when player `p` attacks by opponent's piece. Returns TRUE if successful
+func validateAndDoCapture(captureReq *game.CapturePayload, gameMap map[int32]*game.Piece) bool {
 	if captureReq.GetDetails() == nil || captureReq.GetDestination() == nil {
 		return false
 	}
@@ -49,7 +49,7 @@ func validateCapture(captureReq *game.CapturePayload, gameMap map[int32]*game.Pi
 		return false
 	}
 
-	preyPieceId := captureReq.GetDetails().GetPreyCellIdx()
+	preyPieceId := captureReq.GetDetails().GetPreyPieceId()
 	preyCellIdx := captureReq.GetDetails().GetPreyCellIdx()
 
 	//check Prey params
