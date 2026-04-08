@@ -35,7 +35,7 @@ func processCapturePiece(basePayload *game.BasePayload, gameMap map[int32]*game.
 	return success
 }
 
-// validateAndDoCapture when player `p` attacks by opponent's piece. Returns TRUE if successful
+// validateAndDoCapture when player `p` attacks opponent's piece. Returns TRUE if successful
 func validateAndDoCapture(captureReq *game.CapturePayload, gameMap map[int32]*game.Piece) bool {
 	if captureReq.GetDetails() == nil || captureReq.GetDestination() == nil {
 		return false

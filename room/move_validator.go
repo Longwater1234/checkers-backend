@@ -32,7 +32,7 @@ func processMovePiece(payload *game.BasePayload, gameMap map[int32]*game.Piece, 
 	return success
 }
 
-// validateAndUpdateMap after player's "MOVE" and update gameMap. Returns TRUE only if all is ok.
+// validateAndUpdateMap after player's piece MOVES and update gameMap. Returns TRUE only if successful
 func validateAndUpdateMap(payload *game.MovePayload, gameMap map[int32]*game.Piece) bool {
 	destination := payload.GetDestination()
 	if destination == nil {
