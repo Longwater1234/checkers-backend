@@ -35,120 +35,71 @@ func StartMatch(p1 *player.Player, p2 *player.Player, gameOver chan<- bool) {
 
 	// MAIN GAME LOOP (each player has MAX 30 sec to respond)
 	for {
-		if isPlayerRedTurn {
-			// ============= IT'S PLAYER 1 (RED's) TURN =============//
-			var rawBytes []byte
-			p1.Conn.SetReadDeadline(time.Now().Add(time.Second * 30))
-			if err := websocket.Message.Receive(p1.Conn, &rawBytes); err != nil {
-				log.Println(p1.Name, "disconnected. Cause:", err)
-				p2.SendMessage(&game.BasePayload{
-					Notice: "Opponent has left the game!",
-					Inner: &game.BasePayload_ExitPayload{
-						ExitPayload: &game.ExitPayload{
-							FromTeam: game.TeamColor_TEAM_RED,
-						},
+		current, opponent := p1, p2
+		if !isPlayerRedTurn {
+			current, opponent = p2, p1
+		}
+		// which team triggered the exit
+		fromTeam := game.TeamColor_TEAM_RED
+		if current.Name == game.TeamColor_TEAM_BLACK.String() {
+			fromTeam = game.TeamColor_TEAM_BLACK
+		}
+		// read from connection
+		var rawBytes []byte
+		current.Conn.SetReadDeadline(time.Now().Add(30 * time.Second))
+		if err := websocket.Message.Receive(current.Conn, &rawBytes); err != nil {
+			log.Println(current.Name, "disconnected. Cause:", err)
+			opponent.SendMessage(&game.BasePayload{
+				Notice: "Opponent has left the game!",
+				Inner: &game.BasePayload_ExitPayload{
+					ExitPayload: &game.ExitPayload{
+						FromTeam: fromTeam,
 					},
-				})
+				},
+			})
+			gameOver <- true
+			return
+		}
+
+		var payload game.BasePayload
+		if err := proto.Unmarshal(rawBytes, &payload); err != nil {
+			log.Println("failed to parse protobuf", err)
+			gameOver <- true
+			return
+		}
+
+		if payload.GetMovePayload() != nil {
+			// ============== MESSAGE_TYPE :: "move" ==================== //
+			if valid := processMovePiece(&payload, gameMap, current, opponent); !valid {
 				gameOver <- true
 				return
 			}
-
-			var payload game.BasePayload
-			if err := proto.Unmarshal(rawBytes, &payload); err != nil {
-				log.Println("failed to parse protobuf", err)
+			isPlayerRedTurn = !isPlayerRedTurn
+		} else if payload.GetCapturePayload() != nil {
+			// ============== MESSAGE_TYPE :: "capture" ==================== //
+			capture := payload.GetCapturePayload()
+			isKingBefore := getKingStatusBefore(capture, gameMap)
+			if valid := processCapturePiece(&payload, gameMap, current, opponent); !valid {
 				gameOver <- true
 				return
 			}
-
-			// MESSAGE_TYPE == "move"
-			if payload.GetMovePayload() != nil {
-				//log.Println("move", payload.GetMovePayload().String())
-				if valid := processMovePiece(&payload, gameMap, p1, p2); !valid {
-					gameOver <- true
-					return
-				}
-				isPlayerRedTurn = false
-			} else if payload.GetCapturePayload() != nil {
-				// MESSAGE_TYPE == "capture"
-				isKingBefore := getKingStatusBefore(payload.GetCapturePayload(), gameMap)
-				if valid := processCapturePiece(&payload, gameMap, p1, p2); !valid {
-					gameOver <- true
-					return
-				}
-				if game.HasWinner(p1, p2) {
-					time.Sleep(3 * time.Second)
-					gameOver <- true
-					return
-				}
-				isKingNow := getKingStatusAfter(payload.GetCapturePayload(), gameMap)
-				currentCell := payload.GetCapturePayload().GetDestination().GetCellIndex()
-				var needCheck bool = isKingBefore == isKingNow
-				// CHECK for extra opportunities for P1. if none, toggle turns
-				if needCheck && hasExtraTargets(p1, currentCell, gameMap) {
-					log.Println(p1.Name, " has extra targets!")
-					continue
-				}
-				isPlayerRedTurn = false
-			}
-		} else if !isPlayerRedTurn {
-			// ============= IT'S PLAYER 2 (BLACK's) TURN =============//
-			var rawBytes []byte
-			p2.Conn.SetReadDeadline(time.Now().Add(time.Second * 30))
-			if err := websocket.Message.Receive(p2.Conn, &rawBytes); err != nil {
-				log.Println(p2.Name, "disconnected. Cause:", err.Error())
-				p1.SendMessage(&game.BasePayload{
-					Notice: "Opponent has left the game!",
-					Inner: &game.BasePayload_ExitPayload{
-						ExitPayload: &game.ExitPayload{
-							FromTeam: game.TeamColor_TEAM_BLACK,
-						},
-					},
-				})
+			if game.HasWinner(current, opponent) {
+				time.Sleep(3 * time.Second)
 				gameOver <- true
 				return
 			}
-
-			var payload game.BasePayload
-			if err := proto.Unmarshal(rawBytes, &payload); err != nil {
-				log.Println("failed to parse protobuf", err)
-				gameOver <- true
-				return
+			isKingNow := getKingStatusAfter(capture, gameMap)
+			currentCell := capture.GetDestination().GetCellIndex()
+			var needCheck bool = isKingBefore == isKingNow
+			if needCheck && hasExtraTargets(current, currentCell, gameMap) {
+				log.Println(current.Name, "has extra targets!")
+				continue
 			}
-
-			// MESSAGE_TYPE == "move"
-			if payload.GetMovePayload() != nil {
-				//log.Println("move", payload.GetMovePayload().String())
-				if valid := processMovePiece(&payload, gameMap, p2, p1); !valid {
-					gameOver <- true
-					return
-				}
-				isPlayerRedTurn = true
-			} else if payload.GetCapturePayload() != nil {
-				// MESSAGE_TYPE == "capture"
-				// log.Println("capture", payload.GetCapturePayload().String())
-				isKingBefore := getKingStatusBefore(payload.GetCapturePayload(), gameMap)
-				if valid := processCapturePiece(&payload, gameMap, p2, p1); !valid {
-					gameOver <- true
-					return
-				}
-				if game.HasWinner(p2, p1) {
-					time.Sleep(3 * time.Second)
-					gameOver <- true
-					return
-				}
-				// check for extra opportunities for P2. if NONE, toggle turns
-				isKingNow := getKingStatusAfter(payload.GetCapturePayload(), gameMap)
-				currentCell := payload.GetCapturePayload().GetDestination().GetCellIndex()
-				var needCheck bool = isKingBefore == isKingNow
-				if needCheck && hasExtraTargets(p2, currentCell, gameMap) {
-					log.Println(p2.Name, " has extra targets!")
-					continue
-				}
-				isPlayerRedTurn = true
-			}
-			// ... return to top
+			isPlayerRedTurn = !isPlayerRedTurn
+			// ... RETURN TO TOP^
 		}
 	}
+
 }
 
 // notifyMatchStart to both players, and distribute their pieces
