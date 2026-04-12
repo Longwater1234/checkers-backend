@@ -35,20 +35,22 @@ func StartMatch(p1 *player.Player, p2 *player.Player, gameOver chan<- bool) {
 
 	// MAIN GAME LOOP (each player has MAX 30 sec to respond)
 	for {
-		current, opponent := p1, p2
+		hunter, opponent := p1, p2
 		if !isPlayerRedTurn {
-			current, opponent = p2, p1
+			hunter, opponent = p2, p1
 		}
+
 		// which team triggered the exit
 		fromTeam := game.TeamColor_TEAM_RED
-		if current.Name == game.TeamColor_TEAM_BLACK.String() {
+		if hunter.Name == game.TeamColor_TEAM_BLACK.String() {
 			fromTeam = game.TeamColor_TEAM_BLACK
 		}
+
 		// read from connection
 		var rawBytes []byte
-		current.Conn.SetReadDeadline(time.Now().Add(30 * time.Second))
-		if err := websocket.Message.Receive(current.Conn, &rawBytes); err != nil {
-			log.Println(current.Name, "disconnected. Cause:", err)
+		hunter.Conn.SetReadDeadline(time.Now().Add(30 * time.Second))
+		if err := websocket.Message.Receive(hunter.Conn, &rawBytes); err != nil {
+			log.Println(hunter.Name, "disconnected. Cause:", err)
 			opponent.SendMessage(&game.BasePayload{
 				Notice: "Opponent has left the game!",
 				Inner: &game.BasePayload_ExitPayload{
@@ -70,7 +72,7 @@ func StartMatch(p1 *player.Player, p2 *player.Player, gameOver chan<- bool) {
 
 		if payload.GetMovePayload() != nil {
 			// ============== MESSAGE_TYPE :: "move" ==================== //
-			if valid := processMovePiece(&payload, gameMap, current, opponent); !valid {
+			if valid := processMovePiece(&payload, gameMap, hunter, opponent); !valid {
 				gameOver <- true
 				return
 			}
@@ -79,11 +81,11 @@ func StartMatch(p1 *player.Player, p2 *player.Player, gameOver chan<- bool) {
 			// ============== MESSAGE_TYPE :: "capture" ==================== //
 			capture := payload.GetCapturePayload()
 			isKingBefore := getKingStatusBefore(capture, gameMap)
-			if valid := processCapturePiece(&payload, gameMap, current, opponent); !valid {
+			if valid := processCapturePiece(&payload, gameMap, hunter, opponent); !valid {
 				gameOver <- true
 				return
 			}
-			if game.HasWinner(current, opponent) {
+			if game.HasWinner(hunter, opponent) {
 				time.Sleep(3 * time.Second)
 				gameOver <- true
 				return
@@ -91,8 +93,8 @@ func StartMatch(p1 *player.Player, p2 *player.Player, gameOver chan<- bool) {
 			isKingNow := getKingStatusAfter(capture, gameMap)
 			currentCell := capture.GetDestination().GetCellIndex()
 			var needCheck bool = isKingBefore == isKingNow
-			if needCheck && hasExtraTargets(current, currentCell, gameMap) {
-				log.Println(current.Name, "has extra targets!")
+			if needCheck && hasExtraTargets(hunter, currentCell, gameMap) {
+				log.Println(hunter.Name, "has extra targets!")
 				continue
 			}
 			isPlayerRedTurn = !isPlayerRedTurn
