@@ -14,6 +14,8 @@ const (
 	upperLimit int16 = math.MaxInt16 // piece ID max value (short_max)
 )
 
+var bigMax = big.NewInt(int64(upperLimit))
+
 // generateGameMap creates the hashmap of cell_index --> Piece. Should be called AFTER `generatePieces`
 func generateGameMap(p1 *player.Player, p2 *player.Player) map[int32]*game.Piece {
 	var gameMap = make(map[int32]*game.Piece, 24) // usable cell_idx -> piece
@@ -58,7 +60,6 @@ func generateGameMap(p1 *player.Player, p2 *player.Player) map[int32]*game.Piece
 
 // generatePieces using secure RNG for the two players. You MUST handle the error
 func generatePieces(p1 *player.Player, p2 *player.Player) error {
-	bigMax := big.NewInt(int64(upperLimit))
 	for i := range p1.Pieces {
 		val, err := rand.Int(rand.Reader, bigMax)
 		if err != nil {
