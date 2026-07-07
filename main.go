@@ -34,6 +34,9 @@ func main() {
 	})
 
 	http.Handle("/game", websocket.Handler(wsHandler))
+	http.HandleFunc("GET /players", func(w http.ResponseWriter, r *http.Request) {
+		fmt.Fprintf(w, "{\"count\": %d}", numPlayers.Load())
+	})
 
 	go room.ListenForJoins(lobby)
 	log.Println("Server listening at http://127.0.0.1:" + port)
@@ -45,7 +48,7 @@ func wsHandler(ws *websocket.Conn) {
 	ws.MaxPayloadBytes = maxRequestSize
 	defer ws.Close()
 
-	var clientIp = getPlayerIp(ws)
+	var clientIp = getRealPlayerIp(ws)
 	deadChan := make(chan bool, 1)
 	p := &player.Player{
 		Conn:   ws,
@@ -68,8 +71,8 @@ func wsHandler(ws *websocket.Conn) {
 	log.Println(p.Name, "just left the game. Total players:", numPlayers.Load())
 }
 
-// getPlayerIp address from websocket connection
-func getPlayerIp(ws *websocket.Conn) string {
+// getRealPlayerIp address from websocket connection
+func getRealPlayerIp(ws *websocket.Conn) string {
 	clientIP := ws.Request().Header.Get("X-Forwarded-For")
 	if clientIP == "" {
 		clientIP = ws.Request().Header.Get("X-Real-IP")
