@@ -29,8 +29,8 @@ func main() {
 	}
 	port := strconv.Itoa(portNum)
 
-	http.HandleFunc("/", func(writer http.ResponseWriter, r *http.Request) {
-		fmt.Fprintln(writer, `<p>This is a websocket server. Dial ws://{requestURI}/game </p>`)
+	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		fmt.Fprintln(w, `<p>This is a websocket server. Dial ws://{requestURI}/game </p>`)
 	})
 
 	http.Handle("/game", websocket.Handler(wsHandler))
