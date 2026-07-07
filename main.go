@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"os"
 	"strconv"
+	"strings"
 	"sync/atomic"
 
 	_ "net/http/pprof"
@@ -28,11 +29,14 @@ func main() {
 	}
 	port := strconv.Itoa(portNum)
 
-	http.HandleFunc("/", func(writer http.ResponseWriter, r *http.Request) {
-		fmt.Fprintln(writer, `<p>This is a websocket server. Dial ws://{requestURI}/game </p>`)
+	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		fmt.Fprintln(w, `<p>This is a websocket server. Dial ws://{requestURI}/game </p>`)
 	})
 
 	http.Handle("/game", websocket.Handler(wsHandler))
+	http.HandleFunc("GET /players", func(w http.ResponseWriter, r *http.Request) {
+		fmt.Fprintf(w, "{\"count\": %d}", numPlayers.Load())
+	})
 
 	go room.ListenForJoins(lobby)
 	log.Println("Server listening at http://127.0.0.1:" + port)
@@ -44,7 +48,7 @@ func wsHandler(ws *websocket.Conn) {
 	ws.MaxPayloadBytes = maxRequestSize
 	defer ws.Close()
 
-	var clientIp = ws.Request().RemoteAddr
+	var clientIp = getRealPlayerIp(ws)
 	deadChan := make(chan bool, 1)
 	p := &player.Player{
 		Conn:   ws,
@@ -65,4 +69,20 @@ func wsHandler(ws *websocket.Conn) {
 	<-deadChan                 // block until player exits
 	numPlayers.Add(^uint32(0)) // if player exits, minus 1
 	log.Println(p.Name, "just left the game. Total players:", numPlayers.Load())
+}
+
+// getRealPlayerIp address from websocket connection
+func getRealPlayerIp(ws *websocket.Conn) string {
+	clientIP := ws.Request().Header.Get("X-Forwarded-For")
+	if clientIP == "" {
+		clientIP = ws.Request().Header.Get("X-Real-IP")
+	}
+	if clientIP == "" {
+		clientIP = ws.Request().RemoteAddr
+	}
+
+	// just in case multiple ip's
+	ips := strings.Split(clientIP, ",")
+	clientIP = strings.TrimSpace(ips[0])
+	return clientIP
 }
