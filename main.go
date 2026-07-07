@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"os"
 	"strconv"
+	"strings"
 	"sync/atomic"
 
 	_ "net/http/pprof"
@@ -44,7 +45,7 @@ func wsHandler(ws *websocket.Conn) {
 	ws.MaxPayloadBytes = maxRequestSize
 	defer ws.Close()
 
-	var clientIp = ws.Request().RemoteAddr
+	var clientIp = getPlayerIp(ws)
 	deadChan := make(chan bool, 1)
 	p := &player.Player{
 		Conn:   ws,
@@ -65,4 +66,20 @@ func wsHandler(ws *websocket.Conn) {
 	<-deadChan                 // block until player exits
 	numPlayers.Add(^uint32(0)) // if player exits, minus 1
 	log.Println(p.Name, "just left the game. Total players:", numPlayers.Load())
+}
+
+// getPlayerIp address from websocket connection
+func getPlayerIp(ws *websocket.Conn) string {
+	clientIP := ws.Request().Header.Get("X-Forwarded-For")
+	if clientIP == "" {
+		clientIP = ws.Request().Header.Get("X-Real-IP")
+	}
+	if clientIP == "" {
+		clientIP = ws.Request().RemoteAddr
+	}
+
+	// just in case multiple ip's
+	ips := strings.Split(clientIP, ",")
+	clientIP = strings.TrimSpace(ips[0])
+	return clientIP
 }

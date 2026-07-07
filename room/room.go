@@ -101,7 +101,6 @@ func StartMatch(p1 *player.Player, p2 *player.Player, gameOver chan<- bool) {
 			// ... RETURN TO TOP^
 		}
 	}
-
 }
 
 // notifyMatchStart to both players, and distribute their pieces
