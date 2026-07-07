@@ -35,6 +35,7 @@ func main() {
 
 	http.Handle("/game", websocket.Handler(wsHandler))
 	http.HandleFunc("GET /players", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
 		fmt.Fprintf(w, "{\"count\": %d}", numPlayers.Load())
 	})
 
