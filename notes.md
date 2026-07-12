@@ -53,5 +53,5 @@ Here is layout of the game board as shown on the game client. The empty boxes ar
   |---------------------------------------|
 0 |  4 |    |  3 |    |  2 |    |  1 |    |
   +---------------------------------------+
-  
+
 ```
