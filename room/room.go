@@ -14,10 +14,10 @@ import (
 func StartMatch(p1 *player.Player, p2 *player.Player, gameOver chan<- bool) {
 	log.Println("🟢 Match has begun!")
 
-	//make random pieceId's for both players
-	if errx := generatePieces(p1, p2); errx != nil {
+	// make random pieceId's for both players
+	if errx := generatePieceIds(p1, p2); errx != nil {
 		gameOver <- true
-		log.Panic("cannot generate pieces", errx)
+		log.Panic("[ERROR] cannot generate random numbers", errx)
 	}
 
 	notifyMatchStart(p1, p2)
@@ -65,7 +65,7 @@ func StartMatch(p1 *player.Player, p2 *player.Player, gameOver chan<- bool) {
 
 		var payload game.BasePayload
 		if err := proto.Unmarshal(rawBytes, &payload); err != nil {
-			log.Println("failed to parse protobuf", err)
+			log.Println("[ERROR] failed to parse protobuf", err)
 			gameOver <- true
 			return
 		}
