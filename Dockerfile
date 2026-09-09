@@ -10,9 +10,10 @@ COPY go.mod go.sum ./
 RUN go mod download -x
 COPY . ./
 RUN go version
-RUN go build --ldflags="-s -w" -o checkers-backend
+RUN CGO_ENABLED=0 go build --ldflags="-s -w" -o checkers-backend
 
-FROM gcr.io/distroless/base-debian12 AS runner
+FROM alpine:latest AS runner
+RUN apk add --no-cache ca-certificates tzdata
 WORKDIR /app
 COPY --from=builder /app/checkers-backend /app
 EXPOSE 9876
