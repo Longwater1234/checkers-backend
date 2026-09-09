@@ -76,6 +76,11 @@ func StartMatch(p1 *player.Player, p2 *player.Player, gameOver chan<- bool) {
 				gameOver <- true
 				return
 			}
+			if game.HasWinner(hunter, opponent, gameMap) {
+				time.Sleep(3 * time.Second)
+				gameOver <- true
+				return
+			}
 			isPlayerRedTurn = !isPlayerRedTurn
 		} else if payload.GetCapturePayload() != nil {
 			// ============== MESSAGE_TYPE :: "capture" ==================== //
@@ -85,7 +90,7 @@ func StartMatch(p1 *player.Player, p2 *player.Player, gameOver chan<- bool) {
 				gameOver <- true
 				return
 			}
-			if game.HasWinner(hunter, opponent) {
+			if game.HasWinner(hunter, opponent, gameMap) {
 				time.Sleep(3 * time.Second)
 				gameOver <- true
 				return
