@@ -16,7 +16,7 @@ func ListenForJoins(lobby <-chan *player.Player) {
 		//welcome 1st player
 		p1 := <-lobby
 		var msgOne = &game.BasePayload{
-			Notice: "Connected. You are Team RED. Waiting for opponent...",
+			Notice: "Connected. You are Team RED. Waiting for opponent...(30 sec)",
 			Inner: &game.BasePayload_Welcome{
 				Welcome: &game.WelcomePayload{
 					MyTeam:        game.TeamColor_TEAM_RED,
@@ -58,7 +58,7 @@ func ListenForJoins(lobby <-chan *player.Player) {
 		case <-ctx.Done():
 			// timeout reached. No other player joined! Goodbye p1!
 			p1.SendMessage(&game.BasePayload{
-				Notice: "No other players at this moment. Try again later!",
+				Notice: "Timeout reached. No other players at this moment. Try again later!",
 				Inner: &game.BasePayload_ExitPayload{
 					ExitPayload: &game.ExitPayload{
 						FromTeam: game.TeamColor_TEAM_UNSPECIFIED,
