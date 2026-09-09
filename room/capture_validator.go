@@ -6,8 +6,8 @@ import (
 )
 
 // processCapturePiece made by Player `p` against `opponent`. Returns TRUE if all is OK. Else returns FALSE.
-func processCapturePiece(basePayload *game.BasePayload, gameMap map[int32]*game.Piece, p, opponent *player.Player) bool {
-	capturePayload := basePayload.GetCapturePayload()
+func processCapturePiece(request *game.BasePayload, gameMap map[int32]*game.Piece, p, opponent *player.Player) bool {
+	capturePayload := request.GetCapturePayload()
 	success := validateAndDoCapture(capturePayload, gameMap)
 	if !success {
 		p.SendMessage(&game.BasePayload{
@@ -28,10 +28,10 @@ func processCapturePiece(basePayload *game.BasePayload, gameMap map[int32]*game.
 		})
 		return false
 	}
-	//all is OK, Opponent loses 1 piece
+	// all is OK, Opponent loses 1 piece
 	preyPieceId := capturePayload.GetDetails().GetPreyPieceId()
 	opponent.LosePiece(preyPieceId)
-	opponent.SendMessage(basePayload)
+	opponent.SendMessage(request) // forward the original request to opponent
 	return success
 }
 

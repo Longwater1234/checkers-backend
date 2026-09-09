@@ -63,16 +63,16 @@ func StartMatch(p1 *player.Player, p2 *player.Player, gameOver chan<- bool) {
 			return
 		}
 
-		var payload game.BasePayload
-		if err := proto.Unmarshal(rawBytes, &payload); err != nil {
+		var request game.BasePayload
+		if err := proto.Unmarshal(rawBytes, &request); err != nil {
 			log.Println("[ERROR] failed to parse protobuf", err)
 			gameOver <- true
 			return
 		}
 
-		if payload.GetMovePayload() != nil {
+		if request.GetMovePayload() != nil {
 			// ============== MESSAGE_TYPE :: "move" ==================== //
-			if valid := processMovePiece(&payload, gameMap, hunter, opponent); !valid {
+			if valid := processMovePiece(&request, gameMap, hunter, opponent); !valid {
 				gameOver <- true
 				return
 			}
@@ -82,11 +82,11 @@ func StartMatch(p1 *player.Player, p2 *player.Player, gameOver chan<- bool) {
 				return
 			}
 			isPlayerRedTurn = !isPlayerRedTurn
-		} else if payload.GetCapturePayload() != nil {
+		} else if request.GetCapturePayload() != nil {
 			// ============== MESSAGE_TYPE :: "capture" ==================== //
-			capture := payload.GetCapturePayload()
+			capture := request.GetCapturePayload()
 			isKingBefore := getKingStatusBefore(capture, gameMap)
-			if valid := processCapturePiece(&payload, gameMap, hunter, opponent); !valid {
+			if valid := processCapturePiece(&request, gameMap, hunter, opponent); !valid {
 				gameOver <- true
 				return
 			}

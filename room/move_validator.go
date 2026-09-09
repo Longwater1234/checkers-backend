@@ -6,8 +6,8 @@ import (
 )
 
 // processMovePiece made by Player `p` against `opponent`. Returns TRUE only if all is OK.
-func processMovePiece(payload *game.BasePayload, gameMap map[int32]*game.Piece, p, opponent *player.Player) bool {
-	success := validateAndUpdateMap(payload.GetMovePayload(), gameMap)
+func processMovePiece(request *game.BasePayload, gameMap map[int32]*game.Piece, p, opponent *player.Player) bool {
+	success := validateAndUpdateMap(request.GetMovePayload(), gameMap)
 	if !success {
 		p.SendMessage(&game.BasePayload{
 			Notice: "Illegal move!",
@@ -27,19 +27,19 @@ func processMovePiece(payload *game.BasePayload, gameMap map[int32]*game.Piece, 
 		})
 		return false
 	}
-	// All is OK, forward the "MOVE" payload to opponent
-	opponent.SendMessage(payload)
+	// All is OK, forward the original request to opponent
+	opponent.SendMessage(request)
 	return success
 }
 
 // validateAndUpdateMap after player's piece MOVES and update gameMap. Returns TRUE only if successful
-func validateAndUpdateMap(payload *game.MovePayload, gameMap map[int32]*game.Piece) bool {
-	destination := payload.GetDestination()
+func validateAndUpdateMap(request *game.MovePayload, gameMap map[int32]*game.Piece) bool {
+	destination := request.GetDestination()
 	if destination == nil {
 		return false
 	}
-	srcCellIdx := payload.GetSourceCell()
-	movingPieceId := payload.GetPieceId()
+	srcCellIdx := request.GetSourceCell()
+	movingPieceId := request.GetPieceId()
 
 	piecePtr, exists := gameMap[srcCellIdx]
 	if !exists || movingPieceId != piecePtr.Id {
