@@ -66,7 +66,7 @@ func nextPlayerHasValidMoves(next *player.Player, gameMap map[int32]*Piece) bool
 		if piece == nil || !next.HasThisPiece(piece.Id) {
 			continue
 		}
-		if piece.canMoveLegally() {
+		if piece.canMoveLegally(gameMap) {
 			return true // Early exit, one is enough
 		}
 	}

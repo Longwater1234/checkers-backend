@@ -75,7 +75,7 @@ func (p *Piece) MoveCapture(dest Vec2) bool {
 	return true
 }
 
-// directions is an array of diagonal positions a [Piece] can legally move to.
+// directions is fixed array of possible positions a [Piece] can legally move to.
 var directions = [4]Vec2{
 	{X: -SIZE_CELL, Y: -SIZE_CELL}, // up-left
 	{X: SIZE_CELL, Y: -SIZE_CELL},  // up-right
@@ -84,19 +84,36 @@ var directions = [4]Vec2{
 }
 
 // canMoveLegally returns TRUE if given piece has at least 1 valid move or capture available
-func (p *Piece) canMoveLegally() bool {
+func (p *Piece) canMoveLegally(gameMap map[int32]*Piece) bool {
 	if p == nil {
 		return false
 	}
-	for _, dir := range directions {
-		dest := Vec2{X: p.Pos.X + dir.X, Y: p.Pos.Y + dir.Y}
-		if p.MoveSimple(dest) {
-			return true
-		}
-		destCapture := Vec2{X: p.Pos.X + 2*dir.X, Y: p.Pos.Y + 2*dir.Y}
-		if p.MoveCapture(destCapture) {
-			return true
+	dirs := directions[:]
+	if !p.IsKing {
+		if p.PieceColor == Piece_Red {
+			dirs = directions[:2]
+		} else {
+			dirs = directions[2:]
 		}
 	}
+
+	for _, dir := range dirs {
+		dest := Vec2{
+			X: p.Pos.X + dir.X,
+			Y: p.Pos.Y + dir.Y,
+		}
+		if !IsAwayFromEdge(dest) {
+			continue
+		}
+		var destCellIdx int32 = getCellIndex(dest)
+		if _, exists := gameMap[destCellIdx]; !exists {
+			return true // found at least 1 valid move
+		}
+
+	}
 	return false
+}
+
+func getCellIndex(dest Vec2) int32 {
+	panic("not implemented")
 }
