@@ -23,14 +23,14 @@ func HasWinner(p *player.Player, opponent *player.Player, gameMap map[int32]*Pie
 		// Meaning `opponent` has lost, `p` has won! Game over
 		notifyLoserWinner(p, opponent)
 		return true
-	} else if len(opponent.Pieces) <= 2 && !nextPlayerHasValidMoves(opponent, gameMap) {
+	} else if !nextPlayerHasValidMoves(opponent, gameMap) {
 		notifyLoserWinner(p, opponent)
 		return true
 	}
 	return false
 }
 
-// notifyLoserWinner sends WIN/LOSE message to both players and logs the winner
+// notifyLoserWinner sends WIN/LOSE message to both players, where [p] is the winner, and [opponent] is the loser.
 func notifyLoserWinner(p *player.Player, opponent *player.Player) {
 	var winner TeamColor = TeamColor_TEAM_RED
 	if p.Name == TeamColor_TEAM_BLACK.String() {
@@ -55,22 +55,19 @@ func notifyLoserWinner(p *player.Player, opponent *player.Player) {
 	log.Println("🏆 We got a winner!", p.Name, " has won!")
 }
 
-// nextPlayerHasValidMoves returns TRUE if the next player has at least 1 valid move available.
-func nextPlayerHasValidMoves(p *player.Player, gameMap map[int32]*Piece) bool {
-	if p == nil || len(p.Pieces) == 0 {
+// nextPlayerHasValidMoves returns TRUE if the NEXT player has at least 1 valid move available.
+func nextPlayerHasValidMoves(next *player.Player, gameMap map[int32]*Piece) bool {
+	if next == nil || len(next.Pieces) == 0 {
 		return false
 	}
 
-	// check if player has 1 or 2 pieces left, if NOT then they definitely have valid moves available
-	if len(p.Pieces) > 2 {
-		return false
-	}
-
+	// loop gameMap to check if this player's own pieces
 	for _, piece := range gameMap {
-		if piece.Id == p.Pieces[0] || (len(p.Pieces) > 1 && piece.Id == p.Pieces[1]) {
-			if ok := piece.canMoveLegally(); ok {
-				return true
-			}
+		if piece == nil || !next.HasThisPiece(piece.Id) {
+			continue
+		}
+		if piece.canMoveLegally() {
+			return true // Early exit, one is enough
 		}
 	}
 	return false
