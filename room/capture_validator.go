@@ -28,10 +28,9 @@ func processCapturePiece(request *game.BasePayload, gameMap map[int32]*game.Piec
 		})
 		return false
 	}
-	// all is OK, Opponent loses 1 piece
 	preyPieceId := capturePayload.GetDetails().GetPreyPieceId()
-	opponent.LosePiece(preyPieceId)
-	opponent.SendMessage(request) // forward the original request to opponent
+	opponent.LosePiece(preyPieceId) // all is OK, Opponent loses 1 piece
+	opponent.SendMessage(request)   // forward the original request to opponent
 	return success
 }
 
@@ -41,10 +40,10 @@ func validateAndDoCapture(captureReq *game.CapturePayload, gameMap map[int32]*ga
 		return false
 	}
 	hunterPieceId := captureReq.GetHunterPieceId()
-	hunterSrc := captureReq.GetDetails().GetHunterSrcCell()
+	hunterSrcIdx := captureReq.GetDetails().GetHunterSrcCell()
 
-	//check hunter params
-	hunterPiecePtr, exists := gameMap[hunterSrc]
+	// check hunter params
+	hunterPiecePtr, exists := gameMap[hunterSrcIdx]
 	if !exists || hunterPieceId != hunterPiecePtr.Id {
 		return false
 	}
@@ -52,7 +51,7 @@ func validateAndDoCapture(captureReq *game.CapturePayload, gameMap map[int32]*ga
 	preyPieceId := captureReq.GetDetails().GetPreyPieceId()
 	preyCellIdx := captureReq.GetDetails().GetPreyCellIdx()
 
-	//check Prey params
+	// check Prey params
 	preyPiecePtr, exists := gameMap[preyCellIdx]
 	if !exists || preyPieceId != preyPiecePtr.Id {
 		return false
@@ -65,6 +64,7 @@ func validateAndDoCapture(captureReq *game.CapturePayload, gameMap map[int32]*ga
 		return false
 	}
 
+	// perform the capture
 	success := hunterPiecePtr.MoveCapture(game.Vec2{
 		X: destination.GetX(),
 		Y: destination.GetY(),
@@ -73,7 +73,7 @@ func validateAndDoCapture(captureReq *game.CapturePayload, gameMap map[int32]*ga
 	if !success {
 		return false
 	}
-	delete(gameMap, hunterSrc)                           // set hunter's old location empty!
+	delete(gameMap, hunterSrcIdx)                        // set hunter's old location empty!
 	delete(gameMap, preyCellIdx)                         // set Prey's old location empty!
 	gameMap[destination.GetCellIndex()] = hunterPiecePtr // move hunter to new location
 	return success
