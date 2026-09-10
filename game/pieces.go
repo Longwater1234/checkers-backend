@@ -75,19 +75,19 @@ func (p *Piece) MoveCapture(dest Vec2) bool {
 	return true
 }
 
+// directions is an array of diagonal positions a [Piece] can legally move to.
+var directions = [4]Vec2{
+	{X: -SIZE_CELL, Y: -SIZE_CELL}, // up-left
+	{X: SIZE_CELL, Y: -SIZE_CELL},  // up-right
+	{X: -SIZE_CELL, Y: SIZE_CELL},  // down-left
+	{X: SIZE_CELL, Y: SIZE_CELL},   // down-right
+}
+
 // canMoveLegally returns TRUE if given piece has at least 1 valid move or capture available
 func (p *Piece) canMoveLegally() bool {
 	if p == nil {
 		return false
 	}
-	// check all 4 diagonal directions for valid moves
-	directions := []Vec2{
-		{X: -SIZE_CELL, Y: -SIZE_CELL}, // up-left
-		{X: SIZE_CELL, Y: -SIZE_CELL},  // up-right
-		{X: -SIZE_CELL, Y: SIZE_CELL},  // down-left
-		{X: SIZE_CELL, Y: SIZE_CELL},   // down-right
-	}
-
 	for _, dir := range directions {
 		dest := Vec2{X: p.Pos.X + dir.X, Y: p.Pos.Y + dir.Y}
 		if p.MoveSimple(dest) {
