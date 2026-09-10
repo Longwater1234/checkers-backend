@@ -61,7 +61,7 @@ func nextPlayerHasValidMoves(next *player.Player, gameMap map[int32]*Piece) bool
 		return false
 	}
 
-	// loop gameMap to check if this player's own pieces
+	// loop gameMap to cross-check this player's own pieces only.
 	for _, piece := range gameMap {
 		if piece == nil || !next.HasThisPiece(piece.Id) {
 			continue
