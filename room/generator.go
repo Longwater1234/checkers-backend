@@ -16,7 +16,27 @@ const (
 
 var bigMax = big.NewInt(int64(upperLimit))
 
-// generateGameMap creates the hashmap of cell_index --> Piece. Should be called AFTER `generatePieces`
+// generatePieceIds using secure RNG for the two players. You MUST handle any possible error
+func generatePieceIds(p1 *player.Player, p2 *player.Player) error {
+	for i := range p1.Pieces {
+		val, err := rand.Int(rand.Reader, bigMax)
+		if err != nil {
+			return err
+		}
+		p1.Pieces[i] = int32(val.Int64())
+	}
+
+	for i := range p2.Pieces {
+		val, err := rand.Int(rand.Reader, bigMax)
+		if err != nil {
+			return err
+		}
+		p2.Pieces[i] = int32(val.Int64())
+	}
+	return nil
+}
+
+// generateGameMap creates the hashmap of cell_index -> Piece. Should be called AFTER [generatePieceIds]
 func generateGameMap(p1 *player.Player, p2 *player.Player) map[int32]*game.Piece {
 	var gameMap = make(map[int32]*game.Piece, 24) // usable cell_idx -> piece
 	var counter int32 = 32                        // total playable checker cells
@@ -56,24 +76,4 @@ func generateGameMap(p1 *player.Player, p2 *player.Player) map[int32]*game.Piece
 		}
 	}
 	return gameMap
-}
-
-// generatePieces using secure RNG for the two players. You MUST handle the error
-func generatePieces(p1 *player.Player, p2 *player.Player) error {
-	for i := range p1.Pieces {
-		val, err := rand.Int(rand.Reader, bigMax)
-		if err != nil {
-			return err
-		}
-		p1.Pieces[i] = int32(val.Int64())
-	}
-
-	for i := range p2.Pieces {
-		val, err := rand.Int(rand.Reader, bigMax)
-		if err != nil {
-			return err
-		}
-		p2.Pieces[i] = int32(val.Int64())
-	}
-	return nil
 }

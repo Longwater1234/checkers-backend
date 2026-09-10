@@ -1,8 +1,6 @@
 package game
 
 import (
-	"checkers-backend/player"
-	"log"
 	"math"
 )
 
@@ -27,7 +25,7 @@ type Piece struct {
 	PieceColor PieceType // either RED or BLACK
 }
 
-// MoveSimple does move this piece diagonally to given destination by 1 cell. Returns TRUE if successful
+// MoveSimple moves this piece diagonally to given destination by 1 cell. Returns TRUE if successful
 func (p *Piece) MoveSimple(dest Vec2) bool {
 	var deltaX = float64(dest.X - p.Pos.X)
 	var deltaY = float64(dest.Y - p.Pos.Y)
@@ -77,43 +75,72 @@ func (p *Piece) MoveCapture(dest Vec2) bool {
 	return true
 }
 
-// IsEvenCellRow determines whether the CELL with given Index is on EVEN Row on the board
-func IsEvenCellRow(cellIdx int32) bool {
-	rowNum := (32 - cellIdx) / 4
-	return rowNum%2 == 0
+// directions is fixed array of possible positions a [Piece] can legally move to.
+var directions = [4]Vec2{
+	{X: -SIZE_CELL, Y: -SIZE_CELL}, // up-left
+	{X: SIZE_CELL, Y: -SIZE_CELL},  // up-right
+	{X: -SIZE_CELL, Y: SIZE_CELL},  // down-left
+	{X: SIZE_CELL, Y: SIZE_CELL},   // down-right
 }
 
-// IsAwayFromEdge returns TRUE if given position is NOT on any edge of board
-func IsAwayFromEdge(pos Vec2) bool {
-	return pos.X > 0 && pos.X < 7*SIZE_CELL && pos.Y > 0 && pos.Y < 7*SIZE_CELL
-}
-
-// HasWinner returns TRUE if player `p` has beaten `opponent`, and then notifies both players.
-func HasWinner(p *player.Player, opponent *player.Player) bool {
-	if len(opponent.Pieces) == 0 {
-		// Meaning `opponent` has lost, `p` has won! Game over
-		var winner TeamColor = TeamColor_TEAM_RED
-		if p.Name == TeamColor_TEAM_BLACK.String() {
-			winner = TeamColor_TEAM_BLACK
+// canMoveLegally returns TRUE if given piece has at least 1 valid move or capture available
+func (p *Piece) canMoveLegally(gameMap map[int32]*Piece) bool {
+	if p == nil || gameMap == nil {
+		return false
+	}
+	dirs := directions[:] // for king pieces
+	if !p.IsKing {
+		if p.PieceColor == Piece_Red {
+			dirs = directions[:2]
+		} else {
+			dirs = directions[2:]
 		}
-		p.SendMessage(&BasePayload{
-			Notice: "Congrats! You won! GAME OVER",
-			Inner: &BasePayload_WinlosePayload{
-				WinlosePayload: &WinLosePayload{
-					Winner: winner,
-				},
-			},
-		})
-		opponent.SendMessage(&BasePayload{
-			Notice: "Sorry! You lost! GAME OVER",
-			Inner: &BasePayload_WinlosePayload{
-				WinlosePayload: &WinLosePayload{
-					Winner: winner,
-				},
-			},
-		})
-		log.Println("🏆 We got a winner!", p.Name, " has won!")
-		return true
+	}
+
+	for _, dir := range dirs {
+		dest := Vec2{
+			X: p.Pos.X + dir.X,
+			Y: p.Pos.Y + dir.Y,
+		}
+		destCellIdx := getCellIndex(dest)
+		if destCellIdx < 1 || destCellIdx > 32 {
+			continue
+		}
+
+		prey, occupied := gameMap[destCellIdx]
+		if !occupied || prey == nil {
+			return true // empty adjacent cell, simple move available
+		}
+
+		// If occupied by opponent, check if capture is possible
+		if prey.PieceColor != p.PieceColor {
+			destCapture := Vec2{
+				X: p.Pos.X + 2*dir.X,
+				Y: p.Pos.Y + 2*dir.Y,
+			}
+			captureCellIdx := getCellIndex(destCapture)
+			if captureCellIdx >= 1 && captureCellIdx <= 32 {
+				landingPiece, landOccupied := gameMap[captureCellIdx]
+				if !landOccupied || landingPiece == nil {
+					return true // valid jump over enemy into empty cell
+				}
+			}
+		}
 	}
 	return false
+}
+
+// getCellIndex converts a board coordinate (Vec2) into a 1-based playable cell index (1..32).
+// Returns 0 if the position is off-board or not a playable cell.
+func getCellIndex(dest Vec2) int32 {
+	col := int(math.Round(float64(dest.X / SIZE_CELL)))
+	row := int(math.Round(float64(dest.Y / SIZE_CELL)))
+
+	if col < 0 || col > 7 || row < 0 || row > 7 {
+		return 0
+	}
+	if (row+col)%2 == 0 {
+		return 0
+	}
+	return int32(32 - (row*4 + col/2))
 }

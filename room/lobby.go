@@ -8,7 +8,7 @@ import (
 	"time"
 )
 
-const serverVersion = "1.0.17"
+const serverVersion = "2.0.0"
 
 // ListenForJoins of new players entering lobby. Then forward a pair to new match room
 func ListenForJoins(lobby <-chan *player.Player) {
@@ -16,7 +16,7 @@ func ListenForJoins(lobby <-chan *player.Player) {
 		//welcome 1st player
 		p1 := <-lobby
 		var msgOne = &game.BasePayload{
-			Notice: "Connected. You are Team RED. Waiting for opponent...",
+			Notice: "Connected. You are Team RED. Waiting for opponent...(max 30 sec)",
 			Inner: &game.BasePayload_Welcome{
 				Welcome: &game.WelcomePayload{
 					MyTeam:        game.TeamColor_TEAM_RED,
@@ -58,7 +58,7 @@ func ListenForJoins(lobby <-chan *player.Player) {
 		case <-ctx.Done():
 			// timeout reached. No other player joined! Goodbye p1!
 			p1.SendMessage(&game.BasePayload{
-				Notice: "No other players at this moment. Try again later!",
+				Notice: "Timeout reached. No other players at this moment. Try again later!",
 				Inner: &game.BasePayload_ExitPayload{
 					ExitPayload: &game.ExitPayload{
 						FromTeam: game.TeamColor_TEAM_UNSPECIFIED,
