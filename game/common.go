@@ -20,10 +20,6 @@ func IsAwayFromEdge(pos Vec2) bool {
 // This must be called after the current player has completed their turn, and the gameMap is updated with the latest piece positions.
 func HasWinner(p *player.Player, opponent *player.Player, gameMap map[int32]*Piece) bool {
 	if len(opponent.Pieces) == 0 {
-		// Meaning `opponent` has lost, `p` has won! Game over
-		notifyLoserWinner(p, opponent)
-		return true
-	} else if !nextPlayerHasValidMoves(opponent, gameMap) {
 		notifyLoserWinner(p, opponent)
 		return true
 	}
@@ -53,22 +49,4 @@ func notifyLoserWinner(p *player.Player, opponent *player.Player) {
 		},
 	})
 	log.Println("🏆 We got a winner!", p.Name, " has won!")
-}
-
-// nextPlayerHasValidMoves returns TRUE if the NEXT player has at least 1 valid move available.
-func nextPlayerHasValidMoves(next *player.Player, gameMap map[int32]*Piece) bool {
-	if next == nil || len(next.Pieces) == 0 {
-		return false
-	}
-
-	// loop gameMap to cross-check this player's own pieces only.
-	for _, piece := range gameMap {
-		if piece == nil || !next.HasThisPiece(piece.Id) {
-			continue
-		}
-		if piece.canMoveLegally(gameMap) {
-			return true // Early exit, one is enough
-		}
-	}
-	return false
 }

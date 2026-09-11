@@ -83,8 +83,8 @@ var directions = [4]Vec2{
 	{X: SIZE_CELL, Y: SIZE_CELL},   // down-right
 }
 
-// canMoveLegally returns TRUE if given piece has at least 1 valid move or capture available
-func (p *Piece) canMoveLegally(gameMap map[int32]*Piece) bool {
+// isMovable returns TRUE if given piece has at least 1 valid move or capture available
+func (p *Piece) isMovable(gameMap map[int32]*Piece) bool {
 	if p == nil || gameMap == nil {
 		return false
 	}
@@ -109,7 +109,7 @@ func (p *Piece) canMoveLegally(gameMap map[int32]*Piece) bool {
 
 		prey, occupied := gameMap[destCellIdx]
 		if !occupied || prey == nil {
-			return true // empty adjacent cell, simple move available
+			return true // empty cell, simple move available
 		}
 
 		// If occupied by opponent, check if capture is possible
@@ -120,9 +120,9 @@ func (p *Piece) canMoveLegally(gameMap map[int32]*Piece) bool {
 			}
 			captureCellIdx := getCellIndex(destCapture)
 			if captureCellIdx >= 1 && captureCellIdx <= 32 {
-				landingPiece, landOccupied := gameMap[captureCellIdx]
-				if !landOccupied || landingPiece == nil {
-					return true // valid jump over enemy into empty cell
+				landingPiece, exists := gameMap[captureCellIdx]
+				if !exists || landingPiece == nil {
+					return true // valid jump into empty cell
 				}
 			}
 		}
@@ -133,8 +133,8 @@ func (p *Piece) canMoveLegally(gameMap map[int32]*Piece) bool {
 // getCellIndex converts a board coordinate (Vec2) into a 1-based playable cell index (1..32).
 // Returns 0 if the position is off-board or not a playable cell.
 func getCellIndex(dest Vec2) int32 {
-	col := int(math.Round(float64(dest.X / SIZE_CELL)))
-	row := int(math.Round(float64(dest.Y / SIZE_CELL)))
+	col := int32(dest.X / SIZE_CELL)
+	row := int32(dest.Y / SIZE_CELL)
 
 	if col < 0 || col > 7 || row < 0 || row > 7 {
 		return 0

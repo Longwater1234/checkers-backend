@@ -92,20 +92,20 @@ func TestGetCellIndex(t *testing.T) {
 	}
 }
 
-func TestCanMoveLegally_NilCases(t *testing.T) {
+func TestIsMovable_NilCases(t *testing.T) {
 	var p *Piece
 	gameMap := make(map[int32]*Piece)
-	if p.canMoveLegally(gameMap) {
+	if p.isMovable(gameMap) {
 		t.Errorf("canMoveLegally on nil piece should return false")
 	}
 
 	p = &Piece{Id: 1, Pos: Vec2{X: 75, Y: 75}, PieceColor: Piece_Red}
-	if p.canMoveLegally(nil) {
+	if p.isMovable(nil) {
 		t.Errorf("canMoveLegally with nil gameMap should return false")
 	}
 }
 
-func TestCanMoveLegally_SimpleMoves(t *testing.T) {
+func TestIsMovable_SimpleMoves(t *testing.T) {
 	// Red piece at cell 10 (row 5, col 4: X=300, Y=375)
 	// Open board -> Red moves up towards Y=0
 	redPiece := &Piece{
@@ -118,7 +118,7 @@ func TestCanMoveLegally_SimpleMoves(t *testing.T) {
 		10: redPiece,
 	}
 
-	if !redPiece.canMoveLegally(gameMap) {
+	if !redPiece.isMovable(gameMap) {
 		t.Errorf("Red piece on open board should be able to move legally")
 	}
 
@@ -131,12 +131,12 @@ func TestCanMoveLegally_SimpleMoves(t *testing.T) {
 		IsKing:     false,
 	}
 	gameMap[23] = blackPiece
-	if !blackPiece.canMoveLegally(gameMap) {
+	if !blackPiece.isMovable(gameMap) {
 		t.Errorf("Black piece on open board should be able to move legally")
 	}
 }
 
-func TestCanMoveLegally_BlockedByFriendly(t *testing.T) {
+func TestIsMovable_BlockedByFriendly(t *testing.T) {
 	// Red piece at cell 10 (row 5, col 4: X=300, Y=375)
 	// Block up-left: row 4, col 3 (cell 15)
 	// Block up-right: row 4, col 5 (cell 14)
@@ -163,12 +163,12 @@ func TestCanMoveLegally_BlockedByFriendly(t *testing.T) {
 		14: blocker2,
 	}
 
-	if redPiece.canMoveLegally(gameMap) {
+	if redPiece.isMovable(gameMap) {
 		t.Errorf("Red piece completely blocked by friendly pieces should not be able to move")
 	}
 }
 
-func TestCanMoveLegally_CaptureEnemy(t *testing.T) {
+func TestIsMovable_CaptureEnemy(t *testing.T) {
 	// Red piece at cell 10 (row 5, col 4: X=300, Y=375)
 	// Enemy Black piece at cell 15 (row 4, col 3: X=225, Y=300)
 	// Landing cell for jump: row 3, col 2 (cell 19: X=150, Y=225) is empty
@@ -196,7 +196,7 @@ func TestCanMoveLegally_CaptureEnemy(t *testing.T) {
 		14: friendlyBlocker,
 	}
 
-	if !redPiece.canMoveLegally(gameMap) {
+	if !redPiece.isMovable(gameMap) {
 		t.Errorf("Red piece should be able to capture enemy when landing cell is open")
 	}
 
@@ -208,12 +208,12 @@ func TestCanMoveLegally_CaptureEnemy(t *testing.T) {
 	}
 	gameMap[19] = landingBlocker
 
-	if redPiece.canMoveLegally(gameMap) {
+	if redPiece.isMovable(gameMap) {
 		t.Errorf("Red piece should not be able to capture when landing cell is occupied")
 	}
 }
 
-func TestCanMoveLegally_CaptureOffBoard(t *testing.T) {
+func TestIsMovable_CaptureOffBoard(t *testing.T) {
 	// Enemy is at row 0 (edge). Red piece is at row 1.
 	// Red cannot jump over enemy because landing square would be at row -1 (off board).
 	// Red piece at cell 27 (row 1, col 2: X=150, Y=75)
@@ -242,12 +242,12 @@ func TestCanMoveLegally_CaptureOffBoard(t *testing.T) {
 		31: friendlyRed,
 	}
 
-	if redPiece.canMoveLegally(gameMap) {
+	if redPiece.isMovable(gameMap) {
 		t.Errorf("Red piece cannot jump enemy on edge if landing is off-board")
 	}
 }
 
-func TestCanMoveLegally_KingMovesAndCaptures(t *testing.T) {
+func TestIsMovable_KingMovesAndCaptures(t *testing.T) {
 	// Red King at cell 19 (row 3, col 2: X=150, Y=225)
 	// Block forward directions (row 2, col 1: cell 24; row 2, col 3: cell 23)
 	// Open backward direction (row 4, col 1: cell 16)
@@ -275,7 +275,7 @@ func TestCanMoveLegally_KingMovesAndCaptures(t *testing.T) {
 	}
 
 	// King should be able to move backwards into cell 16 or cell 15
-	if !king.canMoveLegally(gameMap) {
+	if !king.isMovable(gameMap) {
 		t.Errorf("King should be able to move backwards")
 	}
 
@@ -296,7 +296,7 @@ func TestCanMoveLegally_KingMovesAndCaptures(t *testing.T) {
 	gameMap[15] = enemy
 
 	// King can capture enemy backwards into row 5, col 4 (cell 10: X=300, Y=375)
-	if !king.canMoveLegally(gameMap) {
+	if !king.isMovable(gameMap) {
 		t.Errorf("King should be able to capture backwards into open square")
 	}
 
@@ -309,7 +309,7 @@ func TestCanMoveLegally_KingMovesAndCaptures(t *testing.T) {
 	gameMap[10] = blocker4
 
 	// Now all forward moves blocked, backward left blocked, backward right enemy jump blocked
-	if king.canMoveLegally(gameMap) {
+	if king.isMovable(gameMap) {
 		t.Errorf("King with all moves and captures blocked should return false")
 	}
 }
