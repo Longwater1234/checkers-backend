@@ -83,8 +83,8 @@ var directions = [4]Vec2{
 	{X: SIZE_CELL, Y: SIZE_CELL},   // down-right
 }
 
-// canMoveLegally returns TRUE if given piece has at least 1 valid move or capture available
-func (p *Piece) canMoveLegally(gameMap map[int32]*Piece) bool {
+// isMovable returns TRUE if given piece has at least 1 valid move or capture available
+func (p *Piece) isMovable(gameMap map[int32]*Piece) bool {
 	if p == nil || gameMap == nil {
 		return false
 	}
