@@ -19,7 +19,7 @@ import (
 
 const maxRequestSize int = 1 << 10 // 1KB
 
-var numPlayers atomic.Uint32             // total number of LIVE players
+var numPlayers atomic.Int64              // total number of LIVE players
 var lobby = make(chan *player.Player, 1) // waiting room for players
 
 func main() {
@@ -57,18 +57,18 @@ func wsHandler(ws *websocket.Conn) {
 		Dead:   deadChan,
 	}
 
-	// for each pair joining, the First will always be RED
-	if numPlayers.Load()%2 == 0 {
+	// for each pair joining, the First player will always be RED
+	newCount := numPlayers.Add(1)
+	if (newCount-1)%2 == 0 {
 		p.Name = game.TeamColor_TEAM_RED.String()
 	} else {
 		p.Name = game.TeamColor_TEAM_BLACK.String()
 	}
-	numPlayers.Add(1)
 	lobby <- p
 
 	log.Println("Someone connected", clientIp, "Total players:", numPlayers.Load())
-	<-deadChan                 // block until player exits
-	numPlayers.Add(^uint32(0)) // if player exits, minus 1
+	<-deadChan         // block until player exits
+	numPlayers.Add(-1) // if player exits, minus 1
 	log.Println(p.Name, "just left the game. Total players:", numPlayers.Load())
 }
 
