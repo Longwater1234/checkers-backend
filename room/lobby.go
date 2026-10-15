@@ -8,7 +8,7 @@ import (
 	"time"
 )
 
-const serverVersion = "2.0.0"
+const serverVersion = "2.1.0"
 
 // ListenForJoins of new players entering lobby. Then forward a pair to new match room
 func ListenForJoins(lobby <-chan *player.Player) {
