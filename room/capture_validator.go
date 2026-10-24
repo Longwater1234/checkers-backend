@@ -8,7 +8,7 @@ import (
 // processCapturePiece made by Player `p` against `opponent`. Returns TRUE if all is OK. Else returns FALSE.
 func processCapturePiece(request *game.BasePayload, gameMap map[int32]*game.Piece, p, opponent *player.Player) bool {
 	capturePayload := request.GetCapturePayload()
-	success := validateAndDoCapture(capturePayload, gameMap)
+	success := validateAndDoCapture(capturePayload, gameMap, p)
 	if !success {
 		p.SendMessage(&game.BasePayload{
 			Notice: "Illegal move!",
@@ -35,46 +35,55 @@ func processCapturePiece(request *game.BasePayload, gameMap map[int32]*game.Piec
 }
 
 // validateAndDoCapture when player `p` attacks opponent's piece. Returns TRUE if successful
-func validateAndDoCapture(captureReq *game.CapturePayload, gameMap map[int32]*game.Piece) bool {
+func validateAndDoCapture(captureReq *game.CapturePayload, gameMap map[int32]*game.Piece, p *player.Player) bool {
 	if captureReq.GetDetails() == nil || captureReq.GetDestination() == nil {
 		return false
 	}
 	hunterPieceId := captureReq.GetHunterPieceId()
 	hunterSrcIdx := captureReq.GetDetails().GetHunterSrcCell()
 
-	// check hunter params
+	// check hunter params (must be owned by the player whose turn it is)
 	hunterPiecePtr, exists := gameMap[hunterSrcIdx]
-	if !exists || hunterPieceId != hunterPiecePtr.Id {
+	if !exists || hunterPieceId != hunterPiecePtr.Id || !p.HasThisPiece(hunterPieceId) {
 		return false
 	}
 
 	preyPieceId := captureReq.GetDetails().GetPreyPieceId()
 	preyCellIdx := captureReq.GetDetails().GetPreyCellIdx()
 
-	// check Prey params
+	// check Prey params (must be an ENEMY piece)
 	preyPiecePtr, exists := gameMap[preyCellIdx]
-	if !exists || preyPieceId != preyPiecePtr.Id {
+	if !exists || preyPieceId != preyPiecePtr.Id || preyPiecePtr.PieceColor == hunterPiecePtr.PieceColor {
 		return false
 	}
 
-	// check whether destCell already has a Piece
+	// never trust client's cell_index: derive it from the (x,y) position
 	destination := captureReq.GetDestination()
-	_, hasValue := gameMap[destination.GetCellIndex()]
-	if hasValue {
+	destPos := game.Vec2{X: destination.GetX(), Y: destination.GetY()}
+	destCellIdx := game.CellIndex(destPos)
+	if destCellIdx == 0 {
+		return false // off-board, or not a playable cell
+	}
+	if _, occupied := gameMap[destCellIdx]; occupied {
 		return false
 	}
 
-	// perform the capture
-	success := hunterPiecePtr.MoveCapture(game.Vec2{
-		X: destination.GetX(),
-		Y: destination.GetY(),
-	})
-
-	if !success {
+	// Prey must sit exactly halfway between hunter and destination
+	midPos := game.Vec2{
+		X: (hunterPiecePtr.Pos.X + destPos.X) / 2,
+		Y: (hunterPiecePtr.Pos.Y + destPos.Y) / 2,
+	}
+	if game.CellIndex(midPos) != preyCellIdx {
 		return false
 	}
-	delete(gameMap, hunterSrcIdx)                        // set hunter's old location empty!
-	delete(gameMap, preyCellIdx)                         // set Prey's old location empty!
-	gameMap[destination.GetCellIndex()] = hunterPiecePtr // move hunter to new location
-	return success
+
+	// perform the capture (also checks the 2-cell diagonal jump and direction)
+	if !hunterPiecePtr.MoveCapture(destPos) {
+		return false
+	}
+	destination.CellIndex = destCellIdx // so the forwarded request can't desync the opponent
+	delete(gameMap, hunterSrcIdx)       // set hunter's old location empty!
+	delete(gameMap, preyCellIdx)        // set Prey's old location empty!
+	gameMap[destCellIdx] = hunterPiecePtr
+	return true
 }

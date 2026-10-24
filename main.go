@@ -1,7 +1,6 @@
 package main
 
 import (
-	"checkers-backend/game"
 	"checkers-backend/player"
 	"checkers-backend/room"
 	"fmt"
@@ -11,8 +10,6 @@ import (
 	"strconv"
 	"strings"
 	"sync/atomic"
-
-	_ "net/http/pprof"
 
 	"golang.org/x/net/websocket"
 )
@@ -34,6 +31,7 @@ func main() {
 	})
 
 	http.Handle("/game", websocket.Handler(wsHandler))
+
 	http.HandleFunc("GET /players", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		fmt.Fprintf(w, "{\"count\": %d}", numPlayers.Load())
@@ -57,14 +55,8 @@ func wsHandler(ws *websocket.Conn) {
 		Dead:   deadChan,
 	}
 
-	// for each pair joining, the First player will always be RED
-	newCount := numPlayers.Add(1)
-	if (newCount-1)%2 == 0 {
-		p.Name = game.TeamColor_TEAM_RED.String()
-	} else {
-		p.Name = game.TeamColor_TEAM_BLACK.String()
-	}
-	lobby <- p
+	numPlayers.Add(1)
+	lobby <- p // team color (p.Name) is assigned by the lobby when pairing
 
 	log.Println("Someone connected", clientIp, "Total players:", numPlayers.Load())
 	<-deadChan         // block until player exits

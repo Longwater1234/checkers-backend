@@ -52,25 +52,27 @@ func (p *Player) HasThisPiece(pieceId int32) bool {
 }
 
 // StartHeartbeat for checking (every second) if this Player is still connected (when waiting for opponent)
+// It sets `p.Quit` BEFORE returning (so callers never read a nil channel), then pings in a goroutine.
 func (p *Player) StartHeartbeat(ctx context.Context) {
-	tt := time.NewTicker(time.Second)
-	defer tt.Stop()
 	qq := make(chan bool, 1)
 	p.Quit = qq
-	for {
-		select {
-		case <-tt.C:
-			if err := pingCodec.Send(p.Conn, nil); err != nil {
-				// This player has quit early
-				qq <- true
-				close(qq)
+	go func() {
+		tt := time.NewTicker(time.Second)
+		defer tt.Stop()
+		for {
+			select {
+			case <-tt.C:
+				if err := pingCodec.Send(p.Conn, nil); err != nil {
+					// This player has quit early
+					qq <- true
+					close(qq)
+					return
+				}
+			case <-ctx.Done():
+				// timeout (or match found). Do NOT close(qq): a closed channel would race
+				// with ctx.Done() in the lobby's select and swallow the timeout message.
 				return
 			}
-		case <-ctx.Done():
-			// timeout waiting for [p2] reached!
-			close(qq)
-			return
 		}
-
-	}
+	}()
 }

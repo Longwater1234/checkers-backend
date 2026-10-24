@@ -130,6 +130,9 @@ func (p *Piece) isMovable(gameMap map[int32]*Piece) bool {
 	return false
 }
 
+// CellIndex is the exported form of [getCellIndex]. Returns 0 if `pos` is not a playable cell.
+func CellIndex(pos Vec2) int32 { return getCellIndex(pos) }
+
 // getCellIndex converts a board coordinate (Vec2) into a 1-based playable cell index (1..32).
 // Returns 0 if the position is off-board or not a playable cell.
 func getCellIndex(dest Vec2) int32 {
