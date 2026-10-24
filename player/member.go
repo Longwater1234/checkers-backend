@@ -27,12 +27,12 @@ var pingCodec = websocket.Codec{Marshal: func(v any) (data []byte, payloadType b
 func (p *Player) SendMessage(payload proto.Message) {
 	bb, err := proto.Marshal(payload)
 	if err != nil {
-		p.Dead <- true
+		p.Kill()
 		return
 	}
 	if err := websocket.Message.Send(p.Conn, bb); err != nil {
 		log.Println("Failed to sendMessage to", p.Name, ".Reason: ", err)
-		p.Dead <- true
+		p.Kill()
 	}
 }
 
@@ -74,4 +74,13 @@ func (p *Player) StartHeartbeat(ctx context.Context) {
 			}
 		}
 	}()
+}
+
+// Kill signals (at most once, never blocks) that this player is gone.
+func (p *Player) Kill() {
+	select {
+	case p.Dead <- true:
+	default:
+		// do nothing, already sent signal.
+	}
 }

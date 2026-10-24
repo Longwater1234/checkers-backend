@@ -53,8 +53,8 @@ func ListenForJoins(lobby <-chan *player.Player) {
 				StartMatch(p1, p2, gameOver)
 				<-gameOver // block until match ends
 				log.Println("🔴 GAME OVER!")
-				p1.Dead <- true
-				p2.Dead <- true
+				p1.Kill()
+				p2.Kill()
 			}(p1, p2)
 
 		case <-ctx.Done():
@@ -67,12 +67,12 @@ func ListenForJoins(lobby <-chan *player.Player) {
 					},
 				},
 			})
-			p1.Dead <- true
+			p1.Kill()
 
 		case <-p1.Quit:
 			//[p1] has quit before match started
 			cancel()
-			p1.Dead <- true
+			p1.Kill()
 		}
 		// goto TOP... wait for another pair to join.
 	}
