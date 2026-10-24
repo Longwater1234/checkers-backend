@@ -30,8 +30,11 @@ func (p *Player) SendMessage(payload proto.Message) {
 		p.Kill()
 		return
 	}
+	p.Conn.SetWriteDeadline(time.Now().Add(5 * time.Second)) // don't let a stalled client block us
+	defer p.Conn.SetWriteDeadline(time.Time{})               // resets the timer
+
 	if err := websocket.Message.Send(p.Conn, bb); err != nil {
-		log.Println("Failed to sendMessage to", p.Name, ".Reason: ", err)
+		log.Println("Failed to sendMessage to", p.Name, ". Reason: ", err)
 		p.Kill()
 	}
 }
