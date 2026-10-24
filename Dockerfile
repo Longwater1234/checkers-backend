@@ -17,4 +17,5 @@ RUN apk add --no-cache ca-certificates tzdata
 WORKDIR /app
 COPY --from=builder /app/checkers-backend /app
 EXPOSE 9876
+USER 10001:10001
 ENTRYPOINT ["./checkers-backend"]
