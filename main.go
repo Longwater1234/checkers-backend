@@ -11,6 +11,8 @@ import (
 	"strings"
 	"sync/atomic"
 
+	_ "net/http/pprof"
+
 	"golang.org/x/net/websocket"
 )
 
@@ -56,7 +58,7 @@ func wsHandler(ws *websocket.Conn) {
 	}
 
 	numPlayers.Add(1)
-	lobby <- p // team color (p.Name) is assigned by the lobby when pairing
+	lobby <- p // team color is assigned at the lobby when pairing
 
 	log.Println("Someone connected", clientIp, "Total players:", numPlayers.Load())
 	<-deadChan         // block until player exits
