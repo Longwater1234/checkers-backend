@@ -23,7 +23,7 @@ var pingCodec = websocket.Codec{Marshal: func(v any) (data []byte, payloadType b
 	return nil, websocket.PingFrame, nil
 }}
 
-// SendMessage as PROTOBUF to this player
+// SendMessage as protobuf to this player, and if it fails, eject this player.
 func (p *Player) SendMessage(payload proto.Message) {
 	bb, err := proto.Marshal(payload)
 	if err != nil {

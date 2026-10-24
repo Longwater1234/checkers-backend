@@ -7,3 +7,5 @@
 
 # binary on unix
 checkers-backend
+.env*
+*.pem
