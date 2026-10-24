@@ -1,6 +1,6 @@
 module checkers-backend
 
-go 1.26.0
+go 1.27
 
 require (
 	// github.com/goccy/go-json v0.10.3

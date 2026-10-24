@@ -15,6 +15,7 @@ func ListenForJoins(lobby <-chan *player.Player) {
 	for {
 		//welcome 1st player
 		p1 := <-lobby
+		p1.Name = game.TeamColor_TEAM_RED.String()
 		var msgOne = &game.BasePayload{
 			Notice: "Connected. You are Team RED. Waiting for opponent...(max 30 sec)",
 			Inner: &game.BasePayload_Welcome{
@@ -25,13 +26,14 @@ func ListenForJoins(lobby <-chan *player.Player) {
 			},
 		}
 		ctx, cancel := context.WithTimeout(context.Background(), time.Second*30)
-		go p1.StartHeartbeat(ctx)
+		p1.StartHeartbeat(ctx)
 		p1.SendMessage(msgOne)
 
 		//waiting for 2nd player to join (TIMEOUT at 30 seconds)
 		select {
 		case p2 := <-lobby:
 			cancel()
+			p2.Name = game.TeamColor_TEAM_BLACK.String()
 			// welcome 2nd player
 			var msgTwo = &game.BasePayload{
 				Notice: "Connected. You are Team BLACK. Match is starting!",
@@ -51,8 +53,8 @@ func ListenForJoins(lobby <-chan *player.Player) {
 				StartMatch(p1, p2, gameOver)
 				<-gameOver // block until match ends
 				log.Println("🔴 GAME OVER!")
-				p1.Dead <- true
-				p2.Dead <- true
+				p1.Kill()
+				p2.Kill()
 			}(p1, p2)
 
 		case <-ctx.Done():
@@ -65,12 +67,12 @@ func ListenForJoins(lobby <-chan *player.Player) {
 					},
 				},
 			})
-			p1.Dead <- true
+			p1.Kill()
 
 		case <-p1.Quit:
 			//[p1] has quit before match started
 			cancel()
-			p1.Dead <- true
+			p1.Kill()
 		}
 		// goto TOP... wait for another pair to join.
 	}

@@ -17,7 +17,7 @@ func StartMatch(p1 *player.Player, p2 *player.Player, gameOver chan<- bool) {
 	// make random pieceId's for both players
 	if errx := generatePieceIds(p1, p2); errx != nil {
 		gameOver <- true
-		log.Panic("[ERROR] cannot generate random numbers", errx)
+		log.Panic("[ERROR] Severe problem: cannot generate random numbers ", errx)
 	}
 
 	notifyMatchStart(p1, p2)

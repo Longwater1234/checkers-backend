@@ -23,16 +23,19 @@ var pingCodec = websocket.Codec{Marshal: func(v any) (data []byte, payloadType b
 	return nil, websocket.PingFrame, nil
 }}
 
-// SendMessage as PROTOBUF to this player
+// SendMessage as protobuf to this player, and if it fails, eject this player.
 func (p *Player) SendMessage(payload proto.Message) {
 	bb, err := proto.Marshal(payload)
 	if err != nil {
-		p.Dead <- true
+		p.Kill()
 		return
 	}
+	p.Conn.SetWriteDeadline(time.Now().Add(5 * time.Second)) // don't let a stalled client block us
+	defer p.Conn.SetWriteDeadline(time.Time{})               // resets the timer
+
 	if err := websocket.Message.Send(p.Conn, bb); err != nil {
-		log.Println("Failed to sendMessage to", p.Name, ".Reason: ", err)
-		p.Dead <- true
+		log.Println("Failed to sendMessage to", p.Name, ". Reason: ", err)
+		p.Kill()
 	}
 }
 
@@ -52,25 +55,35 @@ func (p *Player) HasThisPiece(pieceId int32) bool {
 }
 
 // StartHeartbeat for checking (every second) if this Player is still connected (when waiting for opponent)
+// It sets `p.Quit` BEFORE returning (so callers never read a nil channel), then pings in a goroutine.
 func (p *Player) StartHeartbeat(ctx context.Context) {
-	tt := time.NewTicker(time.Second)
-	defer tt.Stop()
 	qq := make(chan bool, 1)
 	p.Quit = qq
-	for {
-		select {
-		case <-tt.C:
-			if err := pingCodec.Send(p.Conn, nil); err != nil {
-				// This player has quit early
-				qq <- true
-				close(qq)
+	go func() {
+		tt := time.NewTicker(time.Second)
+		defer tt.Stop()
+		for {
+			select {
+			case <-tt.C:
+				if err := pingCodec.Send(p.Conn, nil); err != nil {
+					// This player has quit early
+					qq <- true
+					close(qq)
+					return
+				}
+			case <-ctx.Done():
+				// timeout in lobby (OR p2 just joined)
 				return
 			}
-		case <-ctx.Done():
-			// timeout waiting for [p2] reached!
-			close(qq)
-			return
 		}
+	}()
+}
 
+// Kill signals (at most once, never blocks) that this player is gone.
+func (p *Player) Kill() {
+	select {
+	case p.Dead <- true:
+	default:
+		// do nothing, already sent signal.
 	}
 }
