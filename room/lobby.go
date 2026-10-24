@@ -26,7 +26,7 @@ func ListenForJoins(lobby <-chan *player.Player) {
 			},
 		}
 		ctx, cancel := context.WithTimeout(context.Background(), time.Second*30)
-		p1.StartHeartbeat(ctx) // sets p1.Quit synchronously, then pings in background
+		p1.StartHeartbeat(ctx)
 		p1.SendMessage(msgOne)
 
 		//waiting for 2nd player to join (TIMEOUT at 30 seconds)

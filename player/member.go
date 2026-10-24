@@ -69,8 +69,7 @@ func (p *Player) StartHeartbeat(ctx context.Context) {
 					return
 				}
 			case <-ctx.Done():
-				// timeout (or match found). Do NOT close(qq): a closed channel would race
-				// with ctx.Done() in the lobby's select and swallow the timeout message.
+				// timeout in lobby (OR p2 just joined)
 				return
 			}
 		}
