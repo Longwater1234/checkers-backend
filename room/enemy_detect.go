@@ -124,7 +124,7 @@ func collectBehindRHS(king *player.Player, cellIdx int32, gameMap map[int32]*gam
 	if king.Name == game.TeamColor_TEAM_RED.String() && piecePtr.Pos.X == 0 {
 		return false
 	}
-	if king.Name == game.TeamColor_TEAM_BLACK.String() && piecePtr.Pos.X > 7*game.SIZE_CELL {
+	if king.Name == game.TeamColor_TEAM_BLACK.String() && piecePtr.Pos.X >= 7*game.SIZE_CELL {
 		return false
 	}
 	var deltaForward int32 = 4
@@ -167,7 +167,7 @@ func collectBehindRHS(king *player.Player, cellIdx int32, gameMap map[int32]*gam
 // collectBehindLHS returns true ONLY IF there is an enemy on SOUTH WEST of player. Only for KING pieces
 func collectBehindLHS(king *player.Player, cellIdx int32, gameMap map[int32]*game.Piece) bool {
 	piecePtr := gameMap[cellIdx]
-	if king.Name == game.TeamColor_TEAM_RED.String() && piecePtr.Pos.X > 7*game.SIZE_CELL {
+	if king.Name == game.TeamColor_TEAM_RED.String() && piecePtr.Pos.X >= 7*game.SIZE_CELL {
 		return false
 	}
 	if king.Name == game.TeamColor_TEAM_BLACK.String() && piecePtr.Pos.X == 0 {
