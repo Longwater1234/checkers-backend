@@ -4,6 +4,6 @@ go 1.27
 
 require (
 	// github.com/goccy/go-json v0.10.3
-	golang.org/x/net v0.61.0
+	golang.org/x/net v0.62.0
 	google.golang.org/protobuf v1.36.12
 )
