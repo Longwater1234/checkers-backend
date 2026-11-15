@@ -10,28 +10,27 @@ import (
 	"google.golang.org/protobuf/proto"
 )
 
-// StartMatch between the two players `p1` and `p2`. If match ends, send signal through `gameOver` channel
+// StartMatch between the two players `p1` and `p2`. Closes `gameOver` when the match ends.
 func StartMatch(p1 *player.Player, p2 *player.Player, gameOver chan<- struct{}) {
 	log.Println("🟢 Match has begun!")
 
+	var gameMap map[int32]*game.Piece
+	defer func() {
+		clear(gameMap)
+		p1.Pieces = nil
+		p2.Pieces = nil
+		close(gameOver)
+	}()
+
 	// make random pieceId's for both players
 	if errx := generatePieceIds(p1, p2); errx != nil {
-		gameOver <- struct{}{}
 		log.Panic("[ERROR] Severe problem: cannot generate random numbers ", errx)
 	}
 
 	notifyMatchStart(p1, p2)
 
-	var isPlayerRedTurn = true            // Whose turn is it now? RED always starts.
-	var gameMap = generateGameMap(p1, p2) // map of cell index --> pieces.
-
-	// cleanup after match ends
-	defer func() {
-		close(gameOver)
-		clear(gameMap)
-		p1.Pieces = nil
-		p2.Pieces = nil
-	}()
+	var isPlayerRedTurn = true        // Whose turn is it now? RED always starts.
+	gameMap = generateGameMap(p1, p2) // map of cell index --> pieces.
 
 	// MAIN GAME LOOP (each player has MAX 30 sec to respond)
 	for {
@@ -59,26 +58,22 @@ func StartMatch(p1 *player.Player, p2 *player.Player, gameOver chan<- struct{}) 
 					},
 				},
 			})
-			gameOver <- struct{}{}
 			return
 		}
 
 		var request game.BasePayload
 		if err := proto.Unmarshal(rawBytes, &request); err != nil {
 			log.Println("[ERROR] failed to parse protobuf", err)
-			gameOver <- struct{}{}
 			return
 		}
 
 		if request.GetMovePayload() != nil {
 			// ============== MESSAGE_TYPE :: "move" ==================== //
 			if valid := processMovePiece(&request, gameMap, hunter, opponent); !valid {
-				gameOver <- struct{}{}
 				return
 			}
 			if game.HasWinner(hunter, opponent, gameMap) {
 				time.Sleep(3 * time.Second)
-				gameOver <- struct{}{}
 				return
 			}
 			isPlayerRedTurn = !isPlayerRedTurn
@@ -87,12 +82,10 @@ func StartMatch(p1 *player.Player, p2 *player.Player, gameOver chan<- struct{}) 
 			capture := request.GetCapturePayload()
 			isKingBefore := getKingStatusBefore(capture, gameMap)
 			if valid := processCapturePiece(&request, gameMap, hunter, opponent); !valid {
-				gameOver <- struct{}{}
 				return
 			}
 			if game.HasWinner(hunter, opponent, gameMap) {
 				time.Sleep(3 * time.Second)
-				gameOver <- struct{}{}
 				return
 			}
 			isKingNow := getKingStatusAfter(capture, gameMap)
