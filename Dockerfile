@@ -14,11 +14,10 @@ COPY . ./
 RUN go version
 RUN CGO_ENABLED=0 go build --ldflags="-s -w" -o checkers-backend
 
-FROM alpine:latest AS runner
-RUN apk update && apk upgrade --no-cache
-RUN apk add --no-cache ca-certificates tzdata
+FROM gcr.io/distroless/base-debian13:nonroot AS runner
+RUN apt-get update && rm -rf /var/lib/apt/lists/*
 WORKDIR /app
 COPY --from=builder /app/checkers-backend /app
 EXPOSE 9876
-USER 10001:10001
+USER nonroot
 ENTRYPOINT ["./checkers-backend"]
