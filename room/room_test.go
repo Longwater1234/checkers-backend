@@ -43,18 +43,10 @@ func setupMatchTest(t *testing.T) (redClient, blackClient *websocket.Conn, start
 	t.Cleanup(func() { _ = c2.Close() })
 	s2 := <-serverConns
 
-	p1 := &player.Player{
-		Conn:   s1,
-		Name:   game.TeamColor_TEAM_RED.String(),
-		Pieces: make([]int32, 12),
-		Dead:   make(chan struct{}, 1),
-	}
-	p2 := &player.Player{
-		Conn:   s2,
-		Name:   game.TeamColor_TEAM_BLACK.String(),
-		Pieces: make([]int32, 12),
-		Dead:   make(chan struct{}, 1),
-	}
+	p1 := player.New(s1)
+	p1.Name = game.TeamColor_TEAM_RED.String()
+	p2 := player.New(s2)
+	p2.Name = game.TeamColor_TEAM_BLACK.String()
 
 	over := make(chan struct{}, 1)
 	go StartMatch(p1, p2, over)

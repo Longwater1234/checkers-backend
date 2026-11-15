@@ -50,18 +50,13 @@ func wsHandler(ws *websocket.Conn) {
 	defer ws.Close()
 
 	var clientIp = getRealPlayerIp(ws)
-	deadChan := make(chan struct{}, 1)
-	p := &player.Player{
-		Conn:   ws,
-		Pieces: make([]int32, 12),
-		Dead:   deadChan,
-	}
+	p := player.New(ws)
 
 	numPlayers.Add(1)
 	lobby <- p // send player to lobby
 
 	log.Println("Someone connected", clientIp, "Total players:", numPlayers.Load())
-	<-deadChan         // block until player exits
+	<-p.Done()         // block until player exits
 	numPlayers.Add(-1) // if player exits, minus 1
 	log.Println(p.Name, "just left the game. Total players:", numPlayers.Load())
 }

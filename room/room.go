@@ -30,7 +30,7 @@ func StartMatch(p1 *player.Player, p2 *player.Player, gameOver chan<- struct{}) 
 	notifyMatchStart(p1, p2)
 
 	var isPlayerRedTurn = true        // Whose turn is it now? RED always starts.
-	gameMap = generateGameMap(p1, p2) // map of cell index --> pieces.
+	gameMap = generateGameMap(p1, p2) // map of cell index --> piece.
 
 	// MAIN GAME LOOP (each player has MAX 30 sec to respond)
 	for {
