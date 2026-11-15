@@ -50,7 +50,7 @@ func wsHandler(ws *websocket.Conn) {
 	defer ws.Close()
 
 	var clientIp = getRealPlayerIp(ws)
-	deadChan := make(chan bool, 1)
+	deadChan := make(chan struct{}, 1)
 	p := &player.Player{
 		Conn:   ws,
 		Pieces: make([]int32, 12),
@@ -58,7 +58,7 @@ func wsHandler(ws *websocket.Conn) {
 	}
 
 	numPlayers.Add(1)
-	lobby <- p // team color is assigned at the lobby when pairing
+	lobby <- p // send player to lobby
 
 	log.Println("Someone connected", clientIp, "Total players:", numPlayers.Load())
 	<-deadChan         // block until player exits

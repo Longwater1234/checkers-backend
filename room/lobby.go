@@ -49,7 +49,7 @@ func ListenForJoins(lobby <-chan *player.Player) {
 			go func(p1, p2 *player.Player) {
 				// sleep REQUIRED for [p2] client to process prev message
 				time.Sleep(200 * time.Millisecond)
-				gameOver := make(chan bool, 1)
+				gameOver := make(chan struct{}, 1)
 				StartMatch(p1, p2, gameOver)
 				<-gameOver // block until match ends
 				log.Println("🔴 GAME OVER!")

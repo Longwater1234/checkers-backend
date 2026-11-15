@@ -14,7 +14,7 @@ import (
 
 // setupMatchTest spins up an in-memory websocket server, connects two players (RED and BLACK),
 // and launches StartMatch in a background goroutine.
-func setupMatchTest(t *testing.T) (redClient, blackClient *websocket.Conn, startPayload *game.StartPayload, gameOver <-chan bool) {
+func setupMatchTest(t *testing.T) (redClient, blackClient *websocket.Conn, startPayload *game.StartPayload, gameOver <-chan struct{}) {
 	t.Helper()
 
 	serverConns := make(chan *websocket.Conn, 2)
@@ -47,16 +47,16 @@ func setupMatchTest(t *testing.T) (redClient, blackClient *websocket.Conn, start
 		Conn:   s1,
 		Name:   game.TeamColor_TEAM_RED.String(),
 		Pieces: make([]int32, 12),
-		Dead:   make(chan bool, 1),
+		Dead:   make(chan struct{}, 1),
 	}
 	p2 := &player.Player{
 		Conn:   s2,
 		Name:   game.TeamColor_TEAM_BLACK.String(),
 		Pieces: make([]int32, 12),
-		Dead:   make(chan bool, 1),
+		Dead:   make(chan struct{}, 1),
 	}
 
-	over := make(chan bool, 1)
+	over := make(chan struct{}, 1)
 	go StartMatch(p1, p2, over)
 
 	// Drain initial StartPayload sent to both players by notifyMatchStart

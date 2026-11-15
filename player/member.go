@@ -14,8 +14,8 @@ type Player struct {
 	Conn   *websocket.Conn // client's WS connection
 	Name   string          // Name can only be RED or BLACK
 	Pieces []int32         // pieces IDs owned by this player. Max size 12
-	Dead   chan<- bool     // to SEND signal this player left AFTER match starts
-	Quit   <-chan bool     // to RECEIVE signal this player has quit BEFORE match starts
+	Dead   chan<- struct{} // to SEND signal this player left AFTER match starts
+	Quit   <-chan struct{} // to RECEIVE signal this player has quit BEFORE match starts
 }
 
 // pingCodec is used to PING the client
@@ -57,7 +57,7 @@ func (p *Player) HasThisPiece(pieceId int32) bool {
 // StartHeartbeat for checking (every second) if this Player is still connected (when waiting for opponent)
 // It sets `p.Quit` BEFORE returning (so callers never read a nil channel), then pings in a goroutine.
 func (p *Player) StartHeartbeat(ctx context.Context) {
-	qq := make(chan bool, 1)
+	qq := make(chan struct{}, 1)
 	p.Quit = qq
 	go func() {
 		tt := time.NewTicker(time.Second)
@@ -67,7 +67,7 @@ func (p *Player) StartHeartbeat(ctx context.Context) {
 			case <-tt.C:
 				if err := pingCodec.Send(p.Conn, nil); err != nil {
 					// This player has quit early
-					qq <- true
+					qq <- struct{}{}
 					close(qq)
 					return
 				}
@@ -82,7 +82,7 @@ func (p *Player) StartHeartbeat(ctx context.Context) {
 // Kill signals (at most once, never blocks) that this player is gone.
 func (p *Player) Kill() {
 	select {
-	case p.Dead <- true:
+	case p.Dead <- struct{}{}:
 	default:
 		// do nothing, already sent signal.
 	}
