@@ -22,6 +22,13 @@ var numPlayers atomic.Int64              // total number of LIVE players
 var lobby = make(chan *player.Player, 1) // waiting room for players
 
 func main() {
+	fmt.Printf(`
++-----------------------+
+|    CHECKERS-SERVER    |
+|    Version: %-5s     |
++-----------------------+
+`, room.ServerVersion)
+
 	portNum, err := strconv.Atoi(os.Getenv("PORT"))
 	if err != nil {
 		portNum = 9876

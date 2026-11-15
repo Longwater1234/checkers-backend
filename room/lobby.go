@@ -8,7 +8,8 @@ import (
 	"time"
 )
 
-const serverVersion = "2.2.0"
+// ServerVersion is sent to clients and displayed at server startup.
+const ServerVersion = "2.2.0"
 
 // ListenForJoins of new players entering lobby. Then forward a pair to new match room
 func ListenForJoins(lobby <-chan *player.Player) {
@@ -21,7 +22,7 @@ func ListenForJoins(lobby <-chan *player.Player) {
 			Inner: &game.BasePayload_Welcome{
 				Welcome: &game.WelcomePayload{
 					MyTeam:        game.TeamColor_TEAM_RED,
-					ServerVersion: serverVersion,
+					ServerVersion: ServerVersion,
 				},
 			},
 		}
