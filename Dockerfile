@@ -1,3 +1,5 @@
+# syntax=docker/dockerfile:1
+
 FROM golang:alpine AS builder
 RUN apk add --no-cache git
 WORKDIR /app
@@ -12,10 +14,9 @@ COPY . ./
 RUN go version
 RUN CGO_ENABLED=0 go build --ldflags="-s -w" -o checkers-backend
 
-FROM alpine:latest AS runner
-RUN apk add --no-cache ca-certificates tzdata
+FROM gcr.io/distroless/static-debian13:nonroot AS runner
 WORKDIR /app
 COPY --from=builder /app/checkers-backend /app
 EXPOSE 9876
-USER 10001:10001
-ENTRYPOINT ["./checkers-backend"]
+USER nonroot
+ENTRYPOINT ["/app/checkers-backend"]
