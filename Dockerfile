@@ -14,10 +14,9 @@ COPY . ./
 RUN go version
 RUN CGO_ENABLED=0 go build --ldflags="-s -w" -o checkers-backend
 
-FROM gcr.io/distroless/base-debian13:nonroot AS runner
-RUN apt-get update && rm -rf /var/lib/apt/lists/*
+FROM gcr.io/distroless/static-debian13:nonroot AS runner
 WORKDIR /app
 COPY --from=builder /app/checkers-backend /app
 EXPOSE 9876
 USER nonroot
-ENTRYPOINT ["./checkers-backend"]
+ENTRYPOINT ["/app/checkers-backend"]
